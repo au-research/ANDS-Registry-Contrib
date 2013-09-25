@@ -1,2 +1,2 @@
-ANDS-Registry-Contrib
+ANDS Registry Contrib
 =====================
