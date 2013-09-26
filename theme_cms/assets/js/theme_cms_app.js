@@ -279,7 +279,9 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 	$scope.preview_relation= function(c){
 		if(c.relation){
 			search_factory.getConnections(c.relation.key).then(function(data){
-				$scope.relationships[c.relation.key] = data.connections[0];
+				if(data.status!='ERROR'){
+					$scope.relationships[c.relation.key] = data.connections[0];
+				}
 			});
 		}
 	}
