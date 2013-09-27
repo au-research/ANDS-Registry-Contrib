@@ -257,7 +257,7 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 				break;
 			case 'search': 
 				newObj = {name:'', value:''};
-				if(!blob.search) blob.search = [];
+				if(!blob.search) blob.search = {};
 				if(!blob.search.fq) blob.search.fq = []; list = blob.search.fq;
 				break;
 		}
@@ -351,3 +351,9 @@ function NewPageCtrl($scope, pages_factory, Slug, $location){
 		});
 	}
 }
+
+$(document).on('keypress', 'input', function(e){
+	if(e.which==13){
+		e.preventDefault();
+	}
+});
