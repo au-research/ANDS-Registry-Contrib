@@ -34,7 +34,8 @@
 								<ul>
 									<li ng-repeat="doc in search_result[c.search.id].data.result.docs"><a href="<?php echo portal_url();?>{{doc.slug}}" target="_blank">{{doc.display_title}}</a></li>
 								</ul>
-								<a href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">View Full Search</a>
+
+								<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">View Full Search ({{search_result[c.search.id].data.result.numFound}} results)</a>
 							</div>
 						</div>
 
@@ -66,7 +67,7 @@
 							<label for="title">Title</label><input type="text" ng-model="c.title">
 							<hr/>
 							<div ng-show="c.type == 'html'">
-								<textarea ui-tinymce ng-model="c.content"></textarea>
+								<textarea ui-tinymce="tinymceOptions" ng-model="c.content"></textarea>
 							</div>
 
 							<div ng-show="c.type == 'gallery'">
@@ -113,7 +114,7 @@
 												<li><a href="" ng-click="setFilterType(f, 'subject_vocab_uri')">Subject</a></li>
 												<li><a href="" ng-click="setFilterType(f, 'subject_value_resolved')">Keywords</a></li>
 												<li><a href="" ng-click="setFilterType(f, 'data_source_key')">Data Source Key</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'temporal')">Originating Source</a></li>
+												<li><a href="" ng-click="setFilterType(f, 'originating_source')">Originating Source</a></li>
 												<li><a href="" ng-click="setFilterType(f, 'spatial')">Spatial</a></li>
 											</ul>
 										</div>
@@ -130,7 +131,7 @@
 												<a href="" tip="Boost This Record" ng-click="addBoost(c, doc.key)"><i class="icon icon-arrow-up"></i></a>
 											</li>
 										</ul>
-										<a href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">View Full Search</a>
+										<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">View Full Search ({{search_result[c.search.id].data.result.numFound}} results)</a>
 									</div>
 									<div ng-show="search_result[c.search.id].data.numFound == 0">
 										There are no search result!

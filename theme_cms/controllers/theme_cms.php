@@ -49,6 +49,7 @@ class Theme_cms extends MX_Controller {
 		$array = json_decode(file_get_contents("php://input"));
 		echo json_encode($array);
 		if($this->write($array->slug, $data)){
+			echo $data;
 			echo 1;
 		}else echo 0;
 	}

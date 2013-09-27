@@ -137,6 +137,21 @@ function ListCtrl($scope, pages_factory){
 
 function ViewPage($scope, $routeParams, pages_factory, $location, search_factory){
 
+	$scope.tinymceOptions = {
+	    selector: "textarea.editor",
+	    theme: "modern",
+	    plugins: [
+	        "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+	        "searchreplace wordcount visualblocks visualchars code fullscreen",
+	        "insertdatetime media nonbreaking save table contextmenu directionality",
+	        "emoticons template paste"
+	    ],
+	    height:"250px",
+	    width:"700px",
+	    entity_encoding : "raw",
+	    toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+	}
+
 	$scope.sortableOptions = {
 		handle:'.widget-title',
 		connectWith: '.region',
@@ -184,7 +199,7 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 		]
 	});
 	$scope.addContent = function(region){
-		var blob = {'title':'New Content', 'type':'html', 'content':''};
+		var blob = {'title':'', 'type':'html', 'content':'', 'editing':true};
 		if(region=='left'){
 			$scope.page.left.push(blob);
 		}else if(region=='right'){
@@ -205,6 +220,7 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 	}
 
 	$scope.save = function(){
+		console.log($scope.page);
 		pages_factory.savePage($scope.page).then(function(data){
 			var now = new Date();
 			$scope.saved_msg = 'Last Saved: '+now; 
@@ -223,7 +239,9 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 		}else c.editing = true;
 	}
 	$scope.delete_blob = function(region, index){
-		$scope.page[region].splice(index, 1);
+		if(confirm('Are you sure you want to delete this content? This action is irreversible')){
+			$scope.page[region].splice(index, 1);
+		}
 	}
 
 	$scope.addToList = function(blob, list){
@@ -256,7 +274,7 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 
 	$scope.preview_search = function(c){
 		if(c.search){
-			if(!c.search.id) c.search.id = Math.random().toString(36).substring(7);
+			if(!c.search.id) c.search.id = Math.random().toString(36).substring(10);
 			var filters = $scope.constructSearchFilters(c);
 			search_factory.search(filters).then(function(data){
 				filter_query ='';
@@ -315,7 +333,7 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 	}
 }
 
-function NewPageCtrl($scope, pages_factory, Slug){
+function NewPageCtrl($scope, pages_factory, Slug, $location){
 	$scope.addPage = function(){
 		$scope.ok, $scope.fail = null;
 		var slug = Slug.slugify(this.new_page_title);
@@ -326,6 +344,7 @@ function NewPageCtrl($scope, pages_factory, Slug){
 		pages_factory.newPage(postData).then(function(data){
 			if(data==1){
 				$scope.ok = {'msg': 'Your Theme Page has been created.', 'slug':slug};
+				$location.path('/view/'+slug);
 			}else{
 				$scope.fail = {'msg':'There is a problem creating your page'};
 			}
