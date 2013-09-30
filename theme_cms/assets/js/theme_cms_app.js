@@ -199,7 +199,7 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 		]
 	});
 	$scope.addContent = function(region){
-		var blob = {'title':'', 'type':'html', 'content':'', 'editing':true};
+		var blob = {'title':'', 'type':'html', 'content':'', 'editing':true, 'id':Math.random().toString(36).substring(10);};
 		if(region=='left'){
 			$scope.page.left.push(blob);
 		}else if(region=='right'){
