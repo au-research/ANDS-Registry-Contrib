@@ -2,34 +2,10 @@
 
 class Orcid_widget extends MX_Controller {
 
-    function index()
-    {
-        $data['js_lib'] = array('core','prettyprint');
-        $data['scripts'] = array();
+    function index(){
         $data['title'] = 'Orcid Widget - ANDS';
+        $data['scripts'] = array('orcid_widget_loader');
+        $data['js_lib'] = array('core', 'orcid_widget', 'prettyprint');
         $this->load->view('documentation', $data);
     }
-
-   function proxy()
-    {
-	//$solr_base = $this->config->item('solr_url');
-	//$sissvoc_base = $this->config->item('sissvoc_url');
-	$this->load->view("proxy");
-    } 
-
-    function demo()
-    {
-	$data['title'] = "ANDS Orcid widget";
-//	$data['scripts'] = array('vocab_widget_loader');
-	$data['js_lib'] = array('core', 'orcid_widget');
-	$this->load->view('demo', $data);
-    }
-
-    function demo2(){
-        $data['title'] = 'ANDS Orcid Widget 2';
-        $data['scripts'] = array('orcid_widget_loader');
-        $data['js_lib'] = array('core', 'orcid_widget');
-        $this->load->view('demo2', $data);
-    }
-
 }
