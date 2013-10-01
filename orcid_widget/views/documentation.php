@@ -22,6 +22,7 @@
                 <h1>ORCID Widget</h1>
                 <input type="text" name="name" value="" size="40" class="orcid_widget"/>
             </form>
+            <?php echo anchor(apps_url('orcid_widget/download/'), '<i class="icon-white icon-download"></i> Download Now', array('class'=>'btn btn-large btn-success')) ?>
 
             <h2>What is this widget?</h2>
             <p>
@@ -128,6 +129,12 @@ $('#custom_settings_orcid').orcid_widget({
                     <?php endforeach; ?>
                 </tbody>
             </table>
+
+            <h2>License</h2>
+            <p>
+                Apache License, Version 2.0: <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>
+            </p>
+
             
         </div>
     </div>

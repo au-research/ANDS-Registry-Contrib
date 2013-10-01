@@ -8,4 +8,11 @@ class Orcid_widget extends MX_Controller {
         $data['js_lib'] = array('core', 'orcid_widget', 'prettyprint');
         $this->load->view('documentation', $data);
     }
+
+    function download(){
+        $this->load->library('zip');
+        $this->zip->read_file('./applications/apps/orcid_widget/assets/css/orcid_widget.css');
+        $this->zip->read_file('./applications/apps/orcid_widget/assets/js/orcid_widget.js');
+        $this->zip->download('orcid_widget.zip');
+    }
 }

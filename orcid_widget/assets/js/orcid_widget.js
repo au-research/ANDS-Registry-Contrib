@@ -97,7 +97,8 @@
 		if(settings.lookup){
 			var lookup_btn = $('<button>').addClass(settings.lookup_class).html(settings.lookup_text);
 			p.append(lookup_btn);
-			$(lookup_btn).on('click', function(){
+			$(lookup_btn).on('click', function(e){
+				e.preventDefault();
 				_lookup(obj, settings);
 			});
 		}
