@@ -1,17 +1,13 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-/**
- *
- */
 class Orcid_widget extends MX_Controller {
 
     function index()
     {
-            $data['js_lib'] = array('core','prettyprint');
-            $data['scripts'] = array();
-            $data['title'] = 'Orcid Widget - ANDS';
-            $this->load->view('documentation', $data);
-
+        $data['js_lib'] = array('core','prettyprint');
+        $data['scripts'] = array();
+        $data['title'] = 'Orcid Widget - ANDS';
+        $this->load->view('documentation', $data);
     }
 
    function proxy()
@@ -27,6 +23,13 @@ class Orcid_widget extends MX_Controller {
 //	$data['scripts'] = array('vocab_widget_loader');
 	$data['js_lib'] = array('core', 'orcid_widget');
 	$this->load->view('demo', $data);
+    }
+
+    function demo2(){
+        $data['title'] = 'ANDS Orcid Widget 2';
+        $data['scripts'] = array('orcid_widget_loader');
+        $data['js_lib'] = array('core', 'orcid_widget');
+        $this->load->view('demo2', $data);
     }
 
 }
