@@ -27,9 +27,8 @@
 		    //location (absolute URL) of the jsonp proxy
 		    search_endpoint: 'http://pub.orcid.org/search/orcid-bio?q=',
 		   	lookup_endpoint: 'http://pub.orcid.org/',
-		    //search mode: what to show when no hits? set to boolean(false) to supress
-		    nohits_msg: '<p>No matches found<br/>If you wish to register for an orcid please click <a href="https://orcid.org/register" target="_blank" style="float:none;padding:0px">here</a></p>',
 
+		    //auto _lookup once init
 		    pre_lookup: false,
 
 		    //Text Settings
@@ -40,17 +39,24 @@
 		    lookup: true,
 		    lookup_text: 'Look up',
 		    lookup_class: 'orcid_lookup btn btn-small',
-
 		    before_html: '<span class="orcid_before_html">http://orcid.org/</span>',
 		    wrap_html: '<div class="orcid_wrapper"></div>',
-
 		    result_success_class: 'orcid_success_div',
 		    result_error_class: 'orcid_error_div',
 		    search_div_class: 'orcid_search_div',
+		    nohits_msg: '<p>No matches found<br/>If you wish to register for an orcid please click <a href="https://orcid.org/register" target="_blank" style="float:none;padding:0px">here</a></p>',
+		    query_text: 'Search Query:',
+		    search_text_btn: 'Search',
+		    close_search_text_btn: '[x]',
 
+		    //custom hooks and handlers
 		    lookup_error_handler: false,
 		    lookup_success_handler: false,
-		    lookup_success_hook: false
+		    lookup_success_hook: false,
+
+		    //auto close the search box once a value is chosen
+		    auto_close_search: false
+
 		};
 
 		//bind and merge the defaults with the given options
@@ -98,7 +104,7 @@
 
 		if(settings.search){
 			var search_btn = $('<button>').addClass(settings.search_class).html(settings.search_text);
-			var search_html = 'Search Query: <input type="text" class="orcid_search_input"/> <a class="search_orcid">Search</a> <div class="orcid_search_result"></div> <a class="close_search">Close</a>';
+			var search_html = settings.query_text+' <input type="text" class="orcid_search_input"/> <a class="search_orcid">'+settings.search_text_btn+'</a> <div class="orcid_search_result"></div> <a class="close_search">'+settings.close_search_text_btn+'</a>';
 			var search_div = $('<div>').addClass(settings.search_div_class).html(search_html);
 			if(!settings.pre_open_search) $(search_div).hide();
 			p.append(search_btn).append(search_div);
@@ -142,7 +148,7 @@
 			timeout: 1000,
 			success: function(data){
 				if(settings.lookup_success_handler && (typeof settings.lookup_success_handler === 'function')){
-					settings.lookup_success_handler(data, obj);
+					settings.lookup_success_handler(data, obj, settings);
 				}else{
 					_clean(obj, settings);
 					var given = data['orcid-profile']['orcid-bio']['personal-details']['given-names'].value || '';
@@ -202,6 +208,7 @@
 					$('.select_orcid_search_result', p).on('click', function(){
 						obj.val($(this).attr('orcid-id'));
 						_lookup(obj, settings);
+						if(settings.auto_close_search) _search_form(obj, settings);
 					});
 					
 				},
