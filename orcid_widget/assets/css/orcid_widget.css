@@ -12,6 +12,7 @@
 	border:1px solid #ccc;
 	margin:10px;
 	padding:10px;
+	position:relative;
 }
 .orcid_error_div{
 	padding:10px;
@@ -19,4 +20,10 @@
 }
 .orcid_success_div a{
 	float:none !important;
+}
+
+.close_search{
+	position:absolute;
+	top:4px;
+	right:5px;
 }

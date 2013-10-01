@@ -6,6 +6,7 @@ $(function(){
 		pre_open_search:true,
 		lookup_text: 'Custom Lookup',
 		search_text: 'Custom Search',
-		before_html: 'Enter Here: '
+		before_html: 'Enter Here: ',
+		auto_close_search: true
 	});
 });
