@@ -9,6 +9,10 @@ class Orcid_widget extends MX_Controller {
         $this->load->view('documentation', $data);
     }
 
+    function proxy(){
+        
+    }
+
     function download(){
         $this->load->library('zip');
         $this->zip->read_file('./applications/apps/orcid_widget/assets/css/orcid_widget.css');
