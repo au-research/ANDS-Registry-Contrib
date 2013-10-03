@@ -265,29 +265,31 @@ class Vocab_services extends CI_Model {
 
 	function undoVersions($vocab_id){
 		$versions = $this->getVersionsByID($vocab_id);
-		foreach($versions as $version){
+		if(is_array($versions) && sizeof($versions) > 0){
+			foreach($versions as $version){
 
-			//make all current superseded
-			if($version->status=='current'){
-				$data = array(
-					'status'=>'superseded'
-				);
-				$this->vocab_db->where('id', $version->id);
-				$this->vocab_db->update('vocab_versions', $data);
-			}
+				//make all current superseded
+				if($version->status=='current'){
+					$data = array(
+						'status'=>'superseded'
+					);
+					$this->vocab_db->where('id', $version->id);
+					$this->vocab_db->update('vocab_versions', $data);
+				}
 
-			//supersede pending delete
-			if($version->status=="pending-delete"){
-				$data = array(
-					'status'=>'superseded'
-				);
-				$this->vocab_db->where('id', $version->id);
-				$this->vocab_db->update('vocab_versions', $data);
-			}
+				//supersede pending delete
+				if($version->status=="pending-delete"){
+					$data = array(
+						'status'=>'superseded'
+					);
+					$this->vocab_db->where('id', $version->id);
+					$this->vocab_db->update('vocab_versions', $data);
+				}
 
-			//delete all pending add
-			if($version->status=="pending-add"){
-				$this->vocab_db->delete('vocab_versions', array('id' => $version->id)); 
+				//delete all pending add
+				if($version->status=="pending-add"){
+					$this->vocab_db->delete('vocab_versions', array('id' => $version->id)); 
+				}
 			}
 		}
 
