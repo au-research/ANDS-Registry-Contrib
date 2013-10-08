@@ -18,7 +18,9 @@
                 <p>Some basic web development knowledge may be needed to implement this widget</p>
             </div>
 
-            <input type="text" class="registry_widget">
+            <form class="form-inline">
+                <input type="text" class="registry_widget">
+            </form>
 
             <h2>License</h2>
             <p>

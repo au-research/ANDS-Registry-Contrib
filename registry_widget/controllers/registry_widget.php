@@ -13,6 +13,8 @@ class Registry_widget extends MX_Controller{
 	 * @return HTML 
 	 */
 	function index(){
+		$this->load->model('registry/registry_object/registry_objects', 'ro');
+		$ro = $this->ro->getByID(137458);
 		$data['title'] = 'Registry Widget - ANDS';
         $data['scripts'] = array();
         $data['js_lib'] = array('core', 'registry_widget', 'prettyprint');

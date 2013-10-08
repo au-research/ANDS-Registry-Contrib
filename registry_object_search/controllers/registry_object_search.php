@@ -41,7 +41,7 @@ class Registry_object_search extends MX_Controller {
 		);
 
 	private function json_header() {
-		header('Content-Type: application/json');
+		// header('Content-Type: application/json');
 	}
 
 	/**
@@ -72,7 +72,7 @@ class Registry_object_search extends MX_Controller {
 	public function types() {
 		$this->json_header();
 
-		$this->load->model('registry_object/registry_objects', 'ro');
+		$this->load->model('registry/registry_object/registry_objects', 'ro');
 		echo self::to_json(array_map(function($t) {
 					return array('key' => $t,
 						     'label' => ucfirst($t));
@@ -88,7 +88,7 @@ class Registry_object_search extends MX_Controller {
 	public function sources() {
 	    $this->json_header();
 
-	    $this->load->model('data_source/data_sources', 'ds');
+	    $this->load->model('registry/data_source/data_sources', 'ds');
 	    $source = (array)$this->ds->getAll(0);
 	    usort($source, function($a,$b) {
 		    return (strtolower($a->title) < strtolower($b->title)) ? -1 : 1;
@@ -120,7 +120,7 @@ class Registry_object_search extends MX_Controller {
 	 */
 	public function search($type=false, $source=false) {
 		$this->json_header();
-		$this->load->model('registry_object/registry_objects', 'ro');
+		$this->load->model('registry/registry_object/registry_objects', 'ro');
 
 		$params = false;
 		try {
@@ -130,6 +130,7 @@ class Registry_object_search extends MX_Controller {
 			$this->_throw($e->getMessage());
 			return;
 		}
+
 
 		//for completeness, ensure params is an array before continuing.
 		if (is_array($params)) {
@@ -153,7 +154,9 @@ class Registry_object_search extends MX_Controller {
 			$args['search'] = $params['term'];
 
 			$args['filter'] = $filter;
+		
 			$ros = $this->ro->filter_by($args, 100);
+
 
 			$results = array();
 			$results['params'] = $params;
