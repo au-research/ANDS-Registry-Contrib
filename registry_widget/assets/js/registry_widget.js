@@ -30,16 +30,35 @@
 		param = typeof(param) === 'undefined' ? false : param;
 
 		var defaults = {
+			//jsonp proxy endpoint
+			proxy: '',
+
+
 			//mode: [search, display]
 			mode: 'search',
 			wrapper: '<div class="rowidget_wrapper"></div>',
-			search_text: '<i class="icon-search"></i> Search',
-			search_class: 'rowidget_search btn btn-small',
+			search_btn_text: 'Search',
+			search_btn_class: 'rowidget_search btn btn-small',
 			search: true,
+
+			lookup:true,
+			auto_lookup:false,
+			lookup_btn_text: 'Resolve',
+			lookup_btn_class: 'rowidget_lookup btn btn-small',
+
+			single_template: '<div class="rowidget_single"><a href="{{rda_link}}">{{title}}</a></div>',
+
+			//return_type: [key, slug, title, id]
+			return_type:'key',
 
 			//location (absolute URL) of the jsonp proxy
 			proxy: ''
 		};
+
+		//ANDS Environment
+		if (typeof(window.real_base_url) !== 'undefined'){
+			defaults['proxy'] = window.real_base_url + 'apps/registry_widget/proxy/';
+		} 
 
 		//bind and merge the defaults with the given options
 		var settings;
@@ -68,43 +87,82 @@
 	}
 
 	function bind_search(obj, s){
+
 		obj.wrap(s.wrapper);
 		obj.p = obj.parent();
 		var p = obj.p;
-		// console.log(obj.p, s);
-		//
-		
-		if(s.search){
-			var search_btn = $('<button>').addClass(s.search_class).html(s.search_text);
-			p.append(search_btn);
-			
-			var template = '<div>{{number1}}+{{number2}}+{{number3}}</div>';
-			var ob = {};
-			ob.number1 = 'test1';
-			ob.number2 = 'test2';
-			var result = template.format(ob);
 
-			p.append(result);
-			
+		// console.log(obj, p, s);
+
+		if(s.search){
+			var search_btn = $('<button>').addClass(s.search_btn_class).html(s.search_btn_text);
+			p.append(search_btn);
+			// p.append(template.renderTpl(values));
 			$(search_btn).on('click', function(e){
 				e.preventDefault();e.stopPropagation();
 				// _search_form(obj,s);
 			});
 		}
+
+		if(s.lookup){
+			var lookup_btn = $('<button>').html(s.lookup_btn_text).addClass(s.lookup_btn_class);
+			p.append(lookup_btn);
+			$(lookup_btn).on('click', function(e){
+				e.preventDefault();e.stopPropagation();
+				_lookup(obj,s);
+			});
+		}
 	}
 
-	function _lookup(){
-
-	}
-
-	String.prototype.format = function() {
-		var args = arguments;
-		return this.replace(/{{(.*?)}}/g, function(match, number) { 
-			return typeof args[0][number] != 'undefined'
-			  ? args[0][number]
-			  : match
-			;
+	function _lookup(obj,s){
+		var query = obj.val();
+		$.ajax({
+			url:s.proxy+'lookup?q='+encodeURIComponent(query)+'&callback=?', 
+			dataType:'json',
+			contentType: "application/json",
+			type: 'POST',
+			success: function(data){
+				if(data.status==0){
+					var template = s.single_template;
+					obj.p.append(template.renderTpl(data.result));
+				}else{
+					console.log(data);
+				}
+			}
 		});
+	}
+
+	String.prototype.renderTpl = function() {
+		var args = arguments;
+		if (typeof(args[0]) == 'undefined') return this; 
+		var values = args[0];
+
+		template = this.replace(/{{#(.*?)}}([\s\S]*?){{\/\1}}/g, function(match, subTplName, subTplValue) {         
+			if (typeof(values[subTplName]) != 'undefined' 
+				&& values[subTplName] instanceof Array 
+				&& values[subTplName].length > 0)
+			{
+				replacement = ''; 
+				for (i=0; i<values[subTplName].length; i++)
+				{
+					var partial = subTplValue.renderTpl(values[subTplName][i]);
+					if (partial != subTplValue)
+					{
+						replacement += partial;
+					}
+				}
+				return (replacement != '' ? replacement : subTplValue);
+	 
+			}
+			else
+				return '';
+		});
+		return template.replace(/{{([\s\S]*?)}}/g, function(match, field_name) { 
+			return typeof values[field_name] != 'undefined'
+			 ? values[field_name]
+			 : match
+			;
+		}); 
 	};
 
 	//catch all .registry_widget and apply registry_widget() with default settings on
