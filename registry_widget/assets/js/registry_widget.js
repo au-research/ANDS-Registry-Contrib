@@ -31,22 +31,24 @@
 
 		var defaults = {
 			//jsonp proxy endpoint
-			proxy: '',
+			proxy: 'http://researchdata.ands.org.au/apps/registry_widget/proxy/',
 
-
-			//mode: [search, display]
+			//mode: [search, display_single, display_multi]
 			mode: 'search',
+
+			search: true,
 			wrapper: '<div class="rowidget_wrapper"></div>',
 			search_btn_text: 'Search',
 			search_btn_class: 'rowidget_search btn btn-small',
-			search: true,
+			search_callback:false,
 
 			lookup:true,
 			auto_lookup:false,
 			lookup_btn_text: 'Resolve',
 			lookup_btn_class: 'rowidget_lookup btn btn-small',
+			lookup_callback: false,
 
-			single_template: '<div class="rowidget_single"><a href="{{rda_link}}">{{title}}</a></div>',
+			single_template: '<div class="rowidget_single"><a href="{{rda_link}}" target="_blank">{{title}}</a></div>',
 
 			//return_type: [key, slug, title, id]
 			return_type:'key',
@@ -107,6 +109,7 @@
 		if(s.lookup){
 			var lookup_btn = $('<button>').html(s.lookup_btn_text).addClass(s.lookup_btn_class);
 			p.append(lookup_btn);
+			p.append($('<div>').addClass('rowidget_display_container'));
 			$(lookup_btn).on('click', function(e){
 				e.preventDefault();e.stopPropagation();
 				_lookup(obj,s);
@@ -114,19 +117,34 @@
 		}
 	}
 
+	function bind_display(obj, s){
+		console.log(obj);
+		$.ajax({
+			url:s.proxy+'lookup?q='+obj.attr('data-query')+'&callback=?', 
+			success: function(data){
+				if(data.status==0){
+					var template = s.single_template;
+					obj.html(template.renderTpl(data.result));
+				}else{
+					// console.log(data);
+				}
+			}
+		});
+	}
+
 	function _lookup(obj,s){
 		var query = obj.val();
 		$.ajax({
 			url:s.proxy+'lookup?q='+encodeURIComponent(query)+'&callback=?', 
-			dataType:'json',
-			contentType: "application/json",
-			type: 'POST',
 			success: function(data){
 				if(data.status==0){
 					var template = s.single_template;
-					obj.p.append(template.renderTpl(data.result));
+					obj..append(template.renderTpl(data.result));
+					if(s.return_type){
+						if(typeof (data.result[s.return_type])!='undefined') obj.val(data.result[s.return_type]);
+					}
 				}else{
-					console.log(data);
+					// console.log(data);
 				}
 			}
 		});

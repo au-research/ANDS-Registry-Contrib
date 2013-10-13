@@ -22,6 +22,9 @@
                 <input type="text" class="registry_widget">
             </form>
 
+            <div id="display_mode" data-query="AODN:93f4e867-0bac-45fa-acca-2881680627f7"></div>
+            <iframe width="100%" height="300" src="http://jsfiddle.net/sparkinson/tspPU/embedded/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
             <h2>License</h2>
             <p>
                 Apache License, Version 2.0: <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>

@@ -14,7 +14,7 @@ class Registry_widget extends MX_Controller{
 	 */
 	function index(){
 		$data['title'] = 'Registry Widget - ANDS';
-        $data['scripts'] = array();
+        $data['scripts'] = array('registry_widget_loader');
         $data['js_lib'] = array('core', 'registry_widget', 'prettyprint');
         $this->load->view('documentation', $data);
 	}
