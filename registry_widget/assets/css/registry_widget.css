@@ -3,5 +3,11 @@
 }
 
 .rowidget_single{
-	
+	border:1px solid #ccc;
+	padding:10px;
+}
+.rowidget_single div.description{
+	text-overflow:ellipsis;
+	max-height:150px;
+	overflow:auto;
 }

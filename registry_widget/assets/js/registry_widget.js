@@ -33,7 +33,7 @@
 			//jsonp proxy endpoint
 			proxy: 'http://researchdata.ands.org.au/apps/registry_widget/proxy/',
 
-			//mode: [search, display_single, display_multi]
+			//mode: [search, display_single, display_result]
 			mode: 'search',
 
 			search: true,
@@ -48,19 +48,18 @@
 			lookup_btn_class: 'rowidget_lookup btn btn-small',
 			lookup_callback: false,
 
-			single_template: '<div class="rowidget_single"><a href="{{rda_link}}" target="_blank">{{title}}</a></div>',
+			result_template: '<ul class="rowidget_results">{{#docs}}<li><a href="javascript:;" data-key="{{key}}" data-slug="{{slug}}" data-id="{{id}}">{{list_title}}</a></li>{{/docs}}</ul>',
+			single_template: '<div class="rowidget_single"><h4><a href="{{rda_link}}" target="_blank">{{title}}</a></h4><span class="text-muted">{{group}}</span><div class="description">{{description}}</div></div>',
 
 			//return_type: [key, slug, title, id]
 			return_type:'key',
-
-			//location (absolute URL) of the jsonp proxy
-			proxy: ''
 		};
 
 		//ANDS Environment
 		if (typeof(window.real_base_url) !== 'undefined'){
 			defaults['proxy'] = window.real_base_url + 'apps/registry_widget/proxy/';
-		} 
+		}
+
 
 		//bind and merge the defaults with the given options
 		var settings;
@@ -75,10 +74,15 @@
 				//bind the plugin handler to this
 				return this.each(function() {
 					var $this = $(this);
+					$this.wrap(settings.wrapper);
+					$this.p = $this.parent();
+					
 					if($this.is('input') && settings.mode=='search'){
 						bind_search($this, settings);
-					}else if(settings.mode=='display'){
-						bind_display($this, settings);
+					}else if(settings.mode=='display_single'){
+						bind_display_single($this, settings);
+					}else if(settings.mode=='display_result'){
+						bind_display_result($this, settings);
 					}else{
 						// alert('mode failed');
 					}
@@ -90,56 +94,69 @@
 
 	function bind_search(obj, s){
 
-		obj.wrap(s.wrapper);
-		obj.p = obj.parent();
-		var p = obj.p;
-
-		// console.log(obj, p, s);
-
 		if(s.search){
 			var search_btn = $('<button>').addClass(s.search_btn_class).html(s.search_btn_text);
-			p.append(search_btn);
-			// p.append(template.renderTpl(values));
+			obj.p.append(search_btn);
 			$(search_btn).on('click', function(e){
 				e.preventDefault();e.stopPropagation();
-				// _search_form(obj,s);
+				_search(obj,s);
 			});
 		}
 
 		if(s.lookup){
 			var lookup_btn = $('<button>').html(s.lookup_btn_text).addClass(s.lookup_btn_class);
-			p.append(lookup_btn);
-			p.append($('<div>').addClass('rowidget_display_container'));
+			obj.p.append(lookup_btn);
+			obj.p.append($('<div>').addClass('rowidget_display_container'));
 			$(lookup_btn).on('click', function(e){
 				e.preventDefault();e.stopPropagation();
-				_lookup(obj,s);
+				_lookup(obj.val(),obj,s);
 			});
 		}
 	}
 
-	function bind_display(obj, s){
-		console.log(obj);
+	function _search(obj, s){
+		// console.log(obj.val());
+		var value = obj.val();
 		$.ajax({
-			url:s.proxy+'lookup?q='+obj.attr('data-query')+'&callback=?', 
+			url:s.proxy+'search?q='+obj.val()+'&callback=?',
+			dataType:'jsonp',
+			timeOut:5000,
 			success: function(data){
 				if(data.status==0){
-					var template = s.single_template;
-					obj.html(template.renderTpl(data.result));
+					var template = s.result_template;
+					$('.rowidget_results', obj.p).remove();
+					$('.ro_widget_single', obj.p).remove();
+					obj.p.append(template.renderTpl(data.result));
+					$('.rowidget_results li', obj.p).on('click', function(e){
+						e.preventDefault();
+						obj.val($('a', this).attr('data-'+s.return_type));
+						_lookup(obj.val(), obj, s);
+						$('.rowidget_results').remove();
+					});
 				}else{
-					// console.log(data);
+					$('.rowidget_results', obj.p).remove();
+					obj.p.append('<div class="rowidget_results">'+data.message+'</div>');
 				}
 			}
-		});
+		})
 	}
 
-	function _lookup(obj,s){
-		var query = obj.val();
+	function bind_display_single(obj, s){
+		if(typeof(obj.attr('data-query'))!='undefined'){
+			_lookup(obj.attr('data-query'), obj, s);
+		}
+	}
+
+	function _lookup(query, obj,s){
 		$.ajax({
-			url:s.proxy+'lookup?q='+encodeURIComponent(query)+'&callback=?', 
+			url:s.proxy+'lookup?q='+encodeURIComponent(query)+'&callback=?',
+			dataType:'jsonp',
+			timeOut:5000,
 			success: function(data){
 				if(data.status==0){
 					var template = s.single_template;
-					obj..append(template.renderTpl(data.result));
+					$('.rowidget_single', obj.p).remove();
+					obj.p.append(template.renderTpl(data.result));
 					if(s.return_type){
 						if(typeof (data.result[s.return_type])!='undefined') obj.val(data.result[s.return_type]);
 					}
@@ -148,6 +165,28 @@
 				}
 			}
 		});
+	}
+
+	function bind_display_result(obj, s){
+		if(typeof(obj.attr('data-query'))!='undefined'){
+			$.ajax({
+				url:s.proxy+'lookup?q='+encodeURIComponent(query)+'&callback=?',
+				dataType:'jsonp',
+				timeOut:5000,
+				success: function(data){
+					if(data.status==0){
+						var template = s.single_template;
+						$('.rowidget_single', obj.p).remove();
+						obj.p.append(template.renderTpl(data.result));
+						if(s.return_type){
+							if(typeof (data.result[s.return_type])!='undefined') obj.val(data.result[s.return_type]);
+						}
+					}else{
+						// console.log(data);
+					}
+				}
+			});
+		}
 	}
 
 	String.prototype.renderTpl = function() {

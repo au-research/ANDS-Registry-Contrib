@@ -29,8 +29,15 @@ class Registry_widget extends MX_Controller{
 				$r = $this->lookup($_GET['q']);
 				$this->JSONP($callback, $r);
 			}else{
-				$r = array('status'=>1, 'message'=>'q must be specified');
+				$this->JSONP($callback, array('status'=>1, 'message'=>'q must be specified'));
+			}
+		}elseif($action=='search'){
+			$q = (isset($_GET['q'])? $_GET['q']: false);
+			if($q){
+				$r = $this->search($q);
 				$this->JSONP($callback, $r);
+			}else{
+				$this->JSONP($callback, array('status'=>1, 'message'=>'q must be specified'));
 			}
 		}
 	}
@@ -55,12 +62,39 @@ class Registry_widget extends MX_Controller{
 				'slug'=>$ro->slug,
 				'title'=>$ro->title,
 				'class'=>$ro->class,
-				'type'=>$ro->type
+				'type'=>$ro->type,
+				'group'=>$ro->group,
 			);
+			if($ro->getMetadata('the_description')) {
+				$r['result']['description']=$ro->getMetadata('the_description');
+			}else $r['result']['description'] = '';
 		}else{
 			$r['status'] = 1;
 			$r['message'] = 'No Registry Object Found';
 		}
+		return $r;
+	}
+
+	private function search($query){
+		$q = urldecode($query);
+		$r = array();
+		$this->load->library('solr');
+		$filters = array('q'=>$q);
+		$this->solr->setFilters($filters);
+		$this->solr->executeSearch();
+		
+		$result = $this->solr->getResult();
+		$r['result'] = $this->solr->getResult();
+		$r['numFound'] = $this->solr->getNumFound();
+
+		if($r['numFound'] > 0){
+			$r['status']=0;
+		}else{
+			$r['status']=1;
+			$r['message'] = 'No Result Found!';
+		}
+		$r['solr_header'] = $this->solr->getHeader();
+		$r['timeTaken'] = $r['solr_header']->{'QTime'} / 1000;
 		return $r;
 	}
 
