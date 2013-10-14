@@ -29,15 +29,19 @@ class Registry_widget extends MX_Controller{
 				$r = $this->lookup($_GET['q']);
 				$this->JSONP($callback, $r);
 			}else{
-				$this->JSONP($callback, array('status'=>1, 'message'=>'q must be specified'));
+				$this->JSONP($callback, array('status'=>1, 'message'=>'q must be specified for lookup'));
 			}
 		}elseif($action=='search'){
 			$q = (isset($_GET['q'])? $_GET['q']: false);
+			$custom_q = (isset($_GET['custom_q'])? $_GET['custom_q']: false);
 			if($q){
 				$r = $this->search($q);
 				$this->JSONP($callback, $r);
+			}elseif($custom_q){
+				$r = $this->search($custom_q, true);
+				$this->JSONP($callback, $r);
 			}else{
-				$this->JSONP($callback, array('status'=>1, 'message'=>'q must be specified'));
+				$this->JSONP($callback, array('status'=>1, 'message'=>'q or custom_q must be specified for search'));
 			}
 		}
 	}
@@ -75,15 +79,20 @@ class Registry_widget extends MX_Controller{
 		return $r;
 	}
 
-	private function search($query){
+	private function search($query, $custom = false){
 		$q = urldecode($query);
 		$r = array();
 		$this->load->library('solr');
-		$filters = array('q'=>$q);
-		$this->solr->setFilters($filters);
-		$this->solr->executeSearch();
+		if(!$custom){
+			$filters = array('q'=>$q);
+			$this->solr->setFilters($filters);
+		}else{
+			$this->solr->setCustomQuery($q);
+		}
 		
+		$this->solr->executeSearch();
 		$result = $this->solr->getResult();
+
 		$r['result'] = $this->solr->getResult();
 		$r['numFound'] = $this->solr->getNumFound();
 

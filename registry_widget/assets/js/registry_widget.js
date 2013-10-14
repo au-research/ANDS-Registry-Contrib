@@ -170,12 +170,12 @@
 	function bind_display_result(obj, s){
 		if(typeof(obj.attr('data-query'))!='undefined'){
 			$.ajax({
-				url:s.proxy+'lookup?q='+encodeURIComponent(query)+'&callback=?',
+				url:s.proxy+'search?custom_q='+encodeURIComponent(obj.attr('data-query'))+'&callback=?',
 				dataType:'jsonp',
 				timeOut:5000,
 				success: function(data){
 					if(data.status==0){
-						var template = s.single_template;
+						var template = s.result_template;
 						$('.rowidget_single', obj.p).remove();
 						obj.p.append(template.renderTpl(data.result));
 						if(s.return_type){
