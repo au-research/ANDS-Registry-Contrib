@@ -13,10 +13,15 @@ class Orcid_widget extends MX_Controller {
         
     }
 
-    function download(){
+    function download($min=''){
         $this->load->library('zip');
-        $this->zip->read_file('./applications/apps/orcid_widget/assets/css/orcid_widget.css');
-        $this->zip->read_file('./applications/apps/orcid_widget/assets/js/orcid_widget.js');
+        if($min=='minified'){
+            $this->zip->read_file('./applications/apps/orcid_widget/assets/dist/orcid_widget.min.css');
+            $this->zip->read_file('./applications/apps/orcid_widget/assets/dist/orcid_widget.min.js');
+        }else{
+            $this->zip->read_file('./applications/apps/orcid_widget/assets/css/orcid_widget.css');
+            $this->zip->read_file('./applications/apps/orcid_widget/assets/js/orcid_widget.js');
+        }
         $this->zip->download('orcid_widget.zip');
     }
 }

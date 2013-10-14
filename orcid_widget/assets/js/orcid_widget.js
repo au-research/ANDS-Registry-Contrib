@@ -70,6 +70,7 @@
 		var handler;
 		if (typeof(options) !== 'string') {
 		    settings = $.extend({}, defaults, options);
+		    console.log('start');
 		    //do some quick and nasty fixes
 		    settings.list_class = typeof(settings.list_class) === 'undefined' ? "" :
 			settings.list_class;
@@ -83,7 +84,7 @@
 				    bind_orcid_plugin($this, settings);
 				});
 		    }
-		    catch (err) { throw err; alert(err); }
+		    catch (err) {  alert(err); }
 		}
 	}
 
@@ -361,7 +362,7 @@
 	function _search_form(obj, settings){
 		obj.p.children('.'+settings.search_div_class).slideToggle();
 	}
-
+	
 	//catch all .orcid_widget and apply orcid_widget() with default settings on
 	$('.orcid_widget').each(function(){
 	   	var elem = $(this);

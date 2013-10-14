@@ -131,7 +131,7 @@
 						e.preventDefault();
 						obj.val($('a', this).attr('data-'+s.return_type));
 						_lookup(obj.val(), obj, s);
-						$('.rowidget_results').remove();
+						$('.rowidget_results', obj.p).remove();
 					});
 				}else{
 					$('.rowidget_results', obj.p).remove();
