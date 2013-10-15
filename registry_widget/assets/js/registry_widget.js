@@ -37,15 +37,17 @@
 			mode: 'search',
 
 			search: true,
+			advanced: false,
+			auto_search: false,
 			wrapper: '<div class="rowidget_wrapper"></div>',
 			search_btn_text: 'Search',
-			search_btn_class: 'rowidget_search btn btn-small',
+			search_btn_class: 'rowidget_search btn btn-small btn-default',
 			search_callback:false,
 
 			lookup:true,
 			auto_lookup:false,
 			lookup_btn_text: 'Resolve',
-			lookup_btn_class: 'rowidget_lookup btn btn-small',
+			lookup_btn_class: 'rowidget_lookup btn btn-small btn-default',
 			lookup_callback: false,
 
 			result_template: '<ul class="rowidget_results">{{#docs}}<li><a href="javascript:;" data-key="{{key}}" data-slug="{{slug}}" data-id="{{id}}">{{list_title}}</a></li>{{/docs}}</ul>',
@@ -76,6 +78,10 @@
 					var $this = $(this);
 					$this.wrap(settings.wrapper);
 					$this.p = $this.parent();
+
+					if($this.attr('data-mode')=='display_single' || $this.attr('data-mode')=='display_result'){
+						settings.mode=$this.attr('data-mode');
+					}
 					
 					if($this.is('input') && settings.mode=='search'){
 						bind_search($this, settings);
@@ -94,6 +100,15 @@
 
 	function bind_search(obj, s){
 
+		if(s.lookup){
+			var lookup_btn = $('<button>').html(s.lookup_btn_text).addClass(s.lookup_btn_class);
+			obj.p.append(lookup_btn);
+			$(lookup_btn).on('click', function(e){
+				e.preventDefault();e.stopPropagation();
+				_lookup(obj.val(),obj,s);
+			});
+		}
+
 		if(s.search){
 			var search_btn = $('<button>').addClass(s.search_btn_class).html(s.search_btn_text);
 			obj.p.append(search_btn);
@@ -101,17 +116,13 @@
 				e.preventDefault();e.stopPropagation();
 				_search(obj,s);
 			});
-		}
-
-		if(s.lookup){
-			var lookup_btn = $('<button>').html(s.lookup_btn_text).addClass(s.lookup_btn_class);
-			obj.p.append(lookup_btn);
-			obj.p.append($('<div>').addClass('rowidget_display_container'));
-			$(lookup_btn).on('click', function(e){
-				e.preventDefault();e.stopPropagation();
-				_lookup(obj.val(),obj,s);
-			});
-		}
+			if(s.auto_search && obj.val()!="") _search(obj,s);
+			if(s.advanced){
+				var advanced_btn = $('<button>').addClass('btn btn-link').html('Advanced');
+				obj.p.append(advanced_btn);
+			}
+		}	
+		
 	}
 
 	function _search(obj, s){

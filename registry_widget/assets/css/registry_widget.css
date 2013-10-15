@@ -1,10 +1,11 @@
-.rowidget_search{
+.rowidget_search, .rowidget_lookup{
 	margin-left:5px;
 }
 
 .rowidget_single{
 	border:1px solid #ccc;
 	padding:10px;
+	margin:5px 0;
 }
 .rowidget_single div.description{
 	text-overflow:ellipsis;
