@@ -107,9 +107,15 @@ class Registry_widget extends MX_Controller{
 		return $r;
 	}
 
-
-
-	function download(){
-		
+	function download($min=''){
+		$this->load->library('zip');
+		if($min=='minified'){
+			$this->zip->read_file('./applications/apps/registry_widget/assets/dist/registry_widget.min.css');
+			$this->zip->read_file('./applications/apps/registry_widget/assets/dist/registry_widget.min.js');
+		}else{
+			$this->zip->read_file('./applications/apps/registry_widget/assets/css/registry_widget.css');
+			$this->zip->read_file('./applications/apps/registry_widget/assets/js/registry_widget.js');
+		}
+		$this->zip->download('registry_widget.zip');
 	}
 }
