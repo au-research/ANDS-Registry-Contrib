@@ -2,7 +2,8 @@ module.exports = function(grunt){
 	//configuration goes here
 	var yeomanConfig = {
 		orcid_widget: 'orcid_widget/assets',
-		registry_widget: 'registry_widget/assets'
+		registry_widget: 'registry_widget/assets',
+		vocab_widget: 'vocab_widget/assets'
 	}
 	grunt.initConfig({
 		yeoman: yeomanConfig,
@@ -13,7 +14,10 @@ module.exports = function(grunt){
 			},
 			registry_widget:{
 				files:{'<%= yeoman.registry_widget %>/dist/registry_widget.min.js':['<%= yeoman.registry_widget %>/js/registry_widget.js']}
-			}
+			},
+			vocab_widget:{
+				files:{'<%= yeoman.vocab_widget %>/dist/vocab_widget.min.js':['<%= yeoman.vocab_widget %>/js/vocab_widget.js']}
+			},
 		},
 		cssmin:{
 			options:{report:'min'},
@@ -24,6 +28,10 @@ module.exports = function(grunt){
 			registry_widget:{
 				src:'<%= yeoman.registry_widget %>/css/registry_widget.css',
 				dest:'<%= yeoman.registry_widget %>/dist/registry_widget.min.css'
+			},
+			vocab_widget:{
+				src:'<%= yeoman.vocab_widget %>/css/vocab_widget.css',
+				dest:'<%= yeoman.vocab_widget %>/dist/vocab_widget.min.css'
 			}
 		},
 	});

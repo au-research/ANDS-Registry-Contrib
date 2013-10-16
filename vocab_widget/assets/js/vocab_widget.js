@@ -26,7 +26,7 @@
 
 	var defaults = {
 	    //location (absolute URL) of the jsonp proxy
-	    endpoint: 'http://ands3.anu.edu.au/workareas/smcphill/ands-online-services/arms/src/registry/vocab_widget/proxy/',
+	    endpoint: 'http://researchdata.ands.org.au/apps/vocab_widget/proxy/',
 
 	    //sisvoc repository to query.
 	    repository: '',
