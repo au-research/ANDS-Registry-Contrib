@@ -134,16 +134,21 @@
 			timeOut:5000,
 			success: function(data){
 				if(data.status==0){
-					var template = s.result_template;
-					$('.rowidget_results', obj.p).remove();
-					$('.ro_widget_single', obj.p).remove();
-					obj.p.append(template.renderTpl(data.result));
-					$('.rowidget_results li', obj.p).on('click', function(e){
-						e.preventDefault();
-						obj.val($('a', this).attr('data-'+s.return_type));
-						_lookup(obj.val(), obj, s);
+					if(s.search_callback && (typeof s.search_callback === 'function')){
+						//if there's a predefined handler, use it instead
+						s.search_callback(data, obj, s);
+					}else{
+						var template = s.result_template;
 						$('.rowidget_results', obj.p).remove();
-					});
+						$('.ro_widget_single', obj.p).remove();
+						obj.p.append(template.renderTpl(data.result));
+						$('.rowidget_results li', obj.p).on('click', function(e){
+							e.preventDefault();
+							obj.val($('a', this).attr('data-'+s.return_type));
+							_lookup(obj.val(), obj, s);
+							$('.rowidget_results', obj.p).remove();
+						});
+					}
 				}else{
 					$('.rowidget_results', obj.p).remove();
 					obj.p.append('<div class="rowidget_results">'+data.message+'</div>');
@@ -165,11 +170,16 @@
 			timeOut:5000,
 			success: function(data){
 				if(data.status==0){
-					var template = s.single_template;
-					$('.rowidget_single', obj.p).remove();
-					obj.p.append(template.renderTpl(data.result));
-					if(s.return_type){
-						if(typeof (data.result[s.return_type])!='undefined') obj.val(data.result[s.return_type]);
+					if(s.lookup_callback && (typeof s.lookup_callback === 'function')){
+						//if there's a predefined handler, use it instead
+						s.lookup_callback(data, obj, s);
+					}else{
+						var template = s.single_template;
+						$('.rowidget_single', obj.p).remove();
+						obj.p.append(template.renderTpl(data.result));
+						if(s.return_type){
+							if(typeof (data.result[s.return_type])!='undefined') obj.val(data.result[s.return_type]);
+						}
 					}
 				}else{
 					// console.log(data);
