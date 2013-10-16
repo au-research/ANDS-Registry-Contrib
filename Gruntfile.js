@@ -3,7 +3,8 @@ module.exports = function(grunt){
 	var yeomanConfig = {
 		orcid_widget: 'orcid_widget/assets',
 		registry_widget: 'registry_widget/assets',
-		vocab_widget: 'vocab_widget/assets'
+		vocab_widget: 'vocab_widget/assets',
+		location_widget: 'location_capture_widget/assets'
 	}
 	grunt.initConfig({
 		yeoman: yeomanConfig,
@@ -17,6 +18,9 @@ module.exports = function(grunt){
 			},
 			vocab_widget:{
 				files:{'<%= yeoman.vocab_widget %>/dist/vocab_widget.min.js':['<%= yeoman.vocab_widget %>/js/vocab_widget.js']}
+			},
+			location_widget:{
+				files:{'<%= yeoman.location_widget %>/dist/location_capture_widget.min.js':['<%= yeoman.location_widget %>/js/location_capture_widget.js']}
 			},
 		},
 		cssmin:{
@@ -32,6 +36,10 @@ module.exports = function(grunt){
 			vocab_widget:{
 				src:'<%= yeoman.vocab_widget %>/css/vocab_widget.css',
 				dest:'<%= yeoman.vocab_widget %>/dist/vocab_widget.min.css'
+			},
+			location_widget:{
+				src:'<%= yeoman.location_widget %>/css/location_capture_widget.css',
+				dest:'<%= yeoman.location_widget %>/dist/location_capture_widget.min.css'
 			}
 		},
 	});
