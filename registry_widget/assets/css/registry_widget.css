@@ -12,3 +12,7 @@
 	max-height:150px;
 	overflow:auto;
 }
+
+.rowidget_results{
+	margin: 5px 0;
+}
