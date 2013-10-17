@@ -26,6 +26,14 @@ class Vocab_widget extends MX_Controller {
 		$this->load->view('demo', $data);
 	}
 
+	function demo2(){
+		$data['title'] = "ANDS Vocab widget";
+		$data['scripts'] = array('vocab_widget_loader');
+		$data['js_lib'] = array('core', 'vocab_widget');
+		$this->load->view('demo2', $data);
+	}
+
+
 	function download($min=''){
 		$this->load->library('zip');
 		if($min=='minified'){

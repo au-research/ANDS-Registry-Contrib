@@ -25,7 +25,7 @@
 		<li><a href="#hownow">How does it work?</a>
 		<ul>
 		  <li><a href="#search">Searching</a></li>
-		  <li><a href="#narrow">Narrowing</a></li>
+		  <li><a href="#narrow">Narrow / Collection</a></li>
 		  <li><a href="#tree">Tree</a></li>
 		  <li><a href="#core">Core usage</a></li>
 		</ul>
@@ -34,7 +34,7 @@
 		<ul>
 		  <li><a href="conf-common">Common options</a></li>
 		  <li><a href="conf-search">Search options</a></li>
-		  <li><a href="conf-narrow">Narrow options</a></li>
+		  <li><a href="conf-narrow">Narrow/inCollection options</a></li>
 		</ul>
 		</li>
 		<li><a href="#events">Events</a></li>
@@ -95,9 +95,9 @@
 		</div>
 	      </div>
               <a name="narrow"></a>
-              <h3>Narrowing</h3>
+              <h3>Narrow/Collection</h3>
 	      <p>
-		Narrow mode can be attached to a select element, or a text input box for an autocomplete-style list:
+		Narrow or collection mode can be attached to a select element, or a text input box for an autocomplete-style list:
 	      </p>
 	      <div class="row">
 		<div class="span1"></div>
@@ -110,7 +110,13 @@
 		    <small>(Click the orange button for sample code.)</small>
 		  </div>
 		</div>
-	      </div>
+	     </div>
+ 		<div>
+ 			<small><ul><li><code>narrow</code> mode usually expresses a direct parent-child relationship in the vocabulary (such as <em>skos:narrower</em>).</li>
+ 				<li><code>collection</code> is used to express less strong groupings of concepts in a vocabulary (such as <em>skos:Collection</em> or even <em>rdf:list</em>).</li>
+ 			</ul></small>
+ 		</div>
+
 	      <a name="tree"></a>
 	      <h3>Tree</h3>
 	      <p>
@@ -238,7 +244,7 @@ $(...).vocab_widget('[option name]', [option value]);
 		  <tr>
 		    <td>mode <span class="pull-right badge badge-info">S</span></td>
 		    <td>-</td>
-		    <td>Vocab widget mode: <code>search</code> provides an autocomplete widget on an HTML input element, while <code>narrow</code> populates an HTML select element with appropriate data. <code>advanced</code> mode exposes the core widget with no UI helpers.</td>
+		    <td>Vocab widget mode: <code>search</code> provides an autocomplete widget on an HTML input element, while <code>narrow</code> or  <code>collection</code> populate an HTML select element with appropriate data. <code>advanced</code> mode exposes the core widget with no UI helpers.</td>
 		  </tr>
 		  <tr  class="required">
 		    <td><span style="background-color:#FFAAAA">repository</span> <span class="pull-right badge badge-info">S</span></td>
@@ -323,7 +329,7 @@ $(...).vocab_widget('[option name]', [option value]);
 	      <a name="conf-narrow"></a>
 	      <table class="table" style="font-size:0.9em">
 		<caption>
-		  <h3>"Narrow" helper options</h3>
+		  <h3>"Narrow" or "Collection" helper options</h3>
 		  <strong>Legend:</strong>
 		  <span class="badge badge-info">S</span>: String,
 		  <span class="badge badge-info">I</span>: Integer,
