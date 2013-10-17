@@ -162,6 +162,9 @@
 		case 'top':
 		    handler._top(param);
 		    break;
+		case 'collection':
+			handler._collection(param);
+			break;
 		default:
 		    if (typeof(defaults[op]) !== 'undefined')
 		    {
