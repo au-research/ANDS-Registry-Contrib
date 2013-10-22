@@ -44,7 +44,7 @@
 			search_btn_class: 'rowidget_search btn btn-small btn-default',
 			search_callback:false,
 
-			lookup:true,
+			lookup:false,
 			auto_lookup:false,
 			lookup_btn_text: 'Resolve',
 			lookup_btn_class: 'rowidget_lookup btn btn-small btn-default',

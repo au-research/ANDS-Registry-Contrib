@@ -61,7 +61,7 @@
 		    post_lookup_success_handler: false,
 
 		    //auto close the search box once a value is chosen
-		    auto_close_search: false
+		    auto_close_search: true
 
 		};
 
