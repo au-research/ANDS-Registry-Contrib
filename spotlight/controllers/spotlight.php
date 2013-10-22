@@ -10,7 +10,7 @@ class Spotlight extends MX_Controller {
 	}
 
 	function index(){
-		$this->checkIsWriteable();
+		// $this->checkIsWriteable();
 
 		$data['js_lib'] = array('core', 'tinymce');
 		$data['scripts'] = array('spotlight');
@@ -18,6 +18,7 @@ class Spotlight extends MX_Controller {
 		$data['less'] = array('spotlight');
 
 		$data['file'] = $this->read();
+		// $data['file'] = '{"items":[{"id":"1","title":"Sample Spotlight Data","url":"http:\/\/sample.org.au\/site\/","url_text":"","img_url":"http:\/\/www.auscope.org.au\/_lib\/img\/lnav_logo.gif","img_attr":"","new_window":"yes","content":"<p>This is a sample organisation.<\/p>","visible":"yes"}]}';
 		$data['items'] = $data['file']['items'];
 
 		$this->load->view('spotlight_cms', $data);
@@ -103,13 +104,13 @@ class Spotlight extends MX_Controller {
 
 	private function checkIsWriteable()
 	{
-		if(!file_exists($this->config->item('spotlight_data_file'))){
-			throw new Exception ("Spotlight Data File is not found - check file exists in: ". $this->config->item('spotlight_data_file'));
-		}
-
 		if (!is_writable($this->config->item('spotlight_data_file')))
 		{
 			throw new Exception ("Spotlight Data File is not writeable - check file permission in: " . $this->config->item('spotlight_data_file'));
+		}
+
+		if(!file_exists($this->config->item('spotlight_data_file'))){
+			throw new Exception ("Spotlight Data File is not found - check file exists in: ". $this->config->item('spotlight_data_file'));
 		}
 	}
 
