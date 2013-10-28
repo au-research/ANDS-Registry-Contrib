@@ -1,32 +1,31 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-/**
- *
- */
 class Orcid_widget extends MX_Controller {
 
-    function index()
-    {
-            $data['js_lib'] = array('core','prettyprint');
-            $data['scripts'] = array();
-            $data['title'] = 'Orcid Widget - ANDS';
-            $this->load->view('documentation', $data);
+	function index(){
+		$data['title'] = 'Orcid Widget - ANDS';
+		$data['scripts'] = array('orcid_widget_loader');
+		$data['js_lib'] = array('core', 'orcid_widget', 'prettyprint');
+		$this->load->view('documentation', $data);
+	}
 
-    }
+	function proxy(){
+		
+	}
 
-   function proxy()
-    {
-	//$solr_base = $this->config->item('solr_url');
-	//$sissvoc_base = $this->config->item('sissvoc_url');
-	$this->load->view("proxy");
-    } 
-
-    function demo()
-    {
-	$data['title'] = "ANDS Orcid widget";
-//	$data['scripts'] = array('vocab_widget_loader');
-	$data['js_lib'] = array('core', 'orcid_widget');
-	$this->load->view('demo', $data);
-    }
-
+	function download($min=''){
+		$this->load->library('zip');
+		if($min=='minified'){
+			$this->zip->read_file('./applications/apps/orcid_widget/assets/dist/orcid_widget.min.css');
+			$this->zip->read_file('./applications/apps/orcid_widget/assets/dist/orcid_widget.min.js');
+		}elseif($min=='full'){
+			$this->zip->read_dir('./applications/apps/Orcid_widget/assets/css/', false);
+			$this->zip->read_dir('./applications/apps/Orcid_widget/assets/js/', false);
+			$this->zip->read_dir('./applications/apps/Orcid_widget/assets/dist/', false);
+		}else{
+			$this->zip->read_file('./applications/apps/orcid_widget/assets/css/orcid_widget.css');
+			$this->zip->read_file('./applications/apps/orcid_widget/assets/js/orcid_widget.js');
+		}
+		$this->zip->download('Orcid_widget.zip');
+	}
 }

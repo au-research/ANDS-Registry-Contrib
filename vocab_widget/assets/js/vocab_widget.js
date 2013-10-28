@@ -26,7 +26,7 @@
 
 	var defaults = {
 	    //location (absolute URL) of the jsonp proxy
-	    endpoint: 'http://ands3.anu.edu.au/workareas/smcphill/ands-online-services/arms/src/registry/vocab_widget/proxy/',
+	    endpoint: 'http://researchdata.ands.org.au/apps/vocab_widget/proxy/',
 
 	    //sisvoc repository to query.
 	    repository: '',
@@ -110,6 +110,9 @@
 		    case 'narrow':
 			handler = new NarrowHandler($this, settings);
 			break;
+			case 'collection':
+			handler = new CollectionHandler($this, settings);
+			break;
 		    case 'tree':
 			handler = new TreeHandler($this, settings);
 			break;
@@ -159,6 +162,9 @@
 		case 'top':
 		    handler._top(param);
 		    break;
+		case 'collection':
+			handler._collection(param);
+			break;
 		default:
 		    if (typeof(defaults[op]) !== 'undefined')
 		    {
@@ -408,6 +414,10 @@
 	    this.__act('narrow', opts);
 	},
 
+	_collection: function(opts) {
+	    this.__act('collection', opts);
+	},
+
 	_top: function(opts) {
 	    this.__act('top', opts);
 	},
@@ -489,10 +499,11 @@
 		},
 		{
 		    fields: ["mode"],
-		    description: "one of <search,narrow,tree,advanced>",
+		    description: "one of <search,narrow,collection,tree,advanced>",
 		    test: function(val) {
 			return (val === 'search' ||
 				val === 'narrow' ||
+				val === 'collection' ||
 				val === 'advanced' ||
 				val === 'tree');
 		    }
@@ -743,7 +754,7 @@
 	},
 
     });
-
+	
     var NarrowHandler = UIHandler.extend({
 	preconditions: function() {
 	    var preconds = this._super();
@@ -782,7 +793,7 @@
 	    }
 	    else {
 		this._err({status:500,
-			   responseText: "in 'narrow' mode, the plugin " +
+			   responseText: "in 'narrow'/'collection' mode, the plugin " +
 			   "must be attached to a select " +
 			   "or input element"});
 	    }
@@ -1020,5 +1031,63 @@
 				 uri: this._container.val()});
 	    }
 	}
+
     });
+
+	var CollectionHandler = NarrowHandler.extend({
+		
+		preconditions: function() {
+			// Skip NarrowHandlers's preconditions, just call the UIHandler preconditions
+		    var preconds = this.__proto__.__proto__.__proto__.preconditions();
+		    preconds.push({
+			fields: ["mode_params"],
+			description: "mode-specific parameters",
+			test: function(val) { return (typeof(val) !== 'undefined'); }
+		    });
+
+		    preconds.push({
+			fields: ["mode"],
+			description: "mode 'collection'",
+			test: function(val) { return val === 'collection'; }
+	    });
+
+	    return preconds;
+		},
+
+		__call: function(callee) {
+		    if (typeof(callee) === 'undefined') {
+			callee = this._container;
+		    }
+		    return this._collection({uri:this.settings.mode_params,
+					 callee:callee});
+		},
+
+		do_ready: function() {
+		    var handler = this;
+		    handler._container.on('error.vocab.ands',
+					  function(event, xhr) {
+					      handler._err(xhr);
+					  });
+		    if (this._ctype === 'SELECT') {
+		      handler._container.on('collection.vocab.ands',
+					    function(event, data) {
+					      handler.process(data);
+					    });
+			this.__call();
+		    }
+		    else {
+
+			this._container.on("keydown", function(e) {
+			    if (e.which == '40') {
+				handler._list.show();
+			    }
+			    else if (e.which == '27') {
+				handler._container.val('');
+				handler._list.hide();
+			    }
+			});
+		    }
+		},
+
+	});
 })( jQuery );

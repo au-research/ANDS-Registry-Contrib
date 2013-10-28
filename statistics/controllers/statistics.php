@@ -268,7 +268,6 @@ private function getUserStatistics($from,$to)
 				$month=date("M", $newMonth);
 				$user_statistics[$month." - ".$theYear]['Provider Organisations'] = $row->thecount;
 			} 
-
 		
 			$theMonth++;
 			if ($theMonth==13)
@@ -281,12 +280,13 @@ private function getUserStatistics($from,$to)
 		}
 		return $user_statistics;	
 	}
-function getCitationStatistics()
+
+	function getCitationStatistics()
 	{
 		$registry_db = $this->load->database('registry', TRUE);
 		$statistics_db = $this->load->database('statistics', TRUE);
 
-		$query = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as collection_count, `data_sources`.`data_source_id`
+	/*	$query = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as collection_count, `data_sources`.`data_source_id`
 							FROM `registry_objects`,`data_sources`
 							WHERE `registry_objects`.`data_source_id` = `data_sources`.`data_source_id`
 							AND `registry_objects`.`class` = 'collection'
@@ -326,8 +326,9 @@ function getCitationStatistics()
 		foreach($fullCitation_query->result() as $key=>$row)
 		{
 			$query = $statistics_db->query("UPDATE  `citations` SET `fullCitation_count` = ".$row->fullCitation_count." WHERE `data_source_id` = ".$row->data_source_id);
-		}		
+		}		*/
 	}
+
 	function collectCitationStatistics()
 	{
 		$registry_db = $this->load->database('registry', TRUE);
@@ -456,38 +457,115 @@ function getCitationStatistics()
 
 	function collectRelationshipStatistics()
 	{
-
 		$registry_db = $this->load->database('registry', TRUE);
 		$statistics_db = $this->load->database('statistics', TRUE);
 
-		$collectionPartyRelationship = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as collectionPartyCount, `registry_objects`.`data_source_id`
+		$query = $registry_db->query("SELECT  `data_sources`.`data_source_id` FROM `dbs_registry`.`data_sources`; ");
+		
+		$timestamp = time();
+
+		foreach($query->result() as $key=>$row)
+		{	
+			$collectionPartyRelationship = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as collectionPartyCount, `registry_objects`.`data_source_id`
 			FROM `dbs_registry`.`registry_objects`, `dbs_registry`.`registry_object_relationships`
 			WHERE `registry_objects`.`status`='PUBLISHED' 
 			AND `registry_objects`.`class` = 'collection'
 			AND `registry_objects`.`registry_object_id` = `registry_object_relationships`.`registry_object_id`
 			AND `registry_object_relationships`.`related_object_class` = 'party'
 			AND `registry_object_relationships`.`origin` = 'EXPLICIT'
-			GROUP BY  `registry_objects`.`data_source_id`");
+			AND `registry_objects`.`data_source_id` = ".$row->data_source_id.";");
 
-		$timestamp = time();
 
-		foreach($collectionPartyRelationship->result() as $key=>$row)
-		{	
-			echo "Datasource ".$row->data_source_id." has ".$row->collectionPartyCount." collections with related party records<br/>";			
+			$result = $collectionPartyRelationship->result();
+			$collectionPartyCount = $result[0]->collectionPartyCount;
+	
+			$collectionArcRelationship = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as collectinArcCount
+			FROM `dbs_registry`.`registry_objects`, `dbs_registry`.`registry_object_relationships`
+			WHERE `registry_objects`.`status`='PUBLISHED' 
+			AND `registry_objects`.`class` = 'collection'
+			AND `registry_objects`.`registry_object_id` = `registry_object_relationships`.`registry_object_id`
+			AND `registry_object_relationships`.`related_object_class` = 'activity'
+			AND `registry_object_relationships`.`origin` = 'EXPLICIT'
+			AND `registry_object_relationships`.`related_object_key` LIKE 'http://purl.org/au-research/grants/arc/%'
+			AND `registry_objects`.`data_source_id` = ".$row->data_source_id.";");
+
+			$result = $collectionArcRelationship->result();
+			$collectinArcCount = $result[0]->collectinArcCount;
+
+			$collectionNhmrcRelationship = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as collectinNhmrcCount
+			FROM `dbs_registry`.`registry_objects`, `dbs_registry`.`registry_object_relationships`
+			WHERE `registry_objects`.`status`='PUBLISHED' 
+			AND `registry_objects`.`class` = 'collection'
+			AND `registry_objects`.`registry_object_id` = `registry_object_relationships`.`registry_object_id`
+			AND `registry_object_relationships`.`related_object_class` = 'activity'
+			AND `registry_object_relationships`.`origin` = 'EXPLICIT'
+			AND `registry_object_relationships`.`related_object_key` LIKE 'http://purl.org/au-research/grants/nhmrc/%'
+			AND `registry_objects`.`data_source_id` = ".$row->data_source_id.";");
+
+			$result = $collectionNhmrcRelationship->result();
+			$collectinNhmrcCount = $result[0]->collectinNhmrcCount;
+
+			$collectionOtherRelationship = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as collectinOtherCount
+			FROM `dbs_registry`.`registry_objects`, `dbs_registry`.`registry_object_relationships`
+			WHERE `registry_objects`.`status`='PUBLISHED' 
+			AND `registry_objects`.`class` = 'collection'
+			AND `registry_objects`.`registry_object_id` = `registry_object_relationships`.`registry_object_id`
+			AND `registry_object_relationships`.`related_object_class` = 'activity'
+			AND `registry_object_relationships`.`origin` = 'EXPLICIT'
+			AND `registry_object_relationships`.`related_object_key` NOT LIKE 'http://purl.org/au-research/grants/arc/%'
+			AND `registry_object_relationships`.`related_object_key` NOT LIKE 'http://purl.org/au-research/grants/nhmrc/%'
+			AND `registry_objects`.`data_source_id` = ".$row->data_source_id.";");
+
+			$result = $collectionOtherRelationship->result();
+			$collectinOtherCount = $result[0]->collectinOtherCount;
+			
+			$researcherCollectionRelationship = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as researcherCollectionCount 
+			FROM `dbs_registry`.`registry_objects`, `dbs_registry`.`registry_object_relationships`, `dbs_registry`.`registry_object_attributes`
+			WHERE `registry_objects`.`status`='PUBLISHED' 
+			AND `registry_objects`.`class` = 'party'
+			AND `registry_objects`.`registry_object_id` = `registry_object_relationships`.`registry_object_id`
+			AND `registry_objects`.`registry_object_id` = `registry_object_attributes`.`registry_object_id`
+			AND `registry_object_attributes`.`attribute` = 'type'
+			AND `registry_object_attributes`.`value` = 'person'
+			AND `registry_object_relationships`.`related_object_class` = 'collection'
+			AND `registry_object_relationships`.`origin` = 'EXPLICIT'
+			AND `registry_objects`.`data_source_id` = ".$row->data_source_id.";");
+
+			$result = $researcherCollectionRelationship->result();
+			$researcherCollectionCount = $result[0]->researcherCollectionCount;
+
+
+			$partyActivityRelationship = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as partyActivityCount, `registry_objects`.`data_source_id`
+			FROM `dbs_registry`.`registry_objects`, `dbs_registry`.`registry_object_relationships`
+			WHERE `registry_objects`.`status`='PUBLISHED' 
+			AND `registry_objects`.`class` = 'party'
+			AND `registry_objects`.`registry_object_id` = `registry_object_relationships`.`registry_object_id`
+			AND `registry_object_relationships`.`related_object_class` = 'activity'
+			AND `registry_object_relationships`.`origin` = 'EXPLICIT'
+			AND `registry_objects`.`data_source_id` = ".$row->data_source_id.";");
+
+
+			$result = $partyActivityRelationship->result();
+			$partyActivityCount = $result[0]->partyActivityCount;
+			
+			$arcCollectionRelationship = $registry_db->query("SELECT COUNT(DISTINCT(`registry_objects`.`registry_object_id`)) as arcCollectionCount
+			FROM `dbs_registry`.`registry_objects`, `dbs_registry`.`registry_object_relationships`
+			WHERE `registry_objects`.`status`='PUBLISHED' 
+			AND `registry_objects`.`class` = 'activity'
+			AND `registry_objects`.`key` LIKE 'http://purl.org/au-research/grants/arc/%'
+			AND `registry_objects`.`registry_object_id` = `registry_object_relationships`.`registry_object_id`
+			AND `registry_object_relationships`.`related_object_class` = 'collection'
+			AND `registry_object_relationships`.`origin` = 'EXPLICIT'
+			AND `registry_objects`.`data_source_id` = ".$row->data_source_id.";");
+
+			$result = $arcCollectionRelationship->result();
+			$arcCollectionCount = $result[0]->arcCollectionCount;
+
+			$query = $statistics_db->query("INSERT INTO  `relationships` 
+				(`data_source_id`,`collection_party` ,`collection_arc`, `collection_nhmrc`, `collection_other`, `researcher_collection`, `party_activity`, `arc_collection`, `timestamp`)
+				VALUES (".$row->data_source_id.",".$collectionPartyCount.",".$collectinArcCount.", ".$collectinNhmrcCount.",".$collectinOtherCount.",".$researcherCollectionCount.",".$partyActivityCount.",".$arcCollectionCount.",".$timestamp.")");
 		}
 
-
-		/*
-		SELECT `registry_objects`.`registry_object_id`, `registry_objects`.`data_source_id`, 
-		`registry_object_relationships`.`related_object_class`,`registry_object_relationships`.`related_object_key`
-		FROM `dbs_registry`.`registry_objects`, `dbs_registry`.`registry_object_relationships`
-		WHERE `registry_objects`.`status`='PUBLISHED' 
-		AND `registry_objects`.`class` = 'collection'
-		AND `registry_objects`.`registry_object_id` = `registry_object_relationships`.`registry_object_id`
-		AND `registry_object_relationships`.`related_object_class` = 'activity'
-		AND `registry_object_relationships`.`origin` = 'EXPLICIT'
-		AND `registry_object_relationships`.`related_object_key` LIKE 'http://purl.org/au-research/grants/arc/%';
-*/
 	}
 
 

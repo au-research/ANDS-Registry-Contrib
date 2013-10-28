@@ -39,7 +39,7 @@ header('Content-type: application/json');
 $jsonData['status'] = 'ERROR';
 $jsonData['message'] = 'searchText must be defined';
 $searchText = '';
-$limit = 500;
+$limit = 3000;
 $recCount = 0;
 $feature = '';
 $callback = "function";
@@ -54,7 +54,7 @@ if (isset($_GET['callback'])) {
 	$callback = $_GET['callback'];
 }
 if (isset($_GET['limit'])) {
-	$limit = $_GET['limit'];
+	//$limit = $_GET['limit']; // ignore this, for now...
 	$jsonData['limit'] = $limit;
 }
 if (isset($_GET['feature'])) {
@@ -62,14 +62,20 @@ if (isset($_GET['feature'])) {
 	$jsonData['feature'] = $feature;
 }
 
+$debug = false;
+if(isset($_GET['debug']))
+{
+	$debug = true;
+}
 
-// Design the XML query (Gazetteer uses bizarre XML fragments in the URL request)
+
+// Design the XML query
 if ($searchText) {
-	$mctGazetteerGeocoderUrl = 'http://gazetteer.mymaps.gov.au/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typename=iso19112:SI_LocationInstance&maxFeatures=5000&filter=';
+	$mctGazetteerGeocoderUrl = 'http://gazetteer.mymaps.gov.au/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typename=iso19112:SI_LocationInstance&maxFeatures='.$limit.'';
 	$filterText = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc"><ogc:PropertyIsLike wildCard="*" singleChar="#" escapeChar="\\"><ogc:PropertyName>iso19112:alternativeGeographicIdentifiers/iso19112:alternativeGeographicIdentifier/iso19112:name</ogc:PropertyName><ogc:Literal>' . $searchText . '</ogc:Literal></ogc:PropertyIsLike></ogc:Filter>';
 }
 if ($feature) {
-	$mctGazetteerGeocoderUrl = 'http://gazetteer.mymaps.gov.au/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typename=iso19112:SI_LocationType&filter=';
+	$mctGazetteerGeocoderUrl = 'http://gazetteer.mymaps.gov.au/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typename=iso19112:SI_LocationType';
 	$filterText = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc"><ogc:PropertyIsLike wildCard="%" singleChar="#" escapeChar="\\"><ogc:PropertyName>@gml:id</ogc:PropertyName><ogc:Literal>' . $feature . '%</ogc:Literal></ogc:PropertyIsLike></ogc:Filter>';
 }
 
@@ -78,7 +84,8 @@ $jsonData = array();
 $jsonData['status'] = 'OK';
 $ch = curl_init() or die(curl_error());
 curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_URL, $mctGazetteerGeocoderUrl . rawurlencode($filterText));
+curl_setopt($ch, CURLOPT_POSTFIELDS, "filter=" . rawurlencode($filterText));
+curl_setopt($ch, CURLOPT_URL, $mctGazetteerGeocoderUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 $data = curl_exec($ch) or die(curl_error());
 
