@@ -41,10 +41,10 @@
 		    search: true,
 		    pre_open_search: false,
 		    search_text: '<i class="icon-search"></i> Search',
-		    search_class: 'orcid_search btn btn-small',
+		    search_class: 'orcid_search btn btn-default btn-small',
 		    lookup: true,
 		    lookup_text: 'Look up',
-		    lookup_class: 'orcid_lookup btn btn-small',
+		    lookup_class: 'orcid_lookup btn btn-default btn-small',
 		    before_html: '<span class="orcid_before_html">http://orcid.org/</span>',
 		    wrap_html: '<div class="orcid_wrapper"></div>',
 		    result_success_class: 'orcid_success_div',
@@ -58,10 +58,10 @@
 		    //custom hooks and handlers
 		    lookup_error_handler: false,
 		    lookup_success_handler: false,
-		    lookup_success_hook: false,
+		    post_lookup_success_handler: false,
 
 		    //auto close the search box once a value is chosen
-		    auto_close_search: false
+		    auto_close_search: true
 
 		};
 
@@ -83,7 +83,7 @@
 				    bind_orcid_plugin($this, settings);
 				});
 		    }
-		    catch (err) { throw err; alert(err); }
+		    catch (err) {  alert(err); }
 		}
 	}
 
@@ -182,9 +182,9 @@
 					var html = _constructORCIDHTML(data['orcid-profile']);
 					var result_div = $('<div>').addClass(settings.result_success_class).html(html);
 					obj.p.append(result_div);
-					if(settings.lookup_success_hook && (typeof settings.lookup_success_hook ==='function')){
+					if(settings.post_lookup_success_handler && (typeof settings.post_lookup_success_handler ==='function')){
 						//if there's a hook defined, use it after success
-						settings.lookup_success_hook();
+						settings.post_lookup_success_handler(data,obj,settings);
 					}
 				}
 			},
@@ -361,7 +361,7 @@
 	function _search_form(obj, settings){
 		obj.p.children('.'+settings.search_div_class).slideToggle();
 	}
-
+	
 	//catch all .orcid_widget and apply orcid_widget() with default settings on
 	$('.orcid_widget').each(function(){
 	   	var elem = $(this);

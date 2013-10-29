@@ -14,6 +14,8 @@ $(document).ready(function() {
 	       			     cache: false,
 	       			     fields: ['definition'],
 	       			     target_field: 'label'});
+
+
     $("#rifcs-idtype-input").vocab_widget({mode:"narrow",
 					   mode_params:"http://purl.org/au-research/vocabulary/RIFCS/1.4/RIFCSIdentifierType",
 					   repository:"rifcs",
@@ -21,6 +23,29 @@ $(document).ready(function() {
 					   fields: ['label', 'definition', 'about'],
 					   target_field: 'label'});
   }
+
+  function collectionmode()
+  {
+  	var collection_uri = "http://purl.org/au-research/vocabulary/RIFCS/1.5/RIFCS" +
+  							$("#rifcs-relation-from").val() +
+  							"To" +
+  							$("#rifcs-relation-to").val() +
+  							"RelationType";
+  	$("#rifcs-relationtype").unbind();
+  	$("#rifcs-relationtype").vocab_widget({
+  	   mode:"collection",
+	   mode_params:collection_uri,
+	   repository:"rifcs15",
+	   cache: false,
+	   fields: ['label'],
+	   target_field: 'label'});
+  }
+  // Update widget on change
+   $("#rifcs-relation-from, #rifcs-relation-to").on('change', function()
+   {
+   	collectionmode();
+   });
+
 
   function coremode() {
     var elem = $("#vocab-core");
@@ -62,6 +87,7 @@ $(document).ready(function() {
   narrowmode();
   treemode();
   coremode();
+  collectionmode();
   $(document).trigger('loaded.internal');
 
 });

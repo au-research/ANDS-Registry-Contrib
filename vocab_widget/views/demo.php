@@ -84,6 +84,32 @@ $("#rifcs-idtype-input").vocab_widget({
 	      </dl>
 	      <i>(autocomplete; begin typing something (e.g. "ABN"), or press the down arrow to browse selections)</i>
 	    </fieldset>
+	    <a name="narrow-collection"></a>
+	    <fieldset>
+	      <legend>Vocab widget: Collection mode <button type="link" class="note-toggle">?</button></legend>
+	      <small>(specific Record-to-Record Relation Types (new in v1.5))</small>
+	      <div class="note">
+		This form section is using the widget in the 'collection' helper mode (similar to "narrow" mode, but for weaker membership relationships (skos:collection))
+		<pre>
+$("#rifcs-relationtype").vocab_widget({
+    mode:"collection",
+    mode_params:"http://purl.org/au-research/vocabulary/RIFCS/1.5/RIFCSPartyToPartyRelationType,
+    repository:"rifcs15",
+    cache: false,
+    fields: ['label'],
+    target_field: 'label'});
+		</pre>
+	      </div>
+	      <dl>
+		<dt>RIFCS Relation Type:</dt>
+		<dd>
+			Between <select id="rifcs-relation-from"><option>Activity</option><option selected>Collection</option><option>Party</option><option>Service</option></select>
+			and <select id="rifcs-relation-to"><option>Activity</option><option selected>Collection</option><option>Party</option><option>Service</option></select>		
+		<dd><select id="rifcs-relationtype" name="rifcs-relation-dropdown" value=""></select></dd>
+	      </dl>
+	    </fieldset>
+
+
 	    <a name="tree"></a>
 	    <fieldset>
 	      <legend>Vocab widget: tree mode  <button type="link" class="note-toggle">?</button></legend>

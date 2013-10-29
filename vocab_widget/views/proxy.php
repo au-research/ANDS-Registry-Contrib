@@ -32,11 +32,12 @@ if (isset($sissvoc_base) && !empty($sissvoc_base)) {
     define("BASE_URL", $sissvoc_base);
 }
 else {
-    define("BASE_URL", "http://ands3.anu.edu.au:8080/sissvoc/api/");
+    define("BASE_URL", "http://researchdata.ands.org.au:8080/vocab/api/");
 }
 
 define("SEARCH_URL", "/concepts.json?anycontains=");
 define("NARROW_URL", "/concepts/narrower.json?uri=");
+define("INCOLLECTION_URL", "/concepts/inCollection.json?uri=");
 define("ALLNARROW_URL", "/concepts/allNarrower.json?uri=");
 define("BROAD_URL", "/concepts/broader.json?uri="); #future use
 define("TOP_URL", "/concepts/topConcepts.json");
@@ -62,6 +63,11 @@ class VocabProxy
 			'sortprocessor' => false),
 		"narrow" => array(
 			'url' => NARROW_URL,
+			'queryprocessor' => false,
+			'itemprocessor' => false,
+			'sortprocessor' => false),
+		"collection" => array(
+			'url' => INCOLLECTION_URL,
 			'queryprocessor' => false,
 			'itemprocessor' => false,
 			'sortprocessor' => false),
@@ -111,6 +117,7 @@ class VocabProxy
 		/**
 		 * Set up sort processors:
 		 *  - for 'top', 'narrow', and 'allnarrow' we want terms sorted by notation, or label
+		 *  - for 'collection' sort by description
 		 */
 		foreach (array('top', 'allnarrow') as $action) {
 		    $this->valid_actions[$action]['sortprocessor'] = function($e1, $e2) {
@@ -126,6 +133,21 @@ class VocabProxy
 			}
 		    };
 		}
+
+		  $this->valid_actions['collection']['sortprocessor'] = function($e1, $e2) {
+			if (array_key_exists('definition', $e1))
+			{
+			    $l1 = $e1['definition'];
+			    $l2 = $e2['definition'];
+			    return $l1 <= $l2 ? -1 : 1;
+			}
+			else
+			{
+			    return;
+			}
+		    };
+
+
 
 		/**
 		 * Set up item processors; this is used to inject solr term counts based on the
@@ -381,6 +403,19 @@ class VocabProxy
 		echo $this->callback . "(" . $this->jsonData . ");";
 	}
 }
+
+function definition_sort ($e1, $e2) {
+	if (array_key_exists('definition', $e1))
+	{
+	    $l1 = $e1['definition'];
+	    $l2 = $e2['definition'];
+	    return $l1 <= $l2 ? -1 : 1;
+	}
+	else
+	{
+	    return;
+	}
+};
 
 $proxy = new VocabProxy();
 ?>
