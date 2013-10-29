@@ -60,7 +60,7 @@ class Uploader extends MX_Controller {
 			// Create the compressed copy of the image based on a hash of the uploaded filename
 			$upload_result = $this->upload->data();
 			$image = new Imagick(  $this->directory . $upload_result['file_name'] );
-
+			$image->setBackgroundColor(new ImagickPixel('white'));
 			// Create the optimised image
 			// "bestfit" param will ensure that the image is downscaled proportionally if needed
 			if ($image->getImageWidth() >= $image->getImageHeight() 
@@ -72,10 +72,17 @@ class Uploader extends MX_Controller {
 			{
 				$image->resizeImage(self::IMAGE_PORTRAIT_WIDTH,self::IMAGE_PORTRAIT_HEIGHT, Imagick::FILTER_LANCZOS, 1, true);
 			}
-			$image->setImageCompression(Imagick::COMPRESSION_JPEG);
-			$image->setCompression(Imagick::COMPRESSION_JPEG);
-			$image->setCompressionQuality(self::COMPRESSION_PERCENTAGE); 
-			$image->writeImage($this->directory . 'img_' . md5($upload_result['file_name']) . ".jpg");
+
+			$flattened = new IMagick();
+			$flattened->newImage($image->getImageWidth(), $image->getImageHeight(), new ImagickPixel("white"));
+			$flattened->compositeImage($image, imagick::COMPOSITE_OVER, 0, 0);
+			$flattened->setImageFormat("jpg");
+			$flattened->setImageCompression(Imagick::COMPRESSION_JPEG);
+			$flattened->setCompression(Imagick::COMPRESSION_JPEG);
+			$flattened->setCompressionQuality(self::COMPRESSION_PERCENTAGE); 
+			$flattened->writeImage($this->directory . 'img_' . md5($upload_result['file_name']) . ".jpg");
+			$flattened->clear();
+			$flattened->destroy();
 			$image->clear();
 			$image->destroy();
 
