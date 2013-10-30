@@ -386,10 +386,10 @@ private function getUserStatistics($from,$to)
 		$this->load->library('solr');
 		$query = $registry_db->query("SELECT  `data_sources`.`data_source_id`
 							FROM `dbs_registry`.`data_sources`; ");
-
+		$timestamp = time();
 		foreach($query->result() as $key=>$row)
 		{
-			$timestamp = time();
+
 			$doi_identifiers = 0;
 			// use solr to get all identifiers of type doi for published collections
 			$this->solr->setOpt('q', '+data_source_id:("'.$row->data_source_id.'") AND +class:collection AND +identifier_type:doi AND +status:PUBLISHED');
