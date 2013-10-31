@@ -48,7 +48,7 @@ $(document).on('click', '#add_confirm', function(){
 
 function listTrustedClients() {
 	$('#trsuted_clients').html('loading');
-	$.getJSON(base_url+'pids/list_trusted_clients/', function(data) {
+	$.getJSON(apps_url+'pids/list_trusted_clients/', function(data) {
 		var template = $('#trusted_clients-template').html();
 		var output = Mustache.render(template, data);
 		$('#trusted_clients').html(output).css('opacity', '1');
