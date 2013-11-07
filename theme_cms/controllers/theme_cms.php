@@ -8,8 +8,27 @@ class Theme_cms extends MX_Controller {
 		$this->checkWritable();
 		$data['title']='Theme CMS';
 		$data['scripts'] = array('theme_cms_app');
-		$data['js_lib'] = array('core', 'tinymce', 'angular', 'rosearch_widget', 'colorbox');
+		$data['js_lib'] = array('core', 'tinymce', 'angular', 'rosearch_widget', 'colorbox', 'select2');
 		$this->load->view('theme_cms_index', $data);
+	}
+
+	function bulk_tag(){
+		$data['title'] = 'Bulk Tagging Tool';
+		$data['scripts'] = array('bulk_tag_app');
+		$data['js_lib'] = array('core', 'angular', 'select2');
+
+		$this->load->model("registry/data_source/data_sources","ds");
+	 	$dataSources = $this->ds->getAll(0,0);
+		$items = array();
+		foreach($dataSources as $ds){
+			$item = array();
+			$item['title'] = $ds->title;
+			$item['key'] = $ds->key;
+			array_push($items, $item);
+		}
+		$data['dataSources'] = $items;
+
+		$this->load->view('bulk_tag_index', $data);
 	}
 
 	function checkWritable(){

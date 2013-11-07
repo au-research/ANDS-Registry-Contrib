@@ -68,7 +68,8 @@
 
 <div id="view_page_template" class="hide">
 	<div class="content-header">
-		<h1>{{page.title}}</h1>
+		<h1 ng-dblclick="editPageTitle = true" ng-hide="editPageTitle">{{page.title}}</h1>
+		<h1 ng-show="editPageTitle"><form class="form form-horizontal"><input type="text" ng-model="page.title"><button class="btn btn-small" ng-click="editPageTitle = false"><i class="icon icon-ok"></i></button></form></h1>
 		<div class="btn-group">
 			<a class="btn btn-large" ng-click="save()"><i class="icon icon-hdd"></i> Save</a>
 			<a class="btn btn-large" href="<?php echo portal_url('theme_page/view/{{page.slug}}'); ?>" target="_blank"><i class="icon icon-eye-open"></i> Preview</a>

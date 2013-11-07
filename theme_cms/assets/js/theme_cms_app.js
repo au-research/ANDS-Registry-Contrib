@@ -1,4 +1,4 @@
-angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSanitize']).
+angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSanitize', 'ui.select2']).
 	factory('pages_factory', function($http){
 		return {
 			listAll : function(){
@@ -199,7 +199,16 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 		]
 	});
 	$scope.addContent = function(region){
-		var blob = {'title':'', 'type':'html', 'content':'', 'editing':true, 'id':Math.random().toString(36).substring(10)};
+		var blob = {
+			'title':'', 
+			'type':'html', 
+			'content':'', 
+			'editing':true, 
+			'id':Math.random().toString(36).substring(10), 
+			'list_ro':[{key:''},{key:''},{key:''},{key:''},{key:''}],
+			'gallery_type':'carousel',
+			'gallery':[{src:''},{src:''},{src:''},{src:''},{src:''}]
+		};
 		if(region=='left'){
 			$scope.page.left.push(blob);
 		}else if(region=='right'){
@@ -220,7 +229,7 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 	}
 
 	$scope.save = function(){
-		console.log($scope.page);
+		// console.log($scope.page);
 		pages_factory.savePage($scope.page).then(function(data){
 			var now = new Date();
 			$scope.saved_msg = 'Last Saved: '+now; 

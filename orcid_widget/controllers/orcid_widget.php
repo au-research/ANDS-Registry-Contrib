@@ -9,6 +9,7 @@ class Orcid_widget extends MX_Controller {
 		$this->load->view('documentation', $data);
 	}
 
+
 	function proxy(){
 		
 	}
