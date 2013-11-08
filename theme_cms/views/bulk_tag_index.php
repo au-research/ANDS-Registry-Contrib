@@ -124,8 +124,8 @@
 					<div class="widget-title">
 						<h5>Search Results <small>{{search_result.data.numFound}} results</small></h5>
 					</div>
-					<div class="widget-content ro_box nopadding">
-						<div class="" ng-show="search_result">
+					<div class="widget-content ro_box nopadding dataTables_wrapper" style="border-bottom:0">
+						<div class="ro_box" ng-show="search_result">
 							<ul class="ro_list">
 								<li ng-repeat="ro in search_result.data.result.docs" class="ro_item" ng-click="select(ro)" ng-class="ro.selected">
 									<div class="ro_item_header">
@@ -140,6 +140,15 @@
 								</li>
 							</ul>
 						</div>
+					</div>
+					<div class="widget-footer" style="padding:4px">
+						<ul class="pagination alternate" style="margin:0;">
+							<li ng-class="minpage"><a href="" ng-Click="page(currentPage - 1)">Prev</a></li>
+							<li class="active">
+								<a href="#">{{currentPage}} / {{maxPage}}</a>
+							</li>
+							<li ng-class="maxpage"><a href="" ng-click="page(currentPage + 1)">Next</a></li>
+						</ul>
 					</div>
 				</div>
 			</div>

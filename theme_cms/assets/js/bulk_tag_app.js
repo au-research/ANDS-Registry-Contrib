@@ -74,7 +74,6 @@ function index($scope, search_factory){
 				}
 			});
 			$scope.search_result = {data:data, filter_query:filter_query};
-
 			//construct facet_fields for easy retrieval
 			if($scope.search_result.data.facet){
 				$scope.facet_result = {};
@@ -91,7 +90,25 @@ function index($scope, search_factory){
 
 			$scope.tags_result = {data:$scope.facet_result.tag};
 			// $scope.get_tags(filters);
+			$scope.maxPage = Math.ceil($scope.search_result.data.numFound / $scope.perPage);
 		});
+	}
+
+	$scope.page = function(page){
+		if(page >= 1 && page <= $scope.maxPage){
+			$scope.currentPage = page;
+			$scope.search();
+		}
+		if($scope.currentPage <= 1){
+			$scope.minpage = 'disabled';
+		}else{
+			$scope.minpage = '';
+		}
+		if($scope.currentPage == $scope.maxPage){
+			$scope.maxpage = 'disabled';
+		}else{
+			$scope.maxpage = '';
+		}
 	}
 
 	$scope.tagAction = function(action, tag){
@@ -135,7 +152,7 @@ function index($scope, search_factory){
 
 	$scope.select = function(ro){
 		if($scope.selected_ro.indexOf(ro.key)===-1){
-			ro.selected = 'selected';
+			ro.selected = 'ro_selected';
 			$scope.selected_ro.push(ro.key);
 		}else{
 			ro.selected = '';
@@ -164,7 +181,8 @@ function index($scope, search_factory){
 		filters['include_facet_tags'] = true;
 		filters['include_facet'] = true;
 		filters['fl'] = 'id, display_title, slug, key, tag, class, score';
-		filters['rows'] = 100;
+		filters['rows'] = $scope.perPage;
+		filters['p'] = $scope.currentPage;
 		if($scope.search_query) filters['q'] = $scope.search_query;
 		$($scope.filters).each(function(){
 			if(this.name){
@@ -189,6 +207,10 @@ function index($scope, search_factory){
 	}
 
 	$scope.show = 5
-	$scope.addFilter({name:'data_source_key', value:'acdata.unsw.edu.au'});
+	$scope.filters = []
+	$scope.currentPage = 1;
+	$scope.minpage = 'disabled'
+	$scope.perPage = 5;
+	// $scope.addFilter({name:'data_source_key', value:'acdata.unsw.edu.au'});
 	$scope.search()
 }

@@ -16,12 +16,9 @@ class Pids extends MX_Controller {
 		$data['scripts'] = array('pids');
 		$data['js_lib'] = array('core');
 
-		// $this->load->library('debugbar');
-		// $data['debugbarRenderer']=$this->debugbar->debugbarRenderer();
 
 		$data['orgRole'] = $this->user->affiliations();
 		array_unshift($data['orgRole'], 'My Identifiers');
-		// $this->debugbar->addMsg($data['orgRole']);
 
 
 		$data['identifier'] = $this->input->get('identifier');
@@ -29,12 +26,9 @@ class Pids extends MX_Controller {
 	}
 
 	public function view(){
-		$this->load->library('debugbar');
-		$data['debugbarRenderer']=$this->debugbar->debugbarRenderer();
 		$handle = $this->input->get('handle');
 		if($handle){
 			$handle = $this->pids->getHandlesDetails(array($handle));
-			
 			$pid = array();
 			foreach($handle as $h){
 				$pid['handle'] = $h['handle'];
@@ -52,8 +46,6 @@ class Pids extends MX_Controller {
 			if(!isset($pid['url'])) $pid['url'] = array();
 			$data['pid'] = $pid;
 			$data['pid_owners'] = $this->pids->getPidOwners();
-			$this->debugbar->addMsg($data['pid_owners']);
-			$this->debugbar->addMsg($pid);
 			$data['title'] = 'View Handle: '.$pid['handle'];
 			$data['resolver_url'] = $this->pids->pidsGetHandleURI($pid['handle']);
 			$data['scripts'] = array('pid');
