@@ -19,7 +19,6 @@ class Mydois extends MX_Controller {
 		acl_enforce('DOI_USER');
 
 		$data['js_lib'] = array('core');
-		$data['scripts'] = array();
 		$data['title'] = 'My DOIs List';
 		$data['associated_app_ids'] = array();
 
@@ -50,7 +49,54 @@ class Mydois extends MX_Controller {
 			$this->load->view('login_required', $data);
 		}
 	}
-	
+
+	function list_trusted(){
+		acl_enforce('SUPERUSER');
+		$data['title'] = 'List Trusted Clients';
+		$data['scripts'] = array('trusted_clients');
+		$data['js_lib'] = array('core', 'dataTables');
+		$data['all_app_id'] = $this->mydois->getAllDoiAppID();
+		$this->load->view('trusted_clients_index', $data);
+	}
+
+	function list_trusted_clients(){
+		$trusted_clients = $this->mydois->getTrustedClients();
+		echo json_encode($trusted_clients);
+	}
+
+	function add_trusted_client(){
+		acl_enforce('SUPERUSER');
+		$posted = $this->input->post('jsonData');
+		$ip = trim(urlencode($posted['ip_address']));
+		$client_name = trim(urlencode($posted['client_name']));
+		$client_contact_name = trim(urlencode($posted['client_contact_name']));	
+		$client_contact_email = trim(urlencode($posted['client_contact_email']));
+		$domainList = trim(urlencode($posted['domainList']));
+		$datacite_prefix = 	trim(urlencode($posted['datacite_prefix']));				
+		$response = $this->mydois->addTrustedClient($ip, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix);
+		echo json_encode($response);
+	}
+
+	function get_trusted_client(){
+		acl_enforce('SUPERUSER');
+		$client_id = $this->input->post('id');
+		$response = $this->mydois->getTrustedClient($client_id);
+		echo json_encode($response);
+	}
+
+	function edit_trusted_client(){
+		acl_enforce('SUPERUSER');
+		$posted = $this->input->post('jsonData');
+		$ip = trim(urlencode($posted['ip_address']));
+		$client_name = trim(urlencode($posted['client_name']));
+		$client_contact_name = trim(urlencode($posted['client_contact_name']));	
+		$client_contact_email = trim(urlencode($posted['client_contact_email']));
+		$domainList = trim(urlencode($posted['domainList']));
+		$datacite_prefix = 	trim(urlencode($posted['datacite_prefix']));				
+		$response = $this->mydois->editTrustedClient($ip, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix);
+		echo json_encode($response);
+	}
+
 	function show()
 	{
 		acl_enforce('DOI_USER');
@@ -289,6 +335,7 @@ class Mydois extends MX_Controller {
 		}
 	
 	}
+
 	function getAppIDConfig()
 	{
 		acl_enforce('DOI_USER');
@@ -313,7 +360,11 @@ class Mydois extends MX_Controller {
 		
 		
 	}
-		
+	
+	function __construct(){
+		acl_enforce('SUPERUSER');
+		$this->load->model('_mydois', 'mydois');
+	}	
 		
 }
 	
