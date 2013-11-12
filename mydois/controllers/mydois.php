@@ -50,12 +50,20 @@ class Mydois extends MX_Controller {
 		}
 	}
 
+	function remove_trusted_client(){
+		acl_enforce('SUPERUSER');
+		$data['title'] = 'Remove Trusted Client';
+		$client_id = $this->input->post('id');
+		$response = $this->mydois->removeTrustedClient($client_id);
+	}
+
 	function list_trusted(){
 		acl_enforce('SUPERUSER');
 		$data['title'] = 'List Trusted Clients';
 		$data['scripts'] = array('trusted_clients');
 		$data['js_lib'] = array('core', 'dataTables');
 		$data['all_app_id'] = $this->mydois->getAllDoiAppID();
+		$data['datacite_prefixs'] = $this->mydois->buildPrefixOptions();
 		$this->load->view('trusted_clients_index', $data);
 	}
 
@@ -72,8 +80,9 @@ class Mydois extends MX_Controller {
 		$client_contact_name = trim(urlencode($posted['client_contact_name']));	
 		$client_contact_email = trim(urlencode($posted['client_contact_email']));
 		$domainList = trim(urlencode($posted['domainList']));
-		$datacite_prefix = 	trim(urlencode($posted['datacite_prefix']));				
-		$response = $this->mydois->addTrustedClient($ip, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix);
+		$datacite_prefix = 	trim(urlencode($posted['datacite_prefix']));
+		$shared_secret = trim(urlencode($posted['shared_secret']))	;			
+		$response = $this->mydois->addTrustedClient($ip, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix, $shared_secret);
 		echo json_encode($response);
 	}
 
@@ -81,6 +90,7 @@ class Mydois extends MX_Controller {
 		acl_enforce('SUPERUSER');
 		$client_id = $this->input->post('id');
 		$response = $this->mydois->getTrustedClient($client_id);
+		$response[0]['domain_list'] = $this->mydois->getTrustedClientDomains($client_id);
 		echo json_encode($response);
 	}
 
@@ -88,12 +98,14 @@ class Mydois extends MX_Controller {
 		acl_enforce('SUPERUSER');
 		$posted = $this->input->post('jsonData');
 		$ip = trim(urlencode($posted['ip_address']));
+		$client_id = trim(urlencode($posted['client_id']));
 		$client_name = trim(urlencode($posted['client_name']));
 		$client_contact_name = trim(urlencode($posted['client_contact_name']));	
 		$client_contact_email = trim(urlencode($posted['client_contact_email']));
 		$domainList = trim(urlencode($posted['domainList']));
-		$datacite_prefix = 	trim(urlencode($posted['datacite_prefix']));				
-		$response = $this->mydois->editTrustedClient($ip, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix);
+		$datacite_prefix = 	trim(urlencode($posted['datacite_prefix']));
+		$shared_secret = trim(urlencode($posted['shared_secret']))	;						
+		$response = $this->mydois->editTrustedClient($ip, $client_id, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix, $shared_secret);
 		echo json_encode($response);
 	}
 

@@ -13,7 +13,6 @@ $(document).on('click', '#add_confirm', function(){
 		jsonData[$(this).attr('name')] = $(this).val();
 	});
 	$('#result_msg').html('').removeClass('label');
-	alert(apps_url+'mydois/add_trusted_client/');
 	$.ajax({
 		url:apps_url+'mydois/add_trusted_client/', 
 		type: 'POST',
@@ -37,7 +36,6 @@ $(document).on('click', '#add_confirm', function(){
 		jsonData[$(this).attr('name')] = $(this).val();
 	});
 	$('#result_msg').html('').removeClass('label');
-	alert(apps_url+'mydois/edit_trusted_client/');
 	$.ajax({
 		url:apps_url+'mydois/edit_trusted_client/', 
 		type: 'POST',
@@ -58,13 +56,13 @@ $(document).on('click', '#add_confirm', function(){
 	$('#app_id_field').show();
 	$('#app_id_field select').chosen();
 }).on('click', '.remove', function(){
-	var ip = $(this).attr('ip');
-	var app_id = $(this).attr('app_id');
-	if(confirm('Are you sure you want to delete this trusted ip: ')){
+	var client_id = $(this).attr('client_id');
+	alert(client_id);
+	if(confirm('Are you sure you want to delete this trusted client: ')){
 		$.ajax({
 			url:apps_url+'mydois/remove_trusted_client', 
 			type: 'POST',
-			data: {ip:ip,app_id:app_id},
+			data: {client_id:client_id},
 			success: function(data){
 				listTrustedClients();
 			}
@@ -72,17 +70,27 @@ $(document).on('click', '#add_confirm', function(){
 	}
 }).on('click', '.edit', function(){
 	var client_id = $(this).attr('client_id');
-		$.ajax({
-			url:apps_url+'mydois/get_trusted_client', 
-			type: 'POST',
-			data: {id:client_id},
-			success: function(data){
-				console.log(data);
-				$('#edit_trusted_client_form').input.client_name.val(data.client_name)
-				$('#edit_trusted_client_modal').modal('show');
-			},
+	$.ajax({
+		url:apps_url+'mydois/get_trusted_client', 
+		type: 'POST',
+		data: {id:client_id},
+		success: function(data){
+			console.log(data);
+			$('#edit_trusted_client_form input[name=client_id]').val(data[0].client_id)			
+			$('#edit_trusted_client_form input[name=client_name]').val(data[0].client_name)
+			$('#edit_trusted_client_form input[name=client_contact_name]').val(data[0].client_contact_name)
+			$('#edit_trusted_client_form input[name=client_contact_email]').val(data[0].client_contact_email)
+			$('#edit_trusted_client_form input[name=ip_address]').val(data[0].ip_address)
+			$('#edit_trusted_client_form input[name=domainList]').val(data[0].domain_list)
+			$('#edit_trusted_client_form input[name=app_id]').val(data[0].app_id)
+			$('#edit_trusted_client_form select[name=datacite_prefix]').val(data[0].datacite_prefix)
+			$('#edit_trusted_client_form input[name=shared_secret]').val(data[0].shared_secret)																					
+			$('#edit_trusted_client_modal').modal('show');
+		},
 		});
-
+}).on('click', '.sec_gen', function(){
+	var sec = $(this).attr('sec');
+	$('#edit_trusted_client_form input[name=shared_secret]').val(sec)	
 });
 
 function listTrustedClients() {

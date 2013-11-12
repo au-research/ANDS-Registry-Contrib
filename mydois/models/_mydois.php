@@ -17,19 +17,31 @@ class _mydois extends CI_Model
 		$this->DOI_SERVICE_BASE_URI = $this->_CI->config->item('gDOIS_SERVICE_BASE_URI');	
 		$this->DOIS_DATACENTRE_NAME_PREFIX = $this->_CI->config->item('gDOIS_DATACENTRE_NAME_PREFIX');
 		$this->DOIS_DATACENTRE_NAME_MIDDLE = $this->_CI->config->item('gDOIS_DATACENTRE_NAME_MIDDLE');
+		$this->DOIS_DATACENTRE_PREFIXS = $this->_CI->config->item('gDOIS_DATACENTRE_PREFIXS');
 	}
 
 	function getTrustedClients(){
-		$query = $this->doi_db->query("SELECT client_id, ip_address,app_id,created_when,client_name,client_contact_name FROM doi_client");
+		$query = $this->doi_db->query("SELECT * FROM doi_client");
 		return $query->result_array();
 	}
 
-	function addTrustedClient($ip, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix){
+	function buildPrefixOptions()
+	{
+
+		$optionStr = '';
+		foreach($this->DOIS_DATACENTRE_PREFIXS as $aPrefix)
+		{
+			$optionStr .= '<option value="'.$aPrefix.'">'.trim($aPrefix,'//').'</option>';
+		}
+		return $optionStr;
+	}
+
+	function addTrustedClient($ip, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix, $shared_secret){
 		
 		$resultXML = '';
 		$result = '';
 		$mode='';
-		$app_id = sha1($ip.$client_name);
+		$app_id = sha1($shared_secret.$client_name);
 
 		$client_name = urldecode($client_name);
 		$client_contact_name = urldecode($client_contact_name);
@@ -38,7 +50,7 @@ class _mydois extends CI_Model
 		$datacite_prefix = urldecode($datacite_prefix);
 
 
-		//need to add the client ot our db and then obtain their client-id:
+		//need to add the client to our db and then obtain their client-id:
 		$clientdata = array(
                'ip_address' =>  $ip,
                'app_id' => $app_id,
@@ -46,13 +58,23 @@ class _mydois extends CI_Model
                'client_name'  => $client_name, 
                'client_contact_name'    => $client_contact_name,  
                'client_contact_email'    => $client_contact_email,
-               'datacite_prefix'    => $datacite_prefix,                      
+               'datacite_prefix'    => $datacite_prefix,
+               'shared_secret' => $shared_secret                                     
             	);
 		$this->doi_db->insert('doi_client', $clientdata); 
 
 		$query = $this->doi_db->query("SELECT MAX(client_id) as client_id FROM doi_client");
 
 		$client_id = $query->result_array()[0]['client_id'];
+		$clientDomains= explode(",",$domainList);
+
+		foreach($clientDomains as $aDomain){
+			$domainData = array(
+				'client_id' => $client_id,
+				'client_domain' => $aDomain);
+			$this->doi_db->insert('doi_client_domains', $domainData); 
+		}
+
 
 		if($client_id<10){$client_id = "-".$client_id;}
 
@@ -60,11 +82,10 @@ class _mydois extends CI_Model
 	
 	}
 
-	function editTrustedClient($ip, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix){	
+	function editTrustedClient($ip, $client_id, $client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix, $shared_secret){	
 		$resultXML = '';
 		$result = '';
 		$mode='';
-		$app_id = sha1($ip.$client_name);
 
 		$client_name = urldecode($client_name);
 		$client_contact_name = urldecode($client_contact_name);
@@ -72,23 +93,30 @@ class _mydois extends CI_Model
 		$domainList = urldecode($domainList);
 		$datacite_prefix = urldecode($datacite_prefix);
 
+		$this->doi_db->delete('doi_client_domains', array('client_id' => $client_id)); 
 
-		//need to add the client ot our db and then obtain their client-id:
+		$clientDomains= explode(",",$domainList);
+
+		foreach($clientDomains as $aDomain){
+			$domainData = array(
+				'client_id' => $client_id,
+				'client_domain' => $aDomain);
+			$this->doi_db->insert('doi_client_domains', $domainData); 
+		}
+
 		$clientdata = array(
                'ip_address' =>  $ip,
-               'app_id' => $app_id,
-               'created_when' => "NOW()", 
                'client_name'  => $client_name, 
                'client_contact_name'    => $client_contact_name,  
                'client_contact_email'    => $client_contact_email,
-               'datacite_prefix'    => $datacite_prefix,                      
+               'datacite_prefix'    => $datacite_prefix, 
+               'shared_secret' => $shared_secret                     
             	);
-		$this->doi_db->insert('doi_client', $clientdata); 
 
-		$query = $this->doi_db->query("SELECT MAX(client_id) as client_id FROM doi_client");
+		$this->doi_db->where('client_id', $client_id); 
+		$this->doi_db->update('doi_client', $clientdata); 
 
-		$client_id = $query->result_array()[0]['client_id'];
-
+		
 		if($client_id<10){$client_id = "-".$client_id;}
 
 		return $this->mdsDatacentreUpdate($client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix);
@@ -145,15 +173,32 @@ class _mydois extends CI_Model
 		return $result;
 	}
 
-	function removeTrustedClient($ip, $appId){
-		$this->pid_db->delete('public.trusted_client', array('ip_address'=>$ip, 'app_id'=>$appId));
+	function removeTrustedClient($client_id){
+
+		$tables = array('doi_client_domains', 'doi_client');
+		$this->doi_db->where('client_id', $client_id);
+		$this->doi_db->delete($tables);
 	}
 
 	
 	function getTrustedClient($client_id)
 	{
-		$query = $this->doi_db->query("SELECT ip_address,app_id,client_name,client_contact_name FROM doi_client WHERE client_id = ".$client_id);
+		$query = $this->doi_db->query("SELECT * FROM doi_client WHERE client_id = ".$client_id);
 		return $query->result_array();		
+	}
+
+	function getTrustedClientDomains($client_id)
+	{
+		$domainList ='';
+
+		$query = $this->doi_db->query("SELECT * FROM doi_client_domains WHERE client_id = ".$client_id);
+
+		foreach($query->result_array() as $adomain)
+		{
+			$domainList .= $adomain['client_domain'].",";
+		}
+		$domainList = trim($domainList,",");
+		return $domainList;		
 	}
 
 }
