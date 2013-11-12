@@ -42,7 +42,6 @@ $(document).on('click', '#add_confirm', function(){
 		data: {jsonData:jsonData},
 		success: function(data){
 			if(data.errorMessages){
-				console.log(data);
 				$('#result_msg').html(data.errorMessages).addClass('label label-important');
 				thisButton.button('reset');
 			}else{
@@ -57,7 +56,6 @@ $(document).on('click', '#add_confirm', function(){
 	$('#app_id_field select').chosen();
 }).on('click', '.remove', function(){
 	var client_id = $(this).attr('client_id');
-	alert(client_id);
 	if(confirm('Are you sure you want to delete this trusted client: ')){
 		$.ajax({
 			url:apps_url+'mydois/remove_trusted_client', 
@@ -75,7 +73,6 @@ $(document).on('click', '#add_confirm', function(){
 		type: 'POST',
 		data: {id:client_id},
 		success: function(data){
-			console.log(data);
 			$('#edit_trusted_client_form input[name=client_id]').val(data[0].client_id)			
 			$('#edit_trusted_client_form input[name=client_name]').val(data[0].client_name)
 			$('#edit_trusted_client_form input[name=client_contact_name]').val(data[0].client_contact_name)
