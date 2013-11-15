@@ -32,6 +32,7 @@
     // Globals and constants
     var TOOL_POINT_PREFIX  = 'alw_tool_point';
     var TOOL_REGION_PREFIX = 'alw_tool_region';
+    var TOOL_BOX_PREFIX = 'alw_tool_box';
     var TOOL_TEXT_PREFIX   = 'alw_tool_text';
     var TOOL_SEARCH_PREFIX = 'alw_tool_search';
     var EMPTY_MAP_PREFIX = "alw_clear";
@@ -56,6 +57,7 @@
 	jumpToPoint: true,                 //jump to existing point?
         mode: false                        //start in mode (search|coords)
     };
+    return_callback: false			//return the data through a function
 
     /**
      * Is our widget instance initialised?
@@ -114,6 +116,7 @@
 		 *  - if it doesn't exist, create it
 		 *  - if it exists, and is being used by another plugin instance, throw an error
 		 */
+		
 		if (!$target.length) {
 		    $target = $('<input id="' + settings.target +
 				'" name="' + settings.target +
@@ -130,6 +133,7 @@
 			     $this);
 		    return;
 		}
+
 
 		//set up the initial coordinate data if provided
 		if (settings.lonLat !== false) {
@@ -174,8 +178,6 @@
 			return $this;
 		    }
 		}
-
-
 
 
 
@@ -328,7 +330,6 @@
 			widget_data.map = map;
 			widget_data.geocoder = new google.maps.Geocoder();
 			$this.data(WIDGET_NS, widget_data);
-
 			//invoke a user-defined mode (if it exists)
 			if (settings.mode !== false) {
 			    switch(settings.mode) {
@@ -402,6 +403,12 @@
 		    $this.on("click", "#" + id, null, function() { startRegion($("#" + TOOL_REGION_PREFIX + $this.attr('id'))); });
 		    widget_data.tools[id] = false;
 		    html += '<span class="alw_tool" id="' + id + '" title="Draw a polygon on the map to mark a region">region</span>';
+
+		    // Box
+		    id = TOOL_BOX_PREFIX + $this.attr('id');
+		    $this.on("click", "#" + id, null, function() { beginDrawingBox(); });
+		    widget_data.tools[id] = false;
+		    html += '<span class="alw_tool" id="' + id + '" title="Draw a polygon on the map to mark a region">box</span>';
 
 		    // search...
 		    id = TOOL_SEARCH_PREFIX + $this.attr('id');
@@ -477,6 +484,7 @@
 		    // =======================================================================
 		    $.each([TOOL_POINT_PREFIX,
 			    TOOL_REGION_PREFIX,
+			    TOOL_BOX_PREFIX,
 			    TOOL_TEXT_PREFIX,
 			    LONLAT_DIALOG_ID_PREFIX,
 			    LONLAT_TEXTAREA_ID_PREFIX,
@@ -524,6 +532,11 @@
 		 */
 		function resetMap() {
 		    setMapFromData(getOriginalInputFieldValue(), {centre:true});
+		}
+
+		function resetZoomLevel(){
+			var widget_data = $this.data(WIDGET_NS);
+			google.maps.event.trigger(widget_data.map, 'resize');
 		}
 
 		/**
@@ -638,10 +651,13 @@
 		    removePolygon();
 
 		    var widget_data = $this.data(WIDGET_NS);
+		    
 		    if (widget_data.drawing_manager !== null) {
-			widget_data.drawing_manager.setMap(null);
-			$this.data(WIDGET_NS, widget_data);
+				widget_data.drawing_manager.setMap(null);
+				$this.data(WIDGET_NS, widget_data);
 		    }
+
+		    resetZoomLevel();
 		}
 
 		/**
@@ -796,6 +812,7 @@
 		    $this.data(WIDGET_NS, widget_data);
 		}
 
+
 		/**
 		 * Begin drawing (a polygon) by clicking points in sequence
 		 * @param the coordinate data for the starting point
@@ -833,6 +850,45 @@
 						      widget_data.drawing_manager.setMap(null);
 						      resetTools();
 						  });
+		}
+
+		function beginDrawingBox(){
+			clearMap();
+		    var widget_data = $this.data(WIDGET_NS);
+		    // Remove any existing temporary polygon.
+		    $.each(widget_data.marker_listeners, function(idx, listener) {
+				google.maps.event.removeListener(listener);
+		    });
+	        widget_data.drawing_manager = new google.maps.drawing.DrawingManager({
+		    	drawingMode: google.maps.drawing.OverlayType.RECTANGLE,
+		    	drawingControl: false,
+		    	polygonOptions: {
+		    	    fillColor: OPEN_POLY_COLOUR,
+		    	    fillOpacity: 0.2,
+		    	    strokeColor: OPEN_POLY_COLOUR,
+		    	    strokeWeight: 2,
+		    	    clickable: true,
+		    	    zIndex: 1,
+		    	    editable: true
+		    	}
+	        });
+	        widget_data.drawing_manager.setMap(widget_data.map);
+	        $this.data(WIDGET_NS, widget_data);
+	        google.maps.event.addListener(widget_data.drawing_manager, 'overlaycomplete', function(e) {
+	            var geoCodeRectangle = e.overlay;
+	            widget_data.box = geoCodeRectangle;
+	            var bnds = geoCodeRectangle.getBounds();
+	            var n = bnds.getNorthEast().lat().toFixed(6);
+	        	var e = bnds.getNorthEast().lng().toFixed(6);
+	        	var s = bnds.getSouthWest().lat().toFixed(6);
+	        	var w = bnds.getSouthWest().lng().toFixed(6);
+	            var val = w + ' ' + s + ' ' + e + ' ' + n;
+	            resetTools();
+	            $target.val(val);
+                if(settings.return_callback && (typeof settings.return_callback === 'function')){
+            		settings.return_callback(val);
+            	}
+	        });
 		}
 
 		/**
@@ -913,8 +969,13 @@
 			}
 		    }
 		    polyString = polyString + " " + coords[0].lng().toFixed(6) + "," + coords[0].lat().toFixed(6);
+
 		    // Set the input field value.
 		    $target.val(polyString);
+
+		    if(settings.return_callback && (typeof settings.return_callback === 'function')){
+				settings.return_callback(polyString);
+			}
 		}
 
 		/**
@@ -928,6 +989,11 @@
 			widget_data.polygon.setMap(null);
 			// Remove the reference.
 			widget_data.polygon = null;
+		    }
+
+		    if(widget_data.box !== undefined && widget_data.box !== null){
+		    	widget_data.box.setMap(null);
+		    	widget_data.box = null;
 		    }
 		    $this.data(WIDGET_NS, widget_data);
 		}

@@ -1,4 +1,4 @@
-angular.module('bulk_tag_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSanitize', 'ui.select2']).
+angular.module('bulk_tag_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSanitize', 'ui.bootstrap', 'ui.utils']).
 	factory('search_factory', function($http){
 		return{
 			search: function(filters){
@@ -24,6 +24,19 @@ angular.module('bulk_tag_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSan
 			}
 		}
 	}).
+	directive('mapwidget', function(){
+		return {
+			restrict : 'A',
+			link: function(scope, element, a){
+				$(element).ands_location_widget({
+					return_callback: function(str){
+						scope.f.value=str;
+						scope.search();
+					}
+				});
+			}
+		}
+	}).
 	config(function($routeProvider){
 		$routeProvider
 			.when('/',{
@@ -32,20 +45,10 @@ angular.module('bulk_tag_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSan
 			})
 	});
 
-function index($scope, search_factory){
+function index($scope, $http, search_factory){
 
 	$scope.datasources = [];
 	$scope.selected_ro = [];
-	search_factory.get_datasources_list().then(function(data){
-		$scope.datasources = data.items;
-	});
-
-	$scope.$watch('selected_datasource', function(){
-		if($scope.selected_datasource){
-			for(var index in $scope.filters) if ($scope.filters[index].name=='data_source_key') $scope.filters.splice(index, 1);
-			$scope.addFilter({name:'data_source_key', value:$scope.selected_datasource});
-		}
-	});
 	
 	$scope.$watch('selected_ro.length', function(){
 		if($scope.selected_ro.length > 0){
@@ -60,6 +63,28 @@ function index($scope, search_factory){
 			if($scope.facet_result) $scope.tags_result = {data:$scope.facet_result.tag};
 		}
 	});
+
+	$scope.$watch('perPage', function(){
+		$scope.search();
+	});
+
+	$scope.available_filters = [
+		{value:'class', title:'Class'},
+		{value:'type', title:'Type'},
+		{value:'group', title:'Group'},
+		{value:'tag', title:'Tag'},
+		{value:'subject_vocab_uri', title:'Subject'},
+		{value:'subject_value_resolved', title:'Keywords'},
+		{value:'data_source_key', title:'Data Source'},
+		{value:'originating_source', title:'Originating Source'},
+		{value:'spatial', title:'Spatial'},
+	];
+
+	$scope.suggest = function(what, q){
+		return $http.get(real_base_url+'registry/services/registry/suggest/'+what+'/'+q).then(function(response){
+			return response.data;
+		});
+	}
 
 	$scope.search = function(){
 		var filters = $scope.constructSearchFilters();
@@ -114,16 +139,24 @@ function index($scope, search_factory){
 	$scope.tagAction = function(action, tag){
 		$('#add_form button').button('loading');$('#add_form input').attr('disabled', 'disabled');
 		var message = '';
-		if(action=='add') tag = $scope.tagToAdd;
+		var affected_num = ($scope.selected_ro.length > 0) ? $scope.selected_ro.length : $scope.search_result.data.numFound;
+		if(action=='add'){
+			tag = $scope.tagToAdd;
+			message = 'Are you sure you want to add tag: ' + tag + ' to ' + affected_num + ' registry objects? ';
+		}else{
+			message = 'Are you sure you want to remove tag: ' + tag + ' from ' + affected_num + ' registry objects? ';
+		}
 		if(tag && confirm(message)){
 			var filters = $scope.constructSearchFilters();
 			if($scope.selected_ro.length > 0){
 				search_factory.tags_action_keys($scope.selected_ro, action, tag).then(function(data){
+					$scope.tagToAdd = '';
 					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');$scope.search();
 				});
 			}else{
 				if(action=='add') filters['rows'] = 99999;
 				search_factory.tags_action_solr(filters, action, tag).then(function(data){
+					$scope.tagToAdd = '';
 					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');$scope.search();
 				});
 			}
@@ -133,7 +166,7 @@ function index($scope, search_factory){
 	}
 
 	$scope.addFilter = function(obj){
-		var newObj = {name:'', value:''};
+		var newObj = {name:'class', value:'', id:Math.random().toString(36).substring(10)};
 		if(obj) newObj = obj;
 		if(!$scope.filters) $scope.filters = [];
 		$scope.filters.push(newObj);
@@ -142,7 +175,6 @@ function index($scope, search_factory){
 
 	$scope.setFilterType = function(filter, type){
 		filter.name = type;
-		$scope.search();
 	}
 
 	$scope.removeFromList = function(list, index){
@@ -157,6 +189,13 @@ function index($scope, search_factory){
 		}else{
 			ro.selected = '';
 			$scope.selected_ro.splice($scope.selected_ro.indexOf(ro.key), 1);
+		}
+	}
+
+	$scope.keyPressed = function(event){
+		console.log(event);
+		if(event.which==13){
+			$scope.search();
 		}
 	}
 
@@ -183,6 +222,7 @@ function index($scope, search_factory){
 		filters['fl'] = 'id, display_title, slug, key, tag, class, score';
 		filters['rows'] = $scope.perPage;
 		filters['p'] = $scope.currentPage;
+		filters['facet.sort'] = 'index';
 		if($scope.search_query) filters['q'] = $scope.search_query;
 		$($scope.filters).each(function(){
 			if(this.name){
@@ -202,12 +242,8 @@ function index($scope, search_factory){
 		return filters;
 	}
 
-	$scope.select2Options = {
-		placeholder: 'Select a Data Source',
-	}
-
-	$scope.show = 5
-	$scope.filters = []
+	$scope.show = 10
+	$scope.filters = [],
 	$scope.currentPage = 1;
 	$scope.minpage = 'disabled'
 	$scope.perPage = 5;

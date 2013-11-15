@@ -1,4 +1,4 @@
-angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSanitize', 'ui.select2']).
+angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSanitize', 'ui.bootstrap', 'ui.utils']).
 	factory('pages_factory', function($http){
 		return {
 			listAll : function(){
@@ -110,11 +110,13 @@ angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSa
 		return {
 			restrict : 'A',
 			link: function(scope, element){
-				$(element).ro_search_widget().on('selected.rosearch.ands', function(e, ro){
-					if(scope.ro){
-						scope.ro.key = ro.key;
-					}else if(scope.c){
-						scope.c.relation.key = ro.key;
+				$(element).registry_widget({
+					lookup_callback: function(data, obj, s){
+						if(scope.ro){
+							scope.ro.key = data.result['key'];
+						}else if(scope.c){
+							scope.c.relation.key = data.result['key'];
+						}
 					}
 				});
 			}
@@ -135,7 +137,7 @@ function ListCtrl($scope, pages_factory){
 	});
 }
 
-function ViewPage($scope, $routeParams, pages_factory, $location, search_factory){
+function ViewPage($scope, $http, $routeParams, pages_factory, $location, search_factory){
 
 	$scope.tinymceOptions = {
 	    selector: "textarea.editor",
@@ -158,6 +160,25 @@ function ViewPage($scope, $routeParams, pages_factory, $location, search_factory
 		stop: function(ev, ui){
 			$scope.save();
 		}
+	}
+
+	$scope.available_filters = [
+		{value:'class', title:'Class'},
+		{value:'type', title:'Type'},
+		{value:'group', title:'Group'},
+		{value:'boost_key', title:'Boost'},
+		{value:'tag', title:'Tag'},
+		{value:'subject_vocab_uri', title:'Subject'},
+		{value:'subject_value_resolved', title:'Keywords'},
+		{value:'data_source_key', title:'Data Source'},
+		{value:'originating_source', title:'Originating Source'},
+		{value:'spatial', title:'Spatial'},
+	];
+
+	$scope.suggest = function(what, q){
+		return $http.get(real_base_url+'registry/services/registry/suggest/'+what+'/'+q).then(function(response){
+			return response.data;
+		});
 	}
 
 	pages_factory.getPage($routeParams.slug).then(function(data){

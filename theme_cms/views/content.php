@@ -51,12 +51,12 @@
 							<a href="" data-toggle="dropdown" class="btn"><span class="caret"></span></a>
 							<ul class="dropdown-menu">
 								<li><a href="" ng-click="delete_blob('<?php echo $region; ?>', $index)"><i class="icon icon-trash"></i> Delete</a></li>
-								<li>
+								<!-- <li>
 									<a href="" ng-click="toggle_visible(c)">
 										<span ng-show="c.hide"><i class="icon icon-eye-closed"></i> Hide</span>
 										<span ng-hide="c.hide"><i class="icon icon-eye-closed"></i> Show</span>
 									</a>
-								</li>
+								</li> -->
 							</ul>
 						</div>
 					</div>
@@ -106,19 +106,10 @@
 										<div class="btn-group" style="display:inline-block;">
 											<button class="btn dropdown-toggle" data-toggle="dropdown">{{f.name}} <span class="caret"></span></button>
 											<ul class="dropdown-menu">
-												<li><a href="" ng-click="setFilterType(f, 'class')">Class</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'type')">Type</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'group')">Group</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'tag')">Tag</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'boost_key')">Boost</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'subject_vocab_uri')">Subject</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'subject_value_resolved')">Keywords</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'data_source_key')">Data Source Key</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'originating_source')">Originating Source</a></li>
-												<li><a href="" ng-click="setFilterType(f, 'spatial')">Spatial</a></li>
+												<li ng-repeat="j in available_filters"><a href="" ng-click="setFilterType(f, j.value)">{{j.title}}</a></li>
 											</ul>
 										</div>
-										<input type="text" name="search-query" class="" ng-model="f.value" placeholder="Value">
+										<input id="{{f.id}}" type="text" ng-model="f.value" typeahead="c.value as c.label for c in suggest(f.name, f.value)" ui-keypress="{13:'preview_search(ro)'}">
 										<a href="" class="btn" ng-click="removeFromList(c.search.fq, $index)"><i class="icon icon-remove"></i></a>
 									</div>
 

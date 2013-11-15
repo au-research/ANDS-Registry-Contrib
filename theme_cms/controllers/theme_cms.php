@@ -4,18 +4,19 @@ class Theme_cms extends MX_Controller {
 	private $directory = './assets/shared/theme_pages/';
 	private $index_file = 'theme_cms_index.json';
 
+
 	function index(){
 		$this->checkWritable();
 		$data['title']='Theme CMS';
 		$data['scripts'] = array('theme_cms_app');
-		$data['js_lib'] = array('core', 'tinymce', 'angular', 'rosearch_widget', 'colorbox', 'select2');
+		$data['js_lib'] = array('core', 'tinymce', 'angular', 'colorbox', 'select2', 'registry_widget');
 		$this->load->view('theme_cms_index', $data);
 	}
 
 	function bulk_tag(){
 		$data['title'] = 'Bulk Tagging Tool';
 		$data['scripts'] = array('bulk_tag_app');
-		$data['js_lib'] = array('core', 'angular', 'select2');
+		$data['js_lib'] = array('core', 'angular', 'select2', 'location_capture_widget', 'googleapi', 'google_map');
 
 		$this->load->model("registry/data_source/data_sources","ds");
 	 	$dataSources = $this->ds->getAll(0,0);
