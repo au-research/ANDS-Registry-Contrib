@@ -92,7 +92,8 @@ class _mydois extends CI_Model
 		$client_contact_email = urldecode($client_contact_email);
 		$domainList = urldecode($domainList);
 		$datacite_prefix = urldecode($datacite_prefix);
-
+		$ip = urldecode($ip);
+		
 		$this->doi_db->delete('doi_client_domains', array('client_id' => $client_id)); 
 
 		$clientDomains= explode(",",$domainList);
@@ -124,8 +125,8 @@ class _mydois extends CI_Model
 
 	function mdsDatacentreUpdate($client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix)
 	{
-		$symbol= $this->DOIS_DATACENTRE_NAME_PREFIX.".TEST";
-		//$symbol= $this->DOIS_DATACENTRE_NAME_PREFIX.".".$this->DOIS_DATACENTRE_NAME_MIDDLE.$client_id;
+		//$symbol= $this->DOIS_DATACENTRE_NAME_PREFIX.".TEST";
+		$symbol= $this->DOIS_DATACENTRE_NAME_PREFIX.".".$this->DOIS_DATACENTRE_NAME_MIDDLE.$client_id;
 
 		//create the datacite datacentre xml
 		$outxml = '<?xml version="1.0" encoding="UTF-8"?>

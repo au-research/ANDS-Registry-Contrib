@@ -14,9 +14,32 @@
  */
 class Mydois extends MX_Controller {
 
+	function testing()
+	{
+		$authstr =  'aa313ba574c47f1cdd8f626942dd8b6509441f23a9:2959ce543222';
+		$context  = array('Content-Type: application/xml;charset=UTF-8','Authorization: Basic '.base64_encode($authstr));
+		//$context = array('Content-Type: application/xml;charset=UTF-8');		
+		$requestURI = 'http://devl.ands.org.au/workareas/liz/ands/apps/mydois/mint/?url=sdfjds.sdfds.dsfdsf&app_id=313ba574c47f1cdd8f626942dd8b6509441f23a9';	
+
+		$postdata = 'xml=<xml><identifier>10.5046/dghjfgg</identifier></xml>';
+	
+		$newch = curl_init();
+		curl_setopt($newch, CURLOPT_URL, $requestURI);
+		curl_setopt($newch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($newch, CURLOPT_POST, 1);
+		curl_setopt($newch, CURLOPT_POSTFIELDS,$postdata);				
+		curl_setopt($newch, CURLOPT_HTTPHEADER,$context);
+
+		$result = curl_exec($newch);
+		$curlinfo = curl_getinfo($newch);
+		curl_close($newch);
+		echo $result;
+
+	}
+
 	function index()
 	{
-		acl_enforce('DOI_USER');
+		acl_enforce('gDOIS_SERVICE_BASE_URI');
 
 		$data['js_lib'] = array('core');
 		$data['title'] = 'My DOIs List';

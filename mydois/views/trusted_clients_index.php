@@ -173,6 +173,7 @@
 		<table class="table table-bordered data-table">
 			<thead>
 				<tr>
+					<th>Client Id </th>
 					<th>Client Name </th>
 					<th>Contact Name </th>
 					<th>App ID</th>
@@ -185,6 +186,7 @@
 			<tbody>
 			{{#.}}
 				<tr>
+					<td>{{client_id}}</td>
 					<td>{{client_name}}</td>
 					<td>{{client_contact_name}}</td>
 					<td>{{app_id}}</td>	
