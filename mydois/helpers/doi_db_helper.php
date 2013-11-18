@@ -265,9 +265,9 @@
 	 * @param  string $ip_range the ip address to match on / or a comma separated list of ips to match on
 	 * @return bool           returns true if the ip is found in some manner that match the ip range
 	 */
-	function test_ip($ip, $ip_range){
+	function test_ip($ip, $ip_list){
 		// first lets get the lists of ip address or ranges separated by commas
-		$ip_ranges = explode(',',$ip_range);
+		$ip_ranges = explode(',',$ip_list);
 		foreach($ip_ranges as $ip_range)
 		{
 			$ip_range = explode('-',$ip_range);
@@ -280,7 +280,6 @@
 					// convert dotted quad notation to long for numeric comparison
 					$lower_bound = ip2long($ip_range[0]);
 					$upper_bound = ip2long($ip_range[1]);
-
 					// If the target_ip is valid
 					if ($target_ip >= $lower_bound && $target_ip <= $upper_bound)
 					{
@@ -290,7 +289,7 @@
 				}
 
 			}else{
-				if(ip_match($ip,$ip_range[0])) return true;
+				if(ip_match($ip,$ip_range[0])){return true;}
 			}
 		}
 		return false;
@@ -310,13 +309,14 @@
 			if(strpos($match, '/')){//if it's a cidr notation
 				if(cidr_match($ip, $match))
 				{
-					echo cidr_match($ip, $match);
 					return true;
 				}
 			}else{//is a random string (let's say a host name)
-				$ip = gethostbyname($ip);
+				$match = gethostbyname($match);
 				if($ip==$match){
 					return true;
+				}else{
+					return false;
 				}
 			}
 		}
