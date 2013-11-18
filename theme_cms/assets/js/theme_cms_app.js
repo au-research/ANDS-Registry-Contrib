@@ -369,7 +369,9 @@ function NewPageCtrl($scope, pages_factory, Slug, $location){
 		var slug = Slug.slugify(this.new_page_title);
 		var postData = {
 			title: this.new_page_title,
-			slug: slug
+			slug: slug,
+			img_src: this.new_page_img_src,
+			desc: this.new_page_desc
 		}
 		pages_factory.newPage(postData).then(function(data){
 			if(data==1){

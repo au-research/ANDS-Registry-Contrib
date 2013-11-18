@@ -68,7 +68,7 @@ class Theme_cms extends MX_Controller {
 		$data = file_get_contents("php://input");
 		$array = json_decode(file_get_contents("php://input"));
 		echo json_encode($array);
-		if($this->write($array->slug, $data)){
+		if($this->write($array->slug, $data) && $this->build_index() && $this->build_solr_index($array->slug)){
 			echo $data;
 			echo 1;
 		}else echo 0;
@@ -95,7 +95,6 @@ class Theme_cms extends MX_Controller {
 	public function build_index(){
 		$root = scandir($this->directory, 1);
 		$result = array();
-		$result = array();
 		foreach($root as $value){
 			if($value === '.' || $value === '..') {continue;} 
 			$pieces = explode(".", $value);
@@ -105,6 +104,8 @@ class Theme_cms extends MX_Controller {
 					$result[] = array(
 						'title' => (isset($file['title'])?$file['title']:'No Title'),
 						'slug' => (isset($file['slug'])?$file['slug']:$pieces[0]),
+						'img_src'=> (isset($file['img_src'])?$file['img_src']:false),
+						'desc'=>(isset($file['desc'])?$file['desc']:false),
 						'status' => (isset($file['status'])?$file['status']:'')
 					);
 				}
@@ -115,6 +116,58 @@ class Theme_cms extends MX_Controller {
 		} else {
 			return true;
 		}
+	}
+
+	public function build_solr_index($slug=''){
+		$this->load->library('solr');
+		if($slug!=''){
+			$xml = $this->transformSOLR($slug);
+			$this->solr->deleteByQueryCondition("id:(topic_".$slug.")");
+			echo $this->solr->addDoc('<add>' . $xml . '</add>');
+			echo $this->solr->commit();
+		}else{
+			$root = scandir($this->directory, 1);
+			$xml = '';
+			foreach($root as $value){
+				if($value === '.' || $value === '..') {continue;} 
+				$pieces = explode(".", $value);
+				if(is_file("$this->directory/$value")) {
+					if($pieces[0].'.json'!=$this->index_file){
+						$xml.=$this->transformSOLR($pieces[0]);	
+					}
+				} 
+			}
+			$this->solr->deleteByQueryCondition("class:(topic)");
+			echo $this->solr->addDoc('<add>' . $xml . '</add>');
+			echo $this->solr->commit();
+		}
+	}
+
+
+	public function transformSOLR($slug){
+		$file = read_file($this->directory.$slug.'.json');
+		$file = json_decode($file, true);
+		$xml = '<doc>';
+		$xml .=	"<field name='id'>topic_" . $file['slug'] ."</field>" . NL;
+		$xml .=	"<field name='data_source_id'>topic</field>" . NL;
+		$xml .=	"<field name='key'>topic</field>" . NL;
+		$xml .=	"<field name='display_title'>".$file['title']." Theme Page</field>" . NL;
+		$xml .=	"<field name='list_title'>".$file['title']." Theme Page</field>" . NL;
+		$xml .=	"<field name='simplified_title'>".$file['title']." Theme Page</field>" . NL;
+
+		$xml .=	"<field name='class'>topic</field>" . NL;
+		$xml .=	"<field name='slug'>theme_page/".$file['slug']."</field>" . NL;
+		$xml .=	"<field name='status'>PUBLISHED</field>" . NL;
+		//$xml .=	"<field name='logo'>".$topic."</field>" . NL;
+
+		if(isset($file['desc'])) $xml .= "<field name='description'>".htmlentities($file['desc'])."</field>" . NL;
+		if(isset($file['desc'])) $xml .= "<field name='description_value'>".htmlentities($file['desc'])."</field>" . NL;
+		$xml .='</doc>';
+		return $xml;
+	}
+
+	public function build(){
+		if($this->build_index()) echo 'Index Built <br/>';
 	}
 	
 	// Initialise
