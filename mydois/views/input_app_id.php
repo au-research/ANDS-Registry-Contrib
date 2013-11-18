@@ -59,7 +59,7 @@
 			    	 </form>
 			</div> 
 		</div>
-		<?php if($this->user->hasFunction('SUPERUSER')) echo anchor('/mydois/list_trusted','List Trusted Clients', array('class'=>'btn btn-large')); ?>
+
 	</div>
 	<div class="span3">&nbsp;</div>
 </div>
