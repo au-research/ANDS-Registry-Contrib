@@ -11,7 +11,6 @@
 	<h1>Identify My Data</h1>
 	<div class="btn-group">
 		<a data-toggle="modal" href="#mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a new Identifier</a>
-		<?php if($this->user->hasFunction('SUPERUSER')) echo anchor('/pids/list_trusted','List Trusted Clients', array('class'=>'btn btn-large')); ?>
 	</div>
 </div>
 <div id="breadcrumb" style="clear:both;">
