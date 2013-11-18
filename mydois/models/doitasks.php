@@ -350,7 +350,6 @@
 		if($errorMessages == '')
 		{
 			$client_id = checkDoisValidClient($ip,trim($app_id));
-			echo "we have the client_id of ".$client_id;
 			if(!$client_id)
 			{
 				$verbosemessage = 'Client with app_id '.$app_id.' from ip address '.$ip. ' is not a registered doi client.';

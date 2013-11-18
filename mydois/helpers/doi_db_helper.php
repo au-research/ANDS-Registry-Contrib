@@ -240,7 +240,7 @@
    			$thesecret = explode(":",base64_decode($shared_secret));
    			$shared_secret = $thesecret[1];
    		} 
-   		elseif($output['shared_secret'])
+   		elseif(isset($output['shared_secret']))
    		{
    			$shared_secret = $output['shared_secret'];
 
@@ -290,7 +290,7 @@
 				}
 
 			}else{
-				return ip_match($ip,$ip_range[0]);
+				if(ip_match($ip,$ip_range[0])) return true;
 			}
 		}
 		return false;
@@ -310,7 +310,8 @@
 			if(strpos($match, '/')){//if it's a cidr notation
 				if(cidr_match($ip, $match))
 				{
-					return cidr_match($ip, $match);
+					echo cidr_match($ip, $match);
+					return true;
 				}
 			}else{//is a random string (let's say a host name)
 				$ip = gethostbyname($ip);

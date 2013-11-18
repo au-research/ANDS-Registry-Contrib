@@ -16,7 +16,7 @@ class Mydois extends MX_Controller {
 
 	function testing()
 	{
-		$authstr =  'aa313ba574c47f1cdd8f626942dd8b6509441f23a9:2959ce543222';
+		$authstr =  '313ba574c47f1cdd8f626942dd8b6509441f23a9:2959ce543222';
 		$context  = array('Content-Type: application/xml;charset=UTF-8','Authorization: Basic '.base64_encode($authstr));
 		//$context = array('Content-Type: application/xml;charset=UTF-8');		
 		$requestURI = 'http://devl.ands.org.au/workareas/liz/ands/apps/mydois/mint/?url=sdfjds.sdfds.dsfdsf&app_id=313ba574c47f1cdd8f626942dd8b6509441f23a9';	
