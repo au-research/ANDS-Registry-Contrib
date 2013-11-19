@@ -76,7 +76,7 @@ class Mydois extends MX_Controller {
 	function remove_trusted_client(){
 		acl_enforce('SUPERUSER');
 		$data['title'] = 'Remove Trusted Client';
-		$client_id = $this->input->post('id');
+		$client_id = $this->input->post('client_id');
 		$response = $this->mydois->removeTrustedClient($client_id);
 	}
 

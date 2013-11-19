@@ -18,6 +18,7 @@ class _mydois extends CI_Model
 		$this->DOIS_DATACENTRE_NAME_PREFIX = $this->_CI->config->item('gDOIS_DATACENTRE_NAME_PREFIX');
 		$this->DOIS_DATACENTRE_NAME_MIDDLE = $this->_CI->config->item('gDOIS_DATACENTRE_NAME_MIDDLE');
 		$this->DOIS_DATACENTRE_PREFIXS = $this->_CI->config->item('gDOIS_DATACENTRE_PREFIXS');
+		$this->gDefaultBaseUrl = $this->_CI->config->item('default_base_url');
 	}
 
 	function getTrustedClients(){
@@ -78,7 +79,7 @@ class _mydois extends CI_Model
 
 		if($client_id<10){$client_id = "-".$client_id;}
 
-		return $this->mdsDatacentreUpdate($client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix);
+		return $this->mdsDatacentreUpdate($client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix,$client_id);
 	
 	}
 
@@ -120,13 +121,17 @@ class _mydois extends CI_Model
 		
 		if($client_id<10){$client_id = "-".$client_id;}
 
-		return $this->mdsDatacentreUpdate($client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix);
+		return $this->mdsDatacentreUpdate($client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix,$client_id);
 	}
 
-	function mdsDatacentreUpdate($client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix)
+	function mdsDatacentreUpdate($client_name, $client_contact_name, $client_contact_email, $domainList, $datacite_prefix,$client_id)
 	{
-		//$symbol= $this->DOIS_DATACENTRE_NAME_PREFIX.".TEST";
-		$symbol= $this->DOIS_DATACENTRE_NAME_PREFIX.".".$this->DOIS_DATACENTRE_NAME_MIDDLE.$client_id;
+		if($this->gDefaultBaseUrl!="http://researchdata.ands.org.au/")
+		{
+			$symbol= $this->DOIS_DATACENTRE_NAME_PREFIX.".TEST"; //make sure we only hit the test datacenter config for non production domains
+		}else{
+			$symbol= $this->DOIS_DATACENTRE_NAME_PREFIX.".".$this->DOIS_DATACENTRE_NAME_MIDDLE.$client_id;
+		}
 
 		//create the datacite datacentre xml
 		$outxml = '<?xml version="1.0" encoding="UTF-8"?>
@@ -179,6 +184,7 @@ class _mydois extends CI_Model
 		$tables = array('doi_client_domains', 'doi_client');
 		$this->doi_db->where('client_id', $client_id);
 		$this->doi_db->delete($tables);
+		return $client_id;
 	}
 
 	
