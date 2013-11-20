@@ -62,7 +62,7 @@
 					<div class="widget-content">
 						<label for="">Facet Limit: </label>
 						<input type="number" ng-model="show" style="width:30px">
-						<h5>Research Group</h5>
+						<h5>Organisations &amp; groups</h5>
 						<ul><li ng-repeat="f in facet_result.group | limitTo:show"><a href="" ng-click="addFilter({name:'group', value:f.name})">{{f.name}} ({{f.value}})</a></li></ul>
 						<h5>Class</h5>
 						<ul><li ng-repeat="f in facet_result.class | limitTo:show"><a href="" ng-click="addFilter({name:'class', value:f.name})">{{f.name}} ({{f.value}})</a></li></ul>

@@ -84,8 +84,8 @@ angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSa
 			switch(text){
 				case 'collection': return 'Collections';break;
 				case 'activity': return 'Activities';break;
-				case 'party_one': return 'Researchers';break;
-				case 'party_multi': return 'Research Groups';break;
+				case 'party_one': return 'People';break;
+				case 'party_multi': return 'Organisation & Groups';break;
 				case 'service': return 'Services';break;
 				default: return text;break;
 			}
@@ -175,6 +175,14 @@ function ViewPage($scope, $http, $routeParams, pages_factory, $location, search_
 		{value:'spatial', title:'Spatial'},
 	];
 
+	$scope.available_headings = [
+		{value:false, title:'Not Visible'},
+		{value:'h1', title:'Heading 1'},
+		{value:'h2', title:'Heading 2'},
+		{value:'h3', title:'Heading 3'},
+		{value:'h4', title:'Heading 4'}
+	]
+
 	$scope.suggest = function(what, q){
 		return $http.get(real_base_url+'registry/services/registry/suggest/'+what+'/'+q).then(function(response){
 			return response.data;
@@ -204,13 +212,13 @@ function ViewPage($scope, $http, $routeParams, pages_factory, $location, search_
 		});
 		$scope.available_facets = [
 			{type:'class', name:'Class'},
-			{type:'group', name:'Research Groups'},
+			{type:'group', name:'Organisation & Groups'},
 			{type:'license_class', name:'Licences'}
 		];
 		$scope.available_relation_class = [
 			{type:'collection', name:'Collections'},
-			{type:'party_one', name:'Researchers'},
-			{type:'party_multi', name:'Research Groups'},
+			{type:'party_one', name:'People'},
+			{type:'party_multi', name:'Organisation & Groups'},
 			{type:'activity', name:'Activities'},
 			{type:'service', name:'Services'}
 		];

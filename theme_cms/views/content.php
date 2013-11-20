@@ -65,6 +65,7 @@
 
 						<form class="form">
 							<label for="title">Title</label><input type="text" ng-model="c.title">
+							<select ng-model="c.heading" ng-options="h.value as h.title for h in available_headings"></select>
 							<hr/>
 							<div ng-show="c.type == 'html'">
 								<textarea ui-tinymce="tinymceOptions" ng-model="c.content"></textarea>
