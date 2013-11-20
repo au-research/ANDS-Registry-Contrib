@@ -149,7 +149,7 @@ function ViewPage($scope, $http, $routeParams, pages_factory, $location, search_
 	        "emoticons template paste"
 	    ],
 	    height:"250px",
-	    width:"700px",
+	    width:"100%",
 	    entity_encoding : "raw",
 	    toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
 	}

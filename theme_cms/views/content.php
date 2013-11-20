@@ -158,10 +158,10 @@
 									<div class="control-group">
 										<label class="control-label">Relation:</label>
 										<div class="controls">
-											<select ng-model="c.relation.type" ng-options="f.type as f.name for f in available_relation_class"></select>
+											<select ng-model="c.relation.type" ng-options="f.type as f.name for f in available_relation_class" ng-change="preview_relation(c)"></select>
 										</div>
 									</div>
-									<a href="" ng-click="preview_relation(c)" class="btn btn-small">Fetch Relations</a>
+									<div ng-show="relationships[c.relation.key]" ng-bind-html="relationships[c.relation.key] | relationships_display:c.relation.type"></div>
 								</form>
 							</div>
 
