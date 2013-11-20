@@ -111,6 +111,7 @@ angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSa
 			restrict : 'A',
 			link: function(scope, element){
 				$(element).registry_widget({
+					search_btn_class: 'rowidget_search btn btn-default',
 					lookup_callback: function(data, obj, s){
 						if(scope.ro){
 							scope.ro.key = data.result['key'];
