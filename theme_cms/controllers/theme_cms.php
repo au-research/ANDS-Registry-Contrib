@@ -106,7 +106,7 @@ class Theme_cms extends MX_Controller {
 						'slug' => (isset($file['slug'])?$file['slug']:$pieces[0]),
 						'img_src'=> (isset($file['img_src'])?$file['img_src']:false),
 						'desc'=>(isset($file['desc'])?$file['desc']:false),
-						'status' => (isset($file['status'])?$file['status']:'')
+						'visible'=>(isset($file['visible'])?$file['visible']:false),
 					);
 				}
 			} 
