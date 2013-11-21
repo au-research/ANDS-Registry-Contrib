@@ -156,7 +156,7 @@ class Theme_cms extends MX_Controller {
 		$xml .=	"<field name='simplified_title'>".$file['title']." Theme Page</field>" . NL;
 
 		$xml .=	"<field name='class'>topic</field>" . NL;
-		$xml .=	"<field name='slug'>theme_page/".$file['slug']."</field>" . NL;
+		$xml .=	"<field name='slug'>theme/".$file['slug']."</field>" . NL;
 		$xml .=	"<field name='status'>PUBLISHED</field>" . NL;
 		//$xml .=	"<field name='logo'>".$topic."</field>" . NL;
 

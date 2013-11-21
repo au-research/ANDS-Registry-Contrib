@@ -102,7 +102,7 @@
 		<div class="btn-group">
 			<a class="btn btn-large" ng-click="save()"><i class="icon icon-hdd"></i> Save</a>
 			<a class="btn btn-large" ng-click="config=true"><i class="icon icon-wrench"></i> Config</a>
-			<a class="btn btn-large" href="<?php echo portal_url('theme_page/view/{{page.slug}}'); ?>" target="_blank"><i class="icon icon-eye-open"></i> Preview</a>
+			<a class="btn btn-large" href="<?php echo portal_url('theme/{{page.slug}}'); ?>" target="_blank"><i class="icon icon-eye-open"></i> Preview</a>
 			<a class="btn btn-large btn-danger" tip="Delete" ng-click="deleting('true')"><i class="icon-white icon-trash"></i></a>
 		</div>
 	</div>
