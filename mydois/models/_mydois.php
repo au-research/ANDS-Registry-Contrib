@@ -66,7 +66,8 @@ class _mydois extends CI_Model
 
 		$query = $this->doi_db->query("SELECT MAX(client_id) as client_id FROM doi_client");
 
-		$client_id = $query->result_array()[0]['client_id'];
+		$client_id = $query->result_array();
+		$client_id = $client_id[0]['client_id'];
 		$clientDomains= explode(",",$domainList);
 
 		foreach($clientDomains as $aDomain){
