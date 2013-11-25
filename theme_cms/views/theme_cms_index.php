@@ -33,6 +33,8 @@
 								<p ng-show="page.desc">{{page.desc}}</p>
 								<p>
 									<a href="#/view/{{page.slug}}" class="btn btn-primary">View</a>
+									<span class="label label-success" ng-show="page.visible">Visible</span>
+									<span class="label label-important" ng-show="!page.visible">Not Visible</span>
 								</p>
 							</div>
 						</div>
@@ -137,6 +139,13 @@
 						<div class="control-group">
 							<label for="">Description: </label>
 							<textarea cols="30" rows="10" placeholder="Theme Page Description" ng-model="page.desc"></textarea>
+						</div>
+						<div class="control-group">
+							<label for="">Visible: </label>
+							<select ng-model="page.visible">
+								<option value="true">Visible</option>
+								<option value="false">Not Visible</option>
+							</select>
 						</div>
 						<a href="" ng-click="config=false" class="btn">Close</a>
 					</fieldset>
