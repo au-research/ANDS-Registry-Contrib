@@ -33,8 +33,8 @@
 								<p ng-show="page.desc">{{page.desc}}</p>
 								<p>
 									<a href="#/view/{{page.slug}}" class="btn btn-primary">View</a>
-									<span class="label label-success" ng-show="page.visible">Visible</span>
-									<span class="label label-important" ng-show="!page.visible">Not Visible</span>
+									<span class="label label-success" ng-show="page.visible=='true'">Visible</span>
+									<span class="label label-important" ng-show="page.visible=='false'">Not Visible</span>
 								</p>
 							</div>
 						</div>
