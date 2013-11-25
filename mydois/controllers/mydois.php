@@ -136,7 +136,7 @@ class Mydois extends MX_Controller {
 	{
 		acl_enforce('DOI_USER');
 		
-		$doi_db = $this->load->database('dois', TRUE);
+
 		
 		$data['js_lib'] = array('core');
 		$data['scripts'] = array();
@@ -167,7 +167,7 @@ class Mydois extends MX_Controller {
 			throw new Exception ('You do not have authorisation to view dois associated with application id '.$appId);  
 		}
 
-
+		$doi_db = $this->load->database('dois', TRUE);
 		
 		$query = $doi_db->where('app_id',$appId)->select('*')->get('doi_client');
 		if (!$client_obj = $query->result()) throw new Exception ('Invalid App ID');  
@@ -187,7 +187,7 @@ class Mydois extends MX_Controller {
 		}
 		
 		$data['client'] = $client_obj;
-
+		
 		$this->load->view('list_dois', $data);
 
 	}
