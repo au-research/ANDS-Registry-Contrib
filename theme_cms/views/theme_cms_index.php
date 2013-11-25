@@ -23,7 +23,7 @@
 			<div class="widget-content">
 				<ul style="list-style-type:none;clear:both;">
 					<li ng-repeat="page in pages" style="float:left;margin:10px 20px;">
-						<div class="thumbnail">
+						<div class="thumbnail" style="max-width:250px">
 							<a href="#/view/{{page.slug}}" class="thumbnail">
 								<img src="{{page.img_src}}" alt="" ng-show="page.img_src">
 								<img src="http://placehold.it/150x150&amp;text=Placeholder" alt="" ng-show="!page.img_src">
