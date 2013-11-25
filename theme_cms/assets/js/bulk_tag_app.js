@@ -28,6 +28,7 @@ angular.module('bulk_tag_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSan
 		return {
 			restrict : 'A',
 			link: function(scope, element, a){
+				
 				$(element).ands_location_widget({
 					target:'geoLocation'+scope.f.id,
 					return_callback: function(str){

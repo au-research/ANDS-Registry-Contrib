@@ -106,6 +106,20 @@ angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSa
 				template:$('#view_page_template').html()
 			})
 	}).
+	directive('mapwidget', function(){
+		return {
+			restrict : 'A',
+			link: function(scope, element, a){
+				if(!scope.f.id || scope.f.id=='undefined') scope.f.id = Math.random().toString(36).substring(10);
+				$(element).ands_location_widget({
+					target:'geoLocation'+scope.f.id,
+					return_callback: function(str){
+						scope.f.value=str;
+					}
+				});
+			}
+		}
+	}).
 	directive('roSearch', function($compile){
 		return {
 			restrict : 'A',

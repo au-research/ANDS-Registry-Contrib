@@ -112,6 +112,7 @@
 										</div>
 										<input id="{{f.id}}" type="text" ng-model="f.value" typeahead="c.value as c.label for c in suggest(f.name, f.value)" ui-keypress="{13:'preview_search(ro)'}">
 										<a href="" class="btn" ng-click="removeFromList(c.search.fq, $index)"><i class="icon icon-remove"></i></a>
+										<div mapwidget ng-show="f.name=='spatial'"></div>
 									</div>
 
 								</form>
