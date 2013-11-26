@@ -97,7 +97,7 @@
 							<div ng-show="c.type == 'search'">
 								<form class="form-search" ng-submit="preview_search(c)">
 									<div class="input-append">
-										<input type="text" name="search-query" class="" ng-model="c.search.query" placeholder="Search Query">
+										<input type="text" name="search-query" class="" ng-model="c.search.query" placeholder="Search Query" ui-keypress="{13:'preview_search(c)'}">
 										<button type="submit" class="btn" ng-click="preview_search(c)">Preview Search</button>
 										<a href="" class="btn" ng-click="addToList(c, c.search.fq)"><i class="icon icon-plus"></i> Add Filter</a>
 									</div>
