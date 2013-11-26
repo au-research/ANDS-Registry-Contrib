@@ -20,9 +20,12 @@ $(document).on('click', '#add_confirm', function(){
 		success: function(data){
 			if(data.errorMessages){
 				$('#result_msg').html(data.errorMessages).addClass('label label-important');
+				$('#add_trusted_client_form')[0].reset();				
 				thisButton.button('reset');
 			}else{
 				listTrustedClients();
+				$('#add_trusted_client_form')[0].reset();
+				thisButton.button('reset');
 				$('#add_trusted_client_modal').modal('hide');
 			}
 		}
