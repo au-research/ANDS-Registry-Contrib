@@ -110,7 +110,7 @@
 												<li ng-repeat="j in available_filters"><a href="" ng-click="setFilterType(f, j.value)">{{j.title}}</a></li>
 											</ul>
 										</div>
-										<input id="{{f.id}}" type="text" ng-model="f.value" typeahead="c.value as c.label for c in suggest(f.name, f.value)" ui-keypress="{13:'preview_search(ro)'}">
+										<input id="{{f.id}}" type="text" ng-model="f.value" typeahead="c.value as c.label for c in suggest(f.name, f.value)" ui-keypress="{13:'preview_search(c)'}">
 										<a href="" class="btn" ng-click="removeFromList(c.search.fq, $index)"><i class="icon icon-remove"></i></a>
 										<div mapwidget ng-show="f.name=='spatial'"></div>
 									</div>
