@@ -21,15 +21,19 @@ $(document).on('click', '#add_confirm', function(){
 			if(data.errorMessages){
 				console.log(data);
 				$('#result_msg').html(data.errorMessages).addClass('label label-important');
+				$('#add_trusted_client_form')[0].reset();
 				thisButton.button('reset');
 			}else{
-				listTrustedClients();
+				listTrustedClients();		
+				thisButton.button('reset');
+				$('#add_trusted_client_form')[0].reset();
 				$('#add_trusted_client_modal').modal('hide');
 			}
 		}
 	});
 }).on('click', '#edit_confirm', function(){
 	var thisButton = $(this);
+	console.log(thisButton)
 	thisButton.button('loading');
 	var jsonData = {};
 	$('#edit_trusted_client_form input, #edit_trusted_client_form select').each(function(){
@@ -46,6 +50,8 @@ $(document).on('click', '#add_confirm', function(){
 				thisButton.button('reset');
 			}else{
 				listTrustedClients();
+				$('#edit_trusted_client_form')[0].reset();
+				thisButton.button('reset');
 				$('#edit_trusted_client_modal').modal('hide');
 			}
 		}

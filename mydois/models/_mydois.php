@@ -55,7 +55,6 @@ class _mydois extends CI_Model
 		$clientdata = array(
                'ip_address' =>  $ip,
                'app_id' => $app_id,
-               'created_when' => "NOW()", 
                'client_name'  => $client_name, 
                'client_contact_name'    => $client_contact_name,  
                'client_contact_email'    => $client_contact_email,
