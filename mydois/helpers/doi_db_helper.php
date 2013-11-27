@@ -142,7 +142,7 @@
 	
 	function insertDoiObject($doi_id,$publisher,$publicationYear,$client_id,$created_who,$status,$language,$version,$identifier_type,$rights,$url,$xml)
 	{
-		$updateTime = 'now()';
+		$updateTime = date("Y-m-d H:i:s");
 		$data = array(
 		'doi_id'=> $doi_id, 
 		'publisher' => $publisher,
@@ -171,7 +171,7 @@
 	
 	function deleteDoiObjectXml($doi_id)
 	{
-		$updateTime = 'now()';
+		$updateTime = date("Y-m-d H:i:s");
 		$data = array('publisher' => '','publication_year' => '','language' => '','version' => '','rights' =>'', 'updated_when' => $updateTime, 'datacite_xml'=>'');
 		$where = "doi_id = '".$doi_id."'";
 		$CI =& get_instance();
@@ -212,7 +212,7 @@
 	
 	function updateDoiUrl($doi_id,$url)
 	{
-		$updateTime = 'now()';		
+		$updateTime = date("Y-m-d H:i:s");		
 		$data = array('url' => $url, 'updated_when' => $updateTime,);
 		$where = "doi_id = '".$doi_id."'";
 		$CI =& get_instance();

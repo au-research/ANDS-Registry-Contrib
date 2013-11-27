@@ -251,7 +251,7 @@ class Mydois extends MX_Controller {
 	{
 		acl_enforce('DOI_USER');
 		
-		$doi_db = $this->load->database('dois', TRUE);
+
 
 		// Validate the url
 		$new_url = rawurldecode($this->input->get_post('new_url'));
@@ -265,7 +265,7 @@ class Mydois extends MX_Controller {
 		{
 			throw new Exception("Unable to update DOI. Not all parameters were given");
 		}
-
+		$doi_db = $this->load->database('dois', TRUE);
 		$query = $doi_db->where('client_id',$client_id)->select('*')->get('doi_client');
 		if (!$client_obj = $query->result()) throw new Exception ('Invalid Client ID');  
 		$client_obj = array_pop($client_obj);
@@ -275,13 +275,13 @@ class Mydois extends MX_Controller {
 		{
 			throw new Exception ('You do not have authorisation to update DOI  '.$doi_id);  
 		}
+		$doi_db = $this->load->database('dois', TRUE);		
 		$query = $doi_db->where('client_id',$client_id)->select('client_domain')->get('doi_client_domains');
 		if(!$new_url)
 		{
 			$message = "param 'url' required";
 			$client = str_replace("-","0",$client_id);
 			$logdata = array(
-               'timestamp' =>  "NOW()",
                'client_id' => $client,
                'activity' => "UPDATE", 
                'doi_id'  => $doi_id, 
@@ -297,7 +297,7 @@ class Mydois extends MX_Controller {
 		{
 			foreach ($query->result() AS $result)
 			{
-				if(str_replace($result->client_domain,"",$new_url)==$result->client_domain)
+				if(strpos($new_url, $result->client_domain) !== FALSE)
 				{
 					$validDomain = $result->client_domain;
 				}
@@ -309,7 +309,6 @@ class Mydois extends MX_Controller {
 			$message = "Invalid top level domain provided in url ";
 			$client = str_replace("-","0",$client_id);
 			$logdata = array(
-               'timestamp' =>  "NOW()",
                'client_id' => $client,
                'activity' => "UPDATE", 
                'doi_id'  => $doi_id, 
@@ -347,14 +346,13 @@ class Mydois extends MX_Controller {
 			//if its all Ok - update the database and return to the doi listing
 			$data = array(
                'url' => $new_url,
-               'updated_when' => "NOW()",
+               'updated_when' => date("Y-m-d H:i:s"),
             	);
 			$doi_db->where('doi_id', $doi_id);
 			$doi_db->update('doi_objects', $data); 
 			$message =  "DOI ".$doi_id." was successfully update to url '".$new_url."' with ".$validDomain;
 			$client = str_replace("-","0",$client_id);
 			$logdata = array(
-               'timestamp' =>  "NOW()",
                'client_id' => $client,
                'activity' => "UPDATE", 
                'doi_id'  => $doi_id, 
