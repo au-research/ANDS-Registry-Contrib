@@ -1,4 +1,5 @@
 <?php 
+
 function doisGetResponseType($response)
 {
 	$responses = explode(" ", $response);
@@ -127,4 +128,18 @@ function doisGetUserMessage($responseCode, $doi_id,$response_type="string",$app_
 	
 	
 }  
+
+function setResponseType()
+{
+	$CI =& get_instance();
+	$suffix = substr($CI->input->server('REQUEST_URI'), strpos($CI->input->server('REQUEST_URI'), $CI->router->fetch_class()));
+	$suffix = array_shift(explode("/", $suffix));
+	$format="string";
+	if (strpos($suffix, ".") !== FALSE)
+	{
+		$format = array_pop(explode(".",$suffix));
+	}
+	$_GET['response_type'] = $format;
+}
+setResponseType();
  ?>
