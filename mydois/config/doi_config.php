@@ -1,6 +1,7 @@
 <?php
 global $ENV;
 $config['test_doi_prefix'] = '10.5072';
+
 $config['gDOIS_SERVICE_BASE_URI'] = "https://mds.datacite.org/";
 $config['gDOIS_DATACENTRE_NAME_PREFIX'] = "ANDS";
 $config['gDOIS_DATACENTRE_NAME_MIDDLE'] = "CENTRE";
@@ -13,4 +14,10 @@ if (!isset($ENV['gDOIS_DATACITE_PASSWORD']))
 }
 $config['gDOIS_DATACITE_PASSWORD'] = $ENV['gDOIS_DATACITE_PASSWORD'];
 $config['gDOIS_RESPONSE_SUCCESS'] = "OK";
+
+define('gDOIS_SERVICE_BASE_URI',$config['gDOIS_SERVICE_BASE_URI']);
+define('gDOIS_DATACENTRE_NAME_PREFIX',$config['gDOIS_DATACENTRE_NAME_PREFIX']);
+define('gDOIS_DATACENTRE_NAME_MIDDLE',$config['gDOIS_DATACENTRE_NAME_MIDDLE']);
+define('gDOIS_DATACITE_PASSWORD',$config['gDOIS_DATACITE_PASSWORD']);
+define('gDOIS_RESPONSE_SUCCESS',$config['gDOIS_RESPONSE_SUCCESS']);
 ?>

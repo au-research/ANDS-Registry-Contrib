@@ -174,22 +174,26 @@
 		$updateTime = date("Y-m-d H:i:s");
 		$data = array('publisher' => '','publication_year' => '','language' => '','version' => '','rights' =>'', 'updated_when' => $updateTime, 'datacite_xml'=>'');
 		$where = "doi_id = '".$doi_id."'";
+		
 		$CI =& get_instance();
 		$db = $CI->load->database('dois', TRUE);
-    	$query_str = $db->update_string('doi_objects', $data, $where); 
-    	$query_str .= "; DELETE FROM doi_alternate_identifiers WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_contributors WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_creators WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_dates WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_descriptions WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_formats WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_related_identifiers WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_resource_types WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_sizes WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_subjects WHERE doi_id = '".$doi_id."'";
-		$query_str .= "; DELETE FROM doi_titles WHERE doi_id = '".$doi_id."'";
 
-		$result = $db->query($query_str);
+    	$query_str = $db->update_string('doi_objects', $data, $where); 
+    	$result = $db->query($query_str);
+
+    	$db->delete('doi_alternate_identifiers', array('doi_id' => $doi_id)); 
+    	$db->delete('doi_contributors', array('doi_id' => $doi_id)); 
+    	$db->delete('doi_creators', array('doi_id' => $doi_id)); 
+    	$db->delete('doi_dates', array('doi_id' => $doi_id)); 
+    	$db->delete('doi_descriptions', array('doi_id' => $doi_id)); 
+    	$db->delete('doi_formats', array('doi_id' => $doi_id)); 
+    	$db->delete('doi_related_identifiers', array('doi_id' => $doi_id)); 
+
+    	$db->delete('doi_resource_types', array('doi_id' => $doi_id)); 
+		$db->delete('doi_sizes', array('doi_id' => $doi_id)); 
+		$db->delete('doi_subjects', array('doi_id' => $doi_id));
+		$db->delete('doi_titles', array('doi_id' => $doi_id));
+
     	if($result!=1)
     	{
     		return 'Error deleting object xml';
@@ -234,24 +238,22 @@
 		$data = file_get_contents("php://input");
 		parse_str($data, $output);
 
-   		$shared_secret = (str_replace("Basic ",'',$_SERVER['REDIRECT_HTTP_AUTHORIZATION']));
-   		if($shared_secret)
-   		{
-   			$thesecret = explode(":",base64_decode($shared_secret));
-   			$shared_secret = $thesecret[1];
-   		} 
+		$shared_secret = false;               	
+		if(isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW']))
+        {
+        	$shared_secret = $_SERVER['PHP_AUTH_PW'];
+        }
    		elseif(isset($output['shared_secret']))
    		{
    			$shared_secret = $output['shared_secret'];
-
    		} 
  
 		if( $results->num_rows()>0 )
 		{		
 			foreach($results->result() as $row)
 			{	
-				if($shared_secret == $row->shared_secret) return $row->client_id;
-				if(test_ip($ip_address, $row->ip_address)) return $row->client_id;	
+				if($shared_secret && $shared_secret == $row->shared_secret) return $row->client_id;
+				if($ip_address && test_ip($ip_address, $row->ip_address)) return $row->client_id;	
 			}
 	
 		}else{
@@ -341,7 +343,8 @@
 	function checkDoisClientDoi($doi_id,$client_id)
 	{
      	$CI =& get_instance();
-    	$results = $db->get_where('doi_objects', array('doi_id'=>$doi_id,'client_id'=>$client_id));
+     	$doi_db = $CI->load->database('dois', TRUE);		
+    	$results = $doi_db->get_where('doi_objects', array('doi_id'=>$doi_id,'client_id'=>$client_id));
    					
 		if( $results->num_rows()>0 )
 		{

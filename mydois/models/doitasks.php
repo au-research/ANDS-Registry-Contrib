@@ -381,7 +381,7 @@
 			}
 			if($testing=='yes')
 			{
-				$datacite_prefix = $gDOIS_PREFIX_TYPES[3];
+				$datacite_prefix = "10.5072/";
 			}else{
 				$datacite_prefix = $clientDetail->datacite_prefix;
 			}
@@ -843,8 +843,8 @@
 		
 		if($client_id<10) $client_id = '-'.$client_id;	
 		
-		$authstr = gDOIS_DATACENTRE_NAME_PREFIX.".".gDOIS_DATACENTRE_NAME_MIDDLE.$client_id.":".gDOIS_DATACITE_PASSWORD;
-		$requestURI = gDOIS_SERVICE_BASE_URI;
+		$authstr = 'gDOIS_DATACENTRE_NAME_PREFIX'.".".'gDOIS_DATACENTRE_NAME_MIDDLE'.$client_id.":".'gDOIS_DATACITE_PASSWORD';
+		$requestURI = 'gDOIS_SERVICE_BASE_URI';
 
 		$ch = curl_init();
 				
@@ -936,14 +936,9 @@
 		$app_id = $this->input->get('app_id');		//passed as a parameter
 		//or app_id might be passed as part of the authstr
 
-		if(!$app_id)
+		if(!$app_id && isset($_SERVER['PHP_AUTH_USER']))
 		{
-   			$shared_secret = (str_replace("Basic ",'',$_SERVER['REDIRECT_HTTP_AUTHORIZATION']));
-   			if($shared_secret)
-   			{
-   				$theapp_id = explode(":",base64_decode($shared_secret));
-   				$app_id = $theapp_id[0];
-   			} 			
+   			$app_id = $_SERVER['PHP_AUTH_USER'];
 		}
 		return $app_id;
 	} 
