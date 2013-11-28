@@ -363,8 +363,6 @@
 				$verbosemessage = 'You must post xml when minting a doi.';							
 				$errorMessages = doisGetUserMessage("MT010", $doi_id=NULL, $response_type,$app_id, $verbosemessage,$urlValue);
 			}
-		
-
 		}
 		if(!$errorMessages)
 		{
@@ -843,8 +841,8 @@
 		
 		if($client_id<10) $client_id = '-'.$client_id;	
 		
-		$authstr = 'gDOIS_DATACENTRE_NAME_PREFIX'.".".'gDOIS_DATACENTRE_NAME_MIDDLE'.$client_id.":".'gDOIS_DATACITE_PASSWORD';
-		$requestURI = 'gDOIS_SERVICE_BASE_URI';
+		$authstr = gDOIS_DATACENTRE_NAME_PREFIX.".".gDOIS_DATACENTRE_NAME_MIDDLE.$client_id.":".gDOIS_DATACITE_PASSWORD;
+		$requestURI = gDOIS_SERVICE_BASE_URI;
 
 		$ch = curl_init();
 				
