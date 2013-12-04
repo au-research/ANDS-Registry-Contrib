@@ -39,7 +39,7 @@ class Mydois extends MX_Controller {
 
 	function index()
 	{
-		acl_enforce('gDOIS_SERVICE_BASE_URI');
+		acl_enforce('DOI_USER');
 
 		$data['js_lib'] = array('core');
 		$data['title'] = 'My DOIs List';
@@ -135,9 +135,7 @@ class Mydois extends MX_Controller {
 	function show()
 	{
 		acl_enforce('DOI_USER');
-		
 
-		
 		$data['js_lib'] = array('core');
 		$data['scripts'] = array();
 		$data['title'] = 'DOI Query Tool';
@@ -250,8 +248,6 @@ class Mydois extends MX_Controller {
 	function updateDoiUrl()
 	{
 		acl_enforce('DOI_USER');
-		
-
 
 		// Validate the url
 		$new_url = rawurldecode($this->input->get_post('new_url'));
@@ -395,7 +391,7 @@ class Mydois extends MX_Controller {
 	}
 	
 	function __construct(){
-		acl_enforce('SUPERUSER');
+		acl_enforce('DOI_USER');
 		$this->load->model('_mydois', 'mydois');
 	}	
 		
