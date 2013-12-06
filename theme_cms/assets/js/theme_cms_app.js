@@ -106,7 +106,7 @@ angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSa
 				template:$('#view_page_template').html()
 			})
 	}).
-	directive('mapwidget', function(){
+	directive('mapwidget', function($rootScope){
 		return {
 			restrict : 'A',
 			link: function(scope, element, a){
@@ -115,6 +115,7 @@ angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSa
 					target:'geoLocation'+scope.f.id,
 					return_callback: function(str){
 						scope.f.value=str;
+						$rootScope.$broadcast('refreshAll');
 					}
 				});
 			}
@@ -324,6 +325,15 @@ function ViewPage($scope, $http, $routeParams, pages_factory, $location, search_
 	$scope.removeFromList = function(list, index){
 		list.splice(index, 1);
 	}
+
+	$scope.$on('refreshAll', function(){
+		$.each($scope.page.left, function(){
+			$scope.preview_search(this);
+		});
+		$.each($scope.page.right, function(){
+			$scope.preview_search(this);
+		});
+	});
 
 	$scope.preview_search = function(c){
 		if(c.search){

@@ -51,7 +51,7 @@
 						</div>
 
 						<hr>
-						<a class="btn btn-small" ng-click="addFilter()"><i class="icon-plus"></i> Add Filter</a>	
+						<a class="btn btn-small" ng-click="addFilter()"><i class="icon-plus"></i> Add Filter</a>
 					</div>
 				</div>
 
@@ -82,7 +82,10 @@
 						<div ng-show="loading_tags" class="alert alert-info">
 							<img src="<?php echo asset_url('img/ajax-loader.gif','base');?>" alt="loading"> Loading all tags based on this search...
 						</div>
-						<div ng-show="selected_ro.length>0" class="alert alert-info">Adding or removing tags will only affect the selected records ({{selected_ro.length}}) </div>
+						<div ng-show="selected_ro.length>0" class="alert alert-info">
+							Adding or removing tags will only affect the selected records ({{selected_ro.length}})
+							<button class="btn btn-info" ng-click="selected_ro=[]">Clear Selected</button>
+						</div>
 						<div ng-hide="loading_tags">
 							<div class="btn-toolbar tags" ng-show="tags_result.data.length > 0">
 								<div class="btn-group" ng-repeat="tag in tags_result.data">

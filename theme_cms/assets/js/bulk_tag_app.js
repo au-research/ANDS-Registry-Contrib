@@ -28,7 +28,6 @@ angular.module('bulk_tag_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSan
 		return {
 			restrict : 'A',
 			link: function(scope, element, a){
-				
 				$(element).ands_location_widget({
 					target:'geoLocation'+scope.f.id,
 					return_callback: function(str){
@@ -63,6 +62,11 @@ function index($scope, $http, search_factory){
 			});
 		}else{
 			if($scope.facet_result) $scope.tags_result = {data:$scope.facet_result.tag};
+			if($scope.search_result.data.result.docs){
+				$.each($scope.search_result.data.result.docs, function(){
+					this.selected = '';
+				});
+			}
 		}
 	});
 
@@ -90,7 +94,6 @@ function index($scope, $http, search_factory){
 
 	$scope.search = function(){
 		var filters = $scope.constructSearchFilters();
-		$scope.selected_ro = [];
 		$scope.loading_search = true;
 		search_factory.search(filters).then(function(data){
 			$scope.loading_search = false;
@@ -115,8 +118,14 @@ function index($scope, $http, search_factory){
 				}
 			}
 
-			$scope.tags_result = {data:$scope.facet_result.tag};
-			// $scope.get_tags(filters);
+			$.each($scope.search_result.data.result.docs, function(){
+				console.log()
+				if ($.inArray(this.key, $scope.selected_ro)!=-1) {
+					this.selected = 'ro_selected';
+				}
+			});
+
+			if($scope.selected_ro.length == 0) $scope.tags_result = {data:$scope.facet_result.tag};
 			$scope.maxPage = Math.ceil($scope.search_result.data.numFound / $scope.perPage);
 		});
 	}
@@ -192,28 +201,6 @@ function index($scope, $http, search_factory){
 			ro.selected = '';
 			$scope.selected_ro.splice($scope.selected_ro.indexOf(ro.key), 1);
 		}
-	}
-
-	$scope.keyPressed = function(event){
-		console.log(event);
-		if(event.which==13){
-			$scope.search();
-		}
-	}
-
-
-	//Legacy code, tags for filters are now get from facets
-	$scope.get_tags_from_search = function(filters){
-		$scope.loading_tags = true;
-		var hasTags = 0;
-		if($scope.search_result.data.facet) hasTags = $scope.search_result.data.facet.facet_queries.hasTag;
-		if(hasTags > 300) hasTags = 300;
-		filters['rows'] = hasTags;
-		search_factory.get_tags(filters).then(function(data){
-			$scope.loading_tags = false;
-			$scope.tags_result = {data:data};
-			// console.log($scope.tags_result);
-		});
 	}
 
 	$scope.constructSearchFilters = function(){
