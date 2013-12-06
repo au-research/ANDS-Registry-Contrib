@@ -102,7 +102,7 @@ class Statistics extends MX_Controller {
 		{
 			$query = $doi_db->query("SELECT	COUNT(*) as thecount
 			FROM doi_objects 
-			WHERE created_when <  CAST('".date("Y-m-d",$newMonth)."' AS timestamp with time zone) AND doi_id NOT LIKE '10.5072/%' AND status = 'ACTIVE' ");
+			WHERE created_when <  ".date("Y-m-d",$newMonth)." AND doi_id NOT LIKE '10.5072/%' AND status = 'ACTIVE' ");
 			
 			foreach($query->result() as $key=>$row)
 			{
@@ -112,7 +112,7 @@ class Statistics extends MX_Controller {
 
 			$query = $doi_db->query("SELECT COUNT(DISTINCT(app_id)) as thecount
 			FROM doi_client  
-			WHERE created_when <  CAST('".date("Y-m-d",$newMonth)."' AS timestamp with time zone)");
+			WHERE created_when <  ".date("Y-m-d",$newMonth)."");
 			
 			foreach($query->result() as $key=>$row)
 			{
@@ -122,7 +122,7 @@ class Statistics extends MX_Controller {
 
 			$query = $doi_db->query("SELECT COUNT(*) as thecount
 			FROM activity_log 
-			WHERE timestamp <  CAST('".date("Y-m-d",$newMonth)."' AS timestamp with time zone) AND activity = 'MINT' AND result = 'FAILURE' AND doi_id NOT LIKE '10.5072/%'");
+			WHERE timestamp <  ".date("Y-m-d",$newMonth)." AND activity = 'MINT' AND result = 'FAILURE' AND doi_id NOT LIKE '10.5072/%'");
 			
 			foreach($query->result() as $key=>$row)
 			{
