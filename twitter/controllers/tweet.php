@@ -60,8 +60,8 @@ class Tweet extends MX_Controller
 					if (!$dryrun)
 					{
 						$twitter->statusesUpdate($tweet);
+						echo "sent " . BR; flush();
 					}
-					echo "sent " . BR; flush();
 					sleep(0.5);
 
 					// Pause between big chunks of tweets
@@ -73,6 +73,10 @@ class Tweet extends MX_Controller
 			catch (TwitterException $e)
 			{
 			    echo BR . BR . "Unable to send Tweet to Twitter API: " . $e->getMessage() . BR . BR;
+			}
+			catch (Exception $e)
+			{
+			    echo BR . BR . "Unknown Exception: " . $e->getMessage() . BR . BR;
 			}
 			}
 		}
