@@ -92,9 +92,10 @@ function index($scope, $http, search_factory){
 		});
 	}
 
-	$scope.search = function(){
+	$scope.search = function(no_refresh){
 		var filters = $scope.constructSearchFilters();
 		$scope.loading_search = true;
+		if(!no_refresh) $scope.currentPage = 1;
 		search_factory.search(filters).then(function(data){
 			$scope.loading_search = false;
 			filter_query ='';
@@ -133,7 +134,7 @@ function index($scope, $http, search_factory){
 	$scope.page = function(page){
 		if(page >= 1 && page <= $scope.maxPage){
 			$scope.currentPage = page;
-			$scope.search();
+			$scope.search(true);
 		}
 		if($scope.currentPage <= 1){
 			$scope.minpage = 'disabled';
