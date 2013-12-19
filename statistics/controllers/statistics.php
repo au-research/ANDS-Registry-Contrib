@@ -30,6 +30,59 @@ class Statistics extends MX_Controller {
 		$this->load->view('statistics', $data);
 	}
 
+	function GetQuarterlyStats()
+	{
+
+		$start = array(1=>"2012-07-01T00:00:00.000Z",2=>"2012-10-01T00:00:00.000Z",3=>"2013-01-01T00:00:00.000Z",4=>"2013-04-01T00:00:00.000Z");
+		$end = array(1=>"2012-010-01T00:00:00.000Z",2=>"2013-01-01T00:00:00.000Z",3=>"2013-04-01T00:00:00.000Z",4=>"2013-07-01T00:00:00.000Z");				
+
+		$this->load->library('solr');
+		
+
+		$this->solr->setOpt('start', 0);
+		$this->solr->setOpt('rows', 1);
+		$this->solr->setFacetOpt('field','group');
+		$this->solr->setFacetOpt('field','data_source_key');
+		$this->solr->setFacetOpt('sort','index');		
+		//print_r($data['solr_result']);
+		for($quarter=1;$quarter<5;$quarter++)
+		{
+			$this->solr->setOpt('q', '+record_created_timestamp:['.$start[$quarter].' TO '.$end[$quarter].']');
+			$data['solr_result'] = $this->solr->executeSearch();
+			$data['result'] = $this->solr->getResult();	
+			$data['numFound'] = $this->solr->getNumFound();
+			$groups[$quarter] = $this->solr->getFacetResult('group');
+			$datasource[$quarter] = $this->solr->getFacetResult('data_source_key');
+		}
+		$groups[0] =array();
+		$datasource[0] = array();
+		foreach($groups as $groupvalue)
+		{
+			foreach($groupvalue as $aGroup=>$value)
+			{
+			if(isset($groups[0][$aGroup])){ $groups[0][$aGroup] = $groups[0][$aGroup].",".$value;}
+			else {$groups[0][$aGroup] = $value;}
+			}
+		}
+		foreach($datasource as $groupvalue)
+		{
+			foreach($groupvalue as $aGroup=>$value)
+			{
+			if(isset($datasource[0][$aGroup])){ $datasource[0][$aGroup] = $datasource[0][$aGroup].",".$value;}
+			else {$datasource[0][$aGroup] = $value;}
+			}
+		}
+		echo " the group stats<br />";
+		print("<pre>");
+		print_r($groups[0]);
+		print("</pre>");
+	
+		echo " the data_source stats<br />";
+		print("<pre>");
+		print_r($datasource[0]);
+		print("</pre>");
+	}
+
 	// Returns the count by month of the registry objects
 	function getRegistryStatistics($from,$to)
 	{
