@@ -120,7 +120,7 @@ class Theme_cms extends MX_Controller {
 
 	public function build_solr_index($slug=''){
 		$this->load->library('solr');
-		if($slug!=''){
+		if($slug!='' && $this->is_published($slug)){
 			$xml = $this->transformSOLR($slug);
 			$this->solr->deleteByQueryCondition("id:(topic_".$slug.")");
 			echo $this->solr->addDoc('<add>' . $xml . '</add>');
