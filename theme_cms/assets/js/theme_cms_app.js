@@ -405,7 +405,7 @@ function NewPageCtrl($scope, pages_factory, Slug, $location){
 			slug: slug,
 			img_src: this.new_page_img_src,
 			desc: this.new_page_desc,
-			visible: true
+			visible: 'true'
 		}
 		pages_factory.newPage(postData).then(function(data){
 			if(data==1){
