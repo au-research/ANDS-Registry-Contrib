@@ -132,7 +132,7 @@ class Theme_cms extends MX_Controller {
 				if($value === '.' || $value === '..') {continue;} 
 				$pieces = explode(".", $value);
 				if(is_file("$this->directory/$value")) {
-					if($pieces[0].'.json'!=$this->index_file){
+					if($pieces[0].'.json'!=$this->index_file && $this->is_published($pieces[0])){
 						$xml.=$this->transformSOLR($pieces[0]);	
 					}
 				} 
@@ -141,6 +141,16 @@ class Theme_cms extends MX_Controller {
 			echo $this->solr->addDoc('<add>' . $xml . '</add>');
 			echo $this->solr->commit();
 		}
+	}
+
+	public function is_published($slug){
+		$file = read_file($this->directory.$slug.'.json');
+		$file = json_decode($file, true);
+		$visible = (isset($file['visible']) ? $file['visible'] : 'true');
+		$visible = ($visible=="false") ? false : true;
+		if($visible){
+			return true;
+		}else return false;
 	}
 
 
