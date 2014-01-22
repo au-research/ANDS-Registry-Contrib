@@ -130,6 +130,7 @@
 								</li>
 							</ul>
 						</div>
+
 					</div>
 					<div class="widget-footer" style="padding:4px">
 						<ul class="pagination alternate" style="margin:0;">

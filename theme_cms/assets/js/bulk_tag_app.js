@@ -93,9 +93,10 @@ function index($scope, $http, search_factory){
 	}
 
 	$scope.search = function(no_refresh){
+		if(!no_refresh) $scope.currentPage = 1;
 		var filters = $scope.constructSearchFilters();
 		$scope.loading_search = true;
-		if(!no_refresh) $scope.currentPage = 1;
+
 		search_factory.search(filters).then(function(data){
 			$scope.loading_search = false;
 			filter_query ='';
@@ -120,7 +121,6 @@ function index($scope, $http, search_factory){
 			}
 
 			$.each($scope.search_result.data.result.docs, function(){
-				console.log()
 				if ($.inArray(this.key, $scope.selected_ro)!=-1) {
 					this.selected = 'ro_selected';
 				}
@@ -182,7 +182,7 @@ function index($scope, $http, search_factory){
 		if(obj) newObj = obj;
 		if(!$scope.filters) $scope.filters = [];
 		$scope.filters.push(newObj);
-		if(obj) $scope.search();
+		if(obj) $scope.search(false);
 	}
 
 	$scope.setFilterType = function(filter, type){
