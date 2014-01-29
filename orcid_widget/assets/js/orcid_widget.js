@@ -31,8 +31,8 @@
 
 		var defaults = {
 		    //location (absolute URL) of the jsonp proxy
-		    search_endpoint: 'http://pub.orcid.org/search/orcid-bio?q=',
-		   	lookup_endpoint: 'http://pub.orcid.org/',
+		    search_endpoint: 'http://pub.orcid.org/v1.1/search/orcid-bio?q=',
+		   	lookup_endpoint: 'http://pub.orcid.org/v1.1/',
 
 		    //auto _lookup once init
 		    pre_lookup: false,
@@ -207,11 +207,13 @@
 	 * @return {string}     HTML string
 	 */
 	function _constructORCIDHTML(obj) {
+		// console.log(obj);
 		var resStr = '';
 		resStr += "<div class='info-box'>"
 		resStr += "<h6>ORCID Identifier</h6>";
-		var orcid = eval(obj['orcid']);
-		resStr += orcid.value;
+		var orcid = eval(obj['orcid-identifier']);
+		console.log(orcid);
+		resStr += orcid.path;
 
 		if(obj['orcid-bio']['biography'])
 		{		    		
@@ -315,7 +317,7 @@
 						if(data['orcid-search-results']){
 							var html='<ul>';
 							$.each(data['orcid-search-results']['orcid-search-result'], function(){
-								var orcid = this['orcid-profile']['orcid'].value;
+								var orcid = this['orcid-profile']['orcid-identifier'].path;
 								var given = this['orcid-profile']['orcid-bio']['personal-details']['given-names'].value || '';
 								var family = this['orcid-profile']['orcid-bio']['personal-details']['family-name'].value || '';
 								html+='<li>';
