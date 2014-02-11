@@ -62,7 +62,7 @@ function index($scope, $http, search_factory){
 			});
 		}else{
 			if($scope.facet_result) $scope.tags_result = {data:$scope.facet_result.tag};
-			if($scope.search_result.data.result.docs){
+			if($scope.search_result && $scope.search_result.data.result.docs){
 				$.each($scope.search_result.data.result.docs, function(){
 					this.selected = '';
 				});
@@ -98,6 +98,7 @@ function index($scope, $http, search_factory){
 		$scope.loading_search = true;
 
 		search_factory.search(filters).then(function(data){
+			console.log(data);
 			$scope.loading_search = false;
 			filter_query ='';
 			$.each(filters, function(i, k){
@@ -106,28 +107,31 @@ function index($scope, $http, search_factory){
 				}
 			});
 			$scope.search_result = {data:data, filter_query:filter_query};
-			//construct facet_fields for easy retrieval
-			if($scope.search_result.data.facet){
-				$scope.facet_result = {};
-				for(var index in $scope.search_result.data.facet.facet_fields){
-					$scope.facet_result[index] = [];
-					for(i=0;i<$scope.search_result.data.facet.facet_fields[index].length;i+=2){
-						$scope.facet_result[index].push({
-							name: $scope.search_result.data.facet.facet_fields[index][i],
-							value: $scope.search_result.data.facet.facet_fields[index][i+1]
-						});
+			if(data.result){
+				
+				//construct facet_fields for easy retrieval
+				if($scope.search_result.data.facet){
+					$scope.facet_result = {};
+					for(var index in $scope.search_result.data.facet.facet_fields){
+						$scope.facet_result[index] = [];
+						for(i=0;i<$scope.search_result.data.facet.facet_fields[index].length;i+=2){
+							$scope.facet_result[index].push({
+								name: $scope.search_result.data.facet.facet_fields[index][i],
+								value: $scope.search_result.data.facet.facet_fields[index][i+1]
+							});
+						}
 					}
 				}
+
+				$.each($scope.search_result.data.result.docs, function(){
+					if ($.inArray(this.key, $scope.selected_ro)!=-1) {
+						this.selected = 'ro_selected';
+					}
+				});
+
+				if($scope.selected_ro.length == 0) $scope.tags_result = {data:$scope.facet_result.tag};
+				$scope.maxPage = Math.ceil($scope.search_result.data.numFound / $scope.perPage);
 			}
-
-			$.each($scope.search_result.data.result.docs, function(){
-				if ($.inArray(this.key, $scope.selected_ro)!=-1) {
-					this.selected = 'ro_selected';
-				}
-			});
-
-			if($scope.selected_ro.length == 0) $scope.tags_result = {data:$scope.facet_result.tag};
-			$scope.maxPage = Math.ceil($scope.search_result.data.numFound / $scope.perPage);
 		});
 	}
 
@@ -228,7 +232,6 @@ function index($scope, $http, search_factory){
 				}else filters[this.name] = this.value;
 			}
 		});
-		//console.log(filters);
 		return filters;
 	}
 
@@ -237,6 +240,13 @@ function index($scope, $http, search_factory){
 	$scope.currentPage = 1;
 	$scope.minpage = 'disabled'
 	$scope.perPage = 5;
+	$scope.showHidden = false;
+	$scope.hiddenDS = 0;
 	// $scope.addFilter({name:'data_source_key', value:'acdata.unsw.edu.au'});
-	$scope.search()
+	$('.ds-restrict').each(function(){
+		var k = $(this).attr('ds-key');
+		$scope.filters.push({name:'data_source_key', value:k, disable:true});
+		$scope.hiddenDS++;
+	});
+	// $scope.search()
 }

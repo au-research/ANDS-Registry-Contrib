@@ -15,7 +15,7 @@ class Theme_cms extends MX_Controller {
 		$data['js_lib'] = array('core', 'angular', 'select2', 'location_capture_widget', 'googleapi', 'google_map');
 
 		$this->load->model("registry/data_source/data_sources","ds");
-	 	$dataSources = $this->ds->getAll(0,0);
+	 	$dataSources = $this->ds->getOwnedDataSources();
 		$items = array();
 		foreach($dataSources as $ds){
 			$item = array();

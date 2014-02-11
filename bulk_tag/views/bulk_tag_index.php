@@ -1,10 +1,10 @@
 <?php $this->load->view('header'); ?>
 <div ng-app="bulk_tag_app">
+	<?php foreach($dataSources as $d): ?>
+	<div class="ds-restrict" ds-key="<?php echo $d['key'] ?>"></div>
+	<?php endforeach; ?>
 	<div ng-view></div>
 </div>
-
-
-
 
 <div id="index_template" class="hide">
 	<div class="content-header">
@@ -12,7 +12,6 @@
 	</div>
 	<div id="breadcrumb" style="clear:both;">
 		<?php echo anchor(registry_url('auth/dashboard'), '<i class="icon-home"></i> Home'); ?>
-		<?php echo anchor(apps_url('theme_cms'), 'Theme CMS'); ?>
 		<a href="#/" class="current">Bulk Tagging Tool</a>
 	</div>
 	<div class="container-fluid">
@@ -35,23 +34,28 @@
 								<button type="submit" class="btn">Search</button>
 								<input type="text" class="input-medium search-query" placeholder="Keywords" ng-model="search_query" ui-keypress="{13:'search()'}">
 							</div>
+							<a href="" class="btn btn-link" ng-click="showHidden=!showHidden" style="float:right;">Show Hidden Filters</a>
 						</form>
 					</div>
 					<div class="widget-content">
-						<div class="input-prepend input-append" ng-repeat="f in filters">
+						<div class="input-prepend input-append" ng-repeat="f in filters" ng-show="!f.disable || showHidden">
 							<div class="btn-group" style="display:inline-block;">
-								<button class="btn dropdown-toggle" data-toggle="dropdown">{{f.name}} <span class="caret"></span></button>
+								<button class="btn dropdown-toggle" data-toggle="dropdown" ng-disabled="f.disable">{{f.name}} <span class="caret"></span></button>
 								<ul class="dropdown-menu">
 									<li ng-repeat="j in available_filters"><a href="" ng-click="setFilterType(f, j.value)">{{j.title}}</a></li>
 								</ul>
 							</div>
-							<input id="{{f.id}}" type="text" ng-model="f.value" typeahead="c.value as c.label for c in suggest(f.name, f.value)" ui-keypress="{13:'search()'}">
-							<a href="" class="btn" ng-click="removeFromList(filters, $index)"><i class="icon icon-remove"></i></a>
+							<input id="{{f.id}}" type="text" ng-model="f.value" typeahead="c.value as c.label for c in suggest(f.name, f.value)" ui-keypress="{13:'search()'}" ng-disabled="f.disable">
+							<a href="" class="btn" ng-click="removeFromList(filters, $index)" ng-show="!f.disable"><i class="icon icon-remove"></i></a>
 							<div mapwidget ng-show="f.name=='spatial'"></div>
 						</div>
 
 						<hr>
 						<a class="btn btn-small" ng-click="addFilter()"><i class="icon-plus"></i> Add Filter</a>
+						<hr>
+						<div ng-show="hiddenDS" class="well">
+							Your search is restricted to {{hiddenDS}} data sources. <a href="" class="btn btn-link" ng-click="showHidden=!showHidden">Show Hidden Filters</a>
+						</div>
 					</div>
 				</div>
 

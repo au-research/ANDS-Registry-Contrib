@@ -1,0 +1,27 @@
+<?php
+
+class Bulk_tag extends MX_Controller {
+	function index(){
+		$data['title'] = 'Bulk Tagging Tool';
+		$data['scripts'] = array('bulk_tag_app');
+		$data['js_lib'] = array('core', 'angular', 'select2', 'location_capture_widget', 'googleapi', 'google_map');
+
+		$this->load->model("registry/data_source/data_sources","ds");
+	 	$dataSources = $this->ds->getOwnedDataSources();
+		$items = array();
+		foreach($dataSources as $ds){
+			$item = array();
+			$item['title'] = $ds->title;
+			$item['key'] = $ds->key;
+			array_push($items, $item);
+		}
+		$data['dataSources'] = $items;
+
+		$this->load->view('bulk_tag_index', $data);
+	}
+
+	function __construct(){
+		parent::__construct();
+		acl_enforce('ORCA_TAG_MANAGER');
+	}
+}
