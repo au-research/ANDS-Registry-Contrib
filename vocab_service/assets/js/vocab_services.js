@@ -594,7 +594,7 @@ function bindVocabVersioning(view){
 		click:function(){
 			var format_id = $(this).attr('format_id');
 			//console.log(format_id);
-			window.open(base_url+'vocab_service/downloadFormat/'+format_id, '_blank');
+			window.open('vocab_service/downloadFormat/'+format_id, '_blank');
 		}
 	});
 

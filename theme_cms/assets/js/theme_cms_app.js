@@ -24,7 +24,6 @@ angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSa
 					return response.data;
 				});
 				return promise;
-				
 			},
 			savePage: function(postData){
 				var promise = $http.post(apps_url+'theme_cms/save_page', postData).then(function(response){
