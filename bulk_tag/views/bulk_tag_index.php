@@ -1,8 +1,10 @@
 <?php $this->load->view('header'); ?>
 <div ng-app="bulk_tag_app">
+	<?php if(!$this->user->isSuperAdmin()): ?>
 	<?php foreach($dataSources as $d): ?>
 	<div class="ds-restrict" ds-key="<?php echo $d['key'] ?>"></div>
 	<?php endforeach; ?>
+	<?php endif; ?>
 	<div ng-view></div>
 </div>
 
@@ -24,7 +26,6 @@
 			</div>
 		</div>
 
-
 		<div class="row-fluid" ng-show="search_result">
 			<div class="span4">
 				<div class="widget-box">
@@ -34,7 +35,9 @@
 								<button type="submit" class="btn">Search</button>
 								<input type="text" class="input-medium search-query" placeholder="Keywords" ng-model="search_query" ui-keypress="{13:'search()'}">
 							</div>
+							<?php if(!$this->user->isSuperAdmin()): ?>
 							<a href="" class="btn btn-link" ng-click="showHidden=!showHidden" style="float:right;">Show Hidden Filters</a>
+							<?php endif; ?>
 						</form>
 					</div>
 					<div class="widget-content">
@@ -93,14 +96,21 @@
 						<div ng-hide="loading_tags">
 							<div class="btn-toolbar tags" ng-show="tags_result.data.length > 0">
 								<div class="btn-group" ng-repeat="tag in tags_result.data">
-									<button class="btn btn-small" ng-click="addFilter({name:'tag', value:tag.name})">{{tag.name}}</button>
-									<button class="btn btn-small btn-remove" ng-click="tagAction('remove', tag.name)"><i class="icon icon-trash"></i></button>
+									<button class="btn btn-small" ng-click="addFilter({name:'tag', value:tag.name})" ng-class="{'secret': 'btn-danger'}[tag.type]">{{tag.name}}</button>
+									<button class="btn btn-small btn-remove" ng-click="tagAction('remove', tag.name)" ng-class="{'secret': 'btn-danger'}[tag.type]"><i class="icon icon-trash" ng-class="{'secret': 'icon-white'}[tag.type]"></i></button>
 								</div>
 							</div>
 							<div class="alert alert-info" ng-show="tags_result.data.length == 0">No tags found in this search</div>
 							<hr>
 							<form class="form tag_form" ng-submit="tagAction('add')" id="add_form">
-								<div class="input-append">
+								<div class="input-prepend input-append">
+									<div class="btn-group" style="display:inline-block;">
+										<button class="btn dropdown-toggle" data-toggle="dropdown">{{newTagType}} <span class="caret"></span></button>
+										<ul class="dropdown-menu">
+											<li><a href="" ng-click="newTagType='public'">public</a></li>
+											<li><a href="" ng-click="newTagType='secret'">secret</a></li>
+										</ul>
+									</div>
 									<input type="text" ng-model="tagToAdd" typeahead="c.value as c.label for c in suggest('tag', tagToAdd) | filter:$viewValue | limitTo:5"/>
 									<button type="submit" class="btn" data-loading="Loading..."><i class="icon icon-plus"></i> Add Tag</button>
 								</div>
@@ -124,7 +134,8 @@
 								<li ng-repeat="ro in search_result.data.result.docs" class="ro_item" ng-click="select(ro)" ng-class="ro.selected">
 									<div class="ro_item_header">
 										<div class="ro_title"><a href="<?php echo registry_url('registry_object/view/{{ro.id}}'); ?>" tip="<b>{{ro.display_title}}</b> - {{ro.key}}" target="_blank">{{ro.display_title}} </a></div>
-										<img src="<?php echo asset_url('img/{{ro.class}}.png', 'base');?>" alt="" tip="{{ro.class}}" class="class_icon">
+										<i class="class_icon icon-class icon-{{ro.class}}" alt="" tip="{{ro.class}}"></i>
+										
 									</div>
 									<div class="ro_content">
 										<ul class="tags">
