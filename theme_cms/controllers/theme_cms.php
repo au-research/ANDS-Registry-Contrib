@@ -56,6 +56,18 @@ class Theme_cms extends MX_Controller {
 		echo $this->theme_pages->save($data);
 	}
 
+	public function generateSecretTag($slug){
+		header('Cache-Control: no-cache, must-revalidate');
+		header('Content-type: application/json');
+		$secretTag = 'themeSecret_'.$slug.'-'.rand(1,200);
+		$result = $this->db->get_where('tags', array('name'=>$secretTag));
+		if($result->num_rows > 0){
+			echo $this->generateSecretTag($slug);
+		}else{
+			echo $secretTag;
+		}
+	}
+
 	public function view($slug=''){
 		$data['title'] = 'Theme CMS';
 		$data['scripts'] = array('theme_cms');
@@ -69,6 +81,8 @@ class Theme_cms extends MX_Controller {
 		$pages = $this->theme_pages->get();
 		echo json_encode($pages);
 	}
+
+
 	
 	// Initialise
 	function __construct(){
