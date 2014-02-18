@@ -35,8 +35,10 @@ class Theme_pages extends CI_Model {
 			'img_src' => (isset($json->img_src) ? $json->img_src : ''),
 			'description' => (isset($json->desc) ? $json->desc : ''),
 			'visible' => (isset($json->visible) ? $json->visible : 0),
+			'secret_tag' => (isset($json->secret_tag) ? $json->secret_tag : ''),
 			'content' => $data
 		);
+
 		$this->db->where('slug', $json->slug);
 
 		$this->db->update($this->table, $update);
