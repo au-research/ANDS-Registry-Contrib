@@ -113,6 +113,16 @@
 									</div>
 									<input type="text" ng-model="tagToAdd" typeahead="c.value as c.label for c in suggest('tag', tagToAdd) | filter:$viewValue | limitTo:5"/>
 									<button type="submit" class="btn" data-loading="Loading..."><i class="icon icon-plus"></i> Add Tag</button>
+									<hr>
+									<label for="">Choose a theme page: </label>
+									<select ng-model="tagToAdd" ng-change="newTagType='secret'">
+										<option value=""></option>
+										<?php foreach($themepages as $t): ?>
+										<?php if($t['secret_tag']!=''): ?>
+										<option value="<?php echo $t['secret_tag'];?>"><?php echo $t['title']; ?></option>
+										<?php endif; ?>
+										<?php endforeach; ?>
+									</select>
 								</div>
 								<div id="status_message"></div>
 							</form>

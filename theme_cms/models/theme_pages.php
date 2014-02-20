@@ -35,11 +35,32 @@ class Theme_pages extends CI_Model {
 			'img_src' => (isset($json->img_src) ? $json->img_src : ''),
 			'description' => (isset($json->desc) ? $json->desc : ''),
 			'visible' => (isset($json->visible) ? $json->visible : 0),
+			'secret_tag' => (isset($json->secret_tag) ? $json->secret_tag : ''),
 			'content' => $data
 		);
+
 		$this->db->where('slug', $json->slug);
+
 		$this->db->update($this->table, $update);
 		if($update['visible']==1) $this->index($data);
+
+		if($json->secret_tag){
+			$secret_tag = $this->db->get_where('tags', array('name'=>$json->secret_tag));
+			if($secret_tag->num_rows() > 0){
+				$this->db->where('theme', $json->slug);
+				$this->db->update('tags', array('theme'=>''));
+				$this->db->where('name', $json->secret_tag);
+				$this->db->update('tags', array('theme'=>$json->slug));
+			}else{
+				$this->db->where('theme', $json->slug);
+				$this->db->update('tags', array('theme'=>''));
+				$this->db->insert('tags', array(
+					'name' => $json->secret_tag,
+					'type' => 'secret',
+					'theme' => $json->slug
+				));
+			}
+		}
 		echo 1;
 	}
 

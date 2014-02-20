@@ -53,7 +53,7 @@ function index($scope, $http, search_factory){
 			search_factory.tags_get_keys($scope.selected_ro).then(function(data){
 				var tags_array = [];
 				$.each(data, function(i, k){
-					tags_array.push({name:k});
+					tags_array.push(k);
 				});
 				$scope.tags_result = {data:tags_array};
 			});
@@ -74,7 +74,10 @@ function index($scope, $http, search_factory){
 	$scope.$watch('tags_result', function(newr, oldr){
 		if(newr && newr.data && newr.data.length > 0){
 			search_factory.tags_get_status($scope.tags_result).then(function(data){
-				$scope.tags_result.data = data;
+				console.log(data);
+				if(data.status=='OK') {
+					$scope.tags_result.data = data.content;
+				}
 			});
 		}
 	}, true);
