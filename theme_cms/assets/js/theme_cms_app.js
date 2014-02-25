@@ -30,6 +30,9 @@ angular.module('theme_cms_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSa
 					return response.data;
 				});
 				return promise;
+			},
+			generateSecretTag: function(slug){
+				return $http.get(apps_url+'theme_cms/generateSecretTag/'+slug).then(function(response){return response.data});
 			}
 		}
 	}).
@@ -393,6 +396,12 @@ function ViewPage($scope, $http, $routeParams, pages_factory, $location, search_
 		});
 		return filters;
 	}
+
+	$scope.generateSecretTag = function(){
+		pages_factory.generateSecretTag($scope.page.slug).then(function(data){
+			$scope.page.secret_tag = data;
+		});
+	}
 }
 
 function NewPageCtrl($scope, pages_factory, Slug, $location){
@@ -404,7 +413,8 @@ function NewPageCtrl($scope, pages_factory, Slug, $location){
 			slug: slug,
 			img_src: this.new_page_img_src,
 			desc: this.new_page_desc,
-			visible: 'true'
+			visible: 0,
+			secret_tag: ''
 		}
 		pages_factory.newPage(postData).then(function(data){
 			if(data==1){
