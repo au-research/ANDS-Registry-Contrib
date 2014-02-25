@@ -40,6 +40,8 @@
 		    //Text Settings
 		    search: true,
 		    pre_open_search: false,
+		    tooltip:false,
+		    info_box_class:'info-box',
 		    search_text: '<i class="icon-search"></i> Search',
 		    search_class: 'orcid_search btn btn-default btn-small',
 		    lookup: true,
@@ -64,7 +66,6 @@
 		    auto_close_search: true
 
 		};
-
 		//bind and merge the defaults with the given options
 		var settings;
 		var handler;
@@ -122,9 +123,11 @@
 
 		//use settings
 		if(settings.search){
-			var search_btn = $('<button>').addClass(settings.search_class).html(settings.search_text);
-			var search_html = settings.query_text+' <input type="text" class="orcid_search_input"/> <a class="search_orcid">'+settings.search_text_btn+'</a> <div class="orcid_search_result"></div> <a class="close_search">'+settings.close_search_text_btn+'</a>';
+			 
+			var search_btn = $('<button data-toggle="modal">').addClass(settings.search_class).html(settings.search_text);
+			var search_html = settings.query_text+' <input type="text" class="orcid_search_input"/> <a class="search_orcid">'+settings.search_text_btn+'</a><a class="close_search">'+settings.close_search_text_btn+'</a> <div class="orcid_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a>';
 			var search_div = $('<div>').addClass(settings.search_div_class).html(search_html);
+
 			if(!settings.pre_open_search) $(search_div).hide();
 			p.append(search_btn).append(search_div);
 			$(search_btn).on('click', function(e){
@@ -179,7 +182,7 @@
 					settings.lookup_success_handler(data, obj, settings);
 				}else{
 					_clean(obj, settings);
-					var html = _constructORCIDHTML(data['orcid-profile']);
+					var html = _constructORCIDHTML(data['orcid-profile'],settings);
 					var result_div = $('<div>').addClass(settings.result_success_class).html(html);
 					obj.p.append(result_div);
 					if(settings.post_lookup_success_handler && (typeof settings.post_lookup_success_handler ==='function')){
@@ -206,13 +209,13 @@
 	 * @param  {orcid['orcid-profile']} obj orcid-profile array of the returned object
 	 * @return {string}     HTML string
 	 */
-	function _constructORCIDHTML(obj) {
-		// console.log(obj);
+	function _constructORCIDHTML(obj,settings) {
+
 		var resStr = '';
-		resStr += "<div class='info-box'>"
+		resStr += "<div class='"+settings.info_box_class+"'>"
 		resStr += "<h6>ORCID Identifier</h6>";
 		var orcid = eval(obj['orcid-identifier']);
-		console.log(orcid);
+		
 		resStr += orcid.path;
 
 		if(obj['orcid-bio']['biography'])
@@ -273,10 +276,16 @@
 						resStr += "URL Name : " + obj['orcid-bio']['researcher-urls']['researcher-url'][i]['url-name'].value + "<br /> ";   					    			
 					count++;
 				}
-				if(obj['orcid-bio']['researcher-urls']['researcher-url'][count].url.value!='')
-					resStr += "URL : " + obj['orcid-bio']['researcher-urls']['researcher-url'][count].url.value + "<br />";
-				if(obj['orcid-bio']['researcher-urls']['researcher-url'][count]['url-name'].value!='')
-					resStr += "URL Name : " + obj['orcid-bio']['researcher-urls']['researcher-url'][count]['url-name'].value + "<br />";   					    		
+				if(obj['orcid-bio']['researcher-urls']['researcher-url'][count].url)
+				{
+					if(obj['orcid-bio']['researcher-urls']['researcher-url'][count].url.value!='')
+						resStr += "URL : " + obj['orcid-bio']['researcher-urls']['researcher-url'][count].url.value + "<br />";
+				}
+				if(obj['orcid-bio']['researcher-urls']['researcher-url'][count]['url-name'])
+				{
+					if(obj['orcid-bio']['researcher-urls']['researcher-url'][count]['url-name'].value!='')
+						resStr += "URL Name : " + obj['orcid-bio']['researcher-urls']['researcher-url'][count]['url-name'].value + "<br />";   
+				}				    		
 			} 					    					    					    						    	
 		resStr += "</div>"
 		return resStr;
@@ -317,11 +326,13 @@
 						if(data['orcid-search-results']){
 							var html='<ul>';
 							$.each(data['orcid-search-results']['orcid-search-result'], function(){
+								var titleStr = "";
+								if(settings.tooltip) titleStr = 'title="'+_constructORCIDHTML(this['orcid-profile'],settings)+'"';
 								var orcid = this['orcid-profile']['orcid-identifier'].path;
 								var given = this['orcid-profile']['orcid-bio']['personal-details']['given-names'].value || '';
 								var family = this['orcid-profile']['orcid-bio']['personal-details']['family-name'].value || '';
 								html+='<li>';
-								html+='<a class="select_orcid_search_result" orcid-id="'+orcid+'">'+given+' '+family+'</a>';
+								html+='<a class="select_orcid_search_result preview" '+titleStr+' orcid-id="'+orcid+'">'+given+' '+family+'</a>';
 								html+='</li>';
 							});
 							html+='</ul>';
@@ -335,7 +346,30 @@
 						_lookup(obj, settings);
 						if(settings.auto_close_search) _search_form(obj, settings);
 					});
-					
+					if(settings.tooltip){
+						$('.preview').each(function(){       
+   								$(this).qtip({
+       							 content: {
+            						text: $(this).attr('title'),
+            					},
+       							position: {
+           						 	my: 'left center',
+          						  	at: 'right center',
+           						 	viewport: $(window)
+        						},
+        						show: {
+            						event: 'mouseover',
+        						},
+        						hide: {
+            						event: 'mouseout'
+        						},
+        						style: {
+            						classes: 'ui-tooltip-light ui-tooltip-shadow orcidPreview',
+            						width: 550
+       							 }
+    							}); 
+    					});
+					}
 				},
 				error: function(xhr){
 					if(settings.error_handler && (typeof settings.error_handler === 'function')){
@@ -365,8 +399,10 @@
 	}
 	
 	//catch all .orcid_widget and apply orcid_widget() with default settings on
+
 	$('.orcid_widget').each(function(){
 	   	var elem = $(this);
 	   	var widget = elem.orcid_widget();
     });
+
 })( jQuery );
