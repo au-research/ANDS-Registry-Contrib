@@ -137,7 +137,7 @@ class Mydois extends MX_Controller {
 		acl_enforce('DOI_USER');
 
 		$data['js_lib'] = array('core');
-		$data['scripts'] = array();
+		$data['scripts'] = array('mydois');
 		$data['title'] = 'DOI Query Tool';
 		
 		// Validate the appId
@@ -210,6 +210,29 @@ class Mydois extends MX_Controller {
 
 	}
 	
+
+	function runDoiLinkChecker()
+	{
+		header('Content-Type: application/json');
+		acl_enforce('DOI_USER');
+		$appId = $this->input->get_post('app_id');
+		$doi_db = $this->load->database('dois', TRUE);
+		if (!$appId) throw new Exception ('Invalid App ID'); 
+		$query = $doi_db->where('app_id',$appId)->select('*')->get('doi_client');
+		if (!$client_obj = $query->result()) throw new Exception ('Invalid App ID');  
+		$client_obj = array_pop($client_obj);
+		$client_id = $client_obj->client_id;
+		$pythonBin = $this->config->item('PYTHON_BIN');
+		$doiLinkChgeckerScrpt = $this->config->item('DOI_LINK_CHECKER_SCRPT');
+		$command = escapeshellcmd($pythonBin.' '.$doiLinkChgeckerScrpt.' -c '.$client_id);
+		$result = shell_exec($command);
+		$message = '<div>'.$result.'</div>';
+		$message .=  '<p class="alert">An Email was sent to: ('.$client_obj->client_contact_email.') and an activity was logged containing the result.</p>';
+		$data['status'] = 'SUCCESS';
+		$data['message'] = $message;
+		echo json_encode($data);
+	}
+
 	function getDoiXml()
 	{
 		acl_enforce('DOI_USER');
