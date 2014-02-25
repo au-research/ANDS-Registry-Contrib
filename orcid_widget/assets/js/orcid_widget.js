@@ -124,8 +124,8 @@
 		//use settings
 		if(settings.search){
 			 
-			var search_btn = $('<button data-toggle="modal">').addClass(settings.search_class).html(settings.search_text);
-			var search_html = settings.query_text+' <input type="text" class="orcid_search_input"/> <a class="search_orcid">'+settings.search_text_btn+'</a><a class="close_search">'+settings.close_search_text_btn+'</a> <div class="orcid_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a>';
+			var search_btn = $('<button>').addClass(settings.search_class).html(settings.search_text);
+			var search_html = settings.query_text+' <input type="text" class="orcid_search_input"/> <a class="search_orcid">'+settings.search_text_btn+'</a><div class="orcid_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a>';
 			var search_div = $('<div>').addClass(settings.search_div_class).html(search_html);
 
 			if(!settings.pre_open_search) $(search_div).hide();
