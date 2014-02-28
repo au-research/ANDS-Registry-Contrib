@@ -1,14 +1,15 @@
 <?php
 	
-	class Doitasks extends CI_Model {
+class Doitasks extends CI_Model {
 	private $_CI; 
+	const DATACITE_WAIT_TIMEOUT_SECONDS = 5;
   
     function __construct()
     {
         // Call the Model constructor
         parent::__construct();
- 		$this->_CI =& get_instance();       
-        $this->doi_db = $this->load->database('dois', TRUE);
+ 		$this->_CI =& get_instance();
+ 		$this->doi_db = $this->load->database('dois', TRUE);
     }
 
 	function putxml(){
@@ -795,6 +796,69 @@
 		echo $outstr;		
 		
 	}
+
+
+	/**
+	 * Check the availability of the DOI service and upstream DataCite service
+	 * Note: this is an indication of service availability, not a guarantee
+	 *       that subsequent mints will be processed successfully. 
+	 *
+	 * @author Ben Greenwood <ben.greenwood@anu.edu.au>
+	 */
+	function status()
+	{	
+		// XXX: These parameter getters should be in a constructor somewhere 
+		$response_type = $this->input->get('response_type') ?: "string";
+		$api_version = $this->input->get('api_version') ?: "1.0";
+
+		$response_status = true;
+		$timer_start = microtime(true);
+
+		// Ping the local DOI database
+		if (!$this->doi_db->simple_query("SELECT 1;"))
+		{
+			$response_status = false;
+		}
+
+		// Ping DataCite DOI HTTPS service
+		if (!$this->_isDataCiteAlive(self::DATACITE_WAIT_TIMEOUT_SECONDS))
+		{
+			$response_status = false;
+		}
+
+		// Send back our response
+		if ($response_status)
+		{
+			$response_time = round(microtime(true) - $timer_start, 3) * 1000;
+			echo doisGetUserMessage("MT090", NULL, $response_type, NULL, "(took " . $response_time . "ms)");
+			return;
+		}
+		else
+		{
+			echo doisGetUserMessage("MT091", NULL, $response_type);
+			return;
+		}
+
+
+	}	
+
+	/* Ping the DataCite HTTP API, timeout after ~5 seconds (or other if specified) */
+	private function _isDataCiteAlive($timeout = 5)
+	{
+		$curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, gDOIS_SERVICE_BASE_URI);
+        curl_setopt($curl, CURLOPT_FILETIME, true);
+        curl_setopt($curl, CURLOPT_NOBODY, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $timeout);
+		curl_setopt($curl, CURLOPT_TIMEOUT, $timeout);
+		curl_exec($curl);
+
+		return !(curl_errno($curl) || curl_getinfo($curl, CURLINFO_HTTP_CODE) != "200");
+	}
+
+
+
 	
 	function checkurl(){	
 		$unavailableCount = 0;
@@ -958,5 +1022,4 @@
 
 	 		
 	}   
-	}
- ?>
+}
