@@ -96,7 +96,7 @@ class Doitasks extends CI_Model {
 		{
 			$this->debugOn();
 		}		
-		//$app_id = $this->input->get('app_id');		//passed as a parameter
+	
 		$app_id = $this->getAppId();
 		if(substr($app_id,0,4)=='TEST')
 		{
@@ -133,12 +133,12 @@ class Doitasks extends CI_Model {
 		{
 			$client_id = checkDoisValidClient($ip,$app_id);
 
-			if(!$client_id)
+			if($client_id===false)
 			{
 				$errorMessages = doisGetUserMessage("MT009", $doiValue,$response_type,$app_id, $verbosemessage,$urlValue);
 
 			}else{				
-				if(!checkDoisClientDoi($doiValue,$client_id))
+				if(checkDoisClientDoi($doiValue,$client_id)===false)
 				{
 					$errorMessages = doisGetUserMessage("MT008", $doiValue,$response_type,$app_id, $verbosemessage,$urlValue);
 				} 				
@@ -150,15 +150,14 @@ class Doitasks extends CI_Model {
 
 
 		if($doidata->num_rows() > 0){
-			//we need to get the xml if that is to be updated as well
-			//if($_POST){
-				//$xml = trim(implode($_POST));				// passed as posted content
-			//}
+
 			$xml = $this->getXmlInput();
+
 			//first up, lets check that this client is permitted to update this doi.
 
 			if(isset($xml) && $xml) // if the client has posted xml to be updated
 			{
+			
 				$doiObjects = new DOMDocument();
 						
 				$result = $doiObjects->loadXML($xml);
@@ -168,6 +167,7 @@ class Doitasks extends CI_Model {
 				if( $errors )
 				{
 					$errorMessages = "Document Load Error: ".$errors['message']."\n";
+
 				}
 				else 
 				{
@@ -190,7 +190,7 @@ class Doitasks extends CI_Model {
 					$xml = $doiObjects->saveXML();
 
 					$errors = error_get_last();
-					if( $errors )
+					if( $errors || !$result)
 					{
 						$verbosemessage = "Document Validation Error: ".$errors['message']."\n";						
 						$errorMessages = doisGetUserMessage("MT007", doiValue,$response_type,$app_id, $verbosemessage,$urlValue);
@@ -199,10 +199,32 @@ class Doitasks extends CI_Model {
 			}
 			else
 			{
-				$xml = $doidata->row();
-				$xml = $xml->datacite_xml;
+				$xml_row = $doidata->row();
+				$xml = $xml_row->datacite_xml;
 				$doiObjects = new DOMDocument();
-				$doiObjects->loadXML($xml);	
+				$result = $doiObjects->loadXML($xml);
+				$errors = error_get_last();
+			
+				if( $errors )
+				{
+					$errorMessages = "Document Load Error: ".$errors['message']."\n";
+				}else{
+					error_reporting(0);
+					// Create temporary file and save manually created DOMDocument.
+					$tempFile = "/tmp/" . time() . '-' . rand() . '-document.tmp';	
+					  
+					$doiObjects->save($tempFile);	
+					$doiObjects = new DOMDocument();			 
+					// Create temporary DOMDocument and re-load content from file.
+
+					$doiObjects = new DOMDocument();
+					$doiObjects->load($tempFile);
+					if (is_file($tempFile))
+					{
+						unlink($tempFile);
+					}
+
+				}
 			}
 			
 			if( $errorMessages == '' )
@@ -278,10 +300,8 @@ class Doitasks extends CI_Model {
 	}
 	
 	function mint(){
-		global $dataciteSchema;
-		global $api_version;	
-		global $gDOIS_PREFIX_TYPES;	
-
+	
+		$dataciteSchema = $this->config->item('gCMD_SCHEMA_URIS');
 
 		if ( isset($_SERVER["HTTP_X_FORWARDED_FOR"]) )    {
 			$ip=$_SERVER["HTTP_X_FORWARDED_FOR"];
@@ -314,17 +334,6 @@ class Doitasks extends CI_Model {
 			$this->debugOn();
 		}
 		
-	/*	$app_id = $this->input->get('app_id');		//passed as a parameter
-		//or app_id might be passed as part of the authstr
-		if(!$app_id)
-		{
-   			$shared_secret = (str_replace("Basic ",'',$_SERVER['REDIRECT_HTTP_AUTHORIZATION']));
-   			if($shared_secret)
-   			{
-   				$theapp_id = explode(":",base64_decode($shared_secret));
-   				$app_id = $theapp_id[0];
-   			} 			
-		} */
 		$app_id = $this->getAppId();
 		if(substr($app_id,0,4)=='TEST')
 		{
@@ -351,7 +360,7 @@ class Doitasks extends CI_Model {
 		if($errorMessages == '')
 		{
 			$client_id = checkDoisValidClient($ip,trim($app_id));
-			if(!$client_id)
+			if($client_id===false)
 			{
 				$verbosemessage = 'Client with app_id '.$app_id.' from ip address '.$ip. ' is not a registered doi client.';
 				$errorMessages = doisGetUserMessage("MT009", $doi_id=NULL, $response_type,$app_id, $verbosemessage,$urlValue);
@@ -459,7 +468,7 @@ class Doitasks extends CI_Model {
 				$xml = $doiObjects->saveXML();
 			
 				$errors = error_get_last();
-				if( $errors )
+				if( $errors || !$result)
 				{
 					$verbosemessage = "Document Validation Error: ".$errors['message'];
 					$errorMessages = doisGetUserMessage("MT006", $doi_id=NULL, $response_type, $app_id, $verbosemessage,$urlValue);
@@ -578,7 +587,7 @@ class Doitasks extends CI_Model {
 		if($errorMessages =='')
 		{
 		$client_id = checkDoisValidClient($ip,$app_id);
-		if(!$client_id)
+		if($client_id===false)
 		{
 			$verbosemessage = '';
 			$errorMessages = doisGetUserMessage("MT009", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
@@ -719,7 +728,7 @@ class Doitasks extends CI_Model {
 		if($errorMessages =='')
 		{
 		$client_id = checkDoisValidClient($ip,$app_id);
-		if(!$client_id)
+		if($client_id===false)
 		{
 			$verbosemessage = '';
 			$errorMessages = doisGetUserMessage("MT009", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
@@ -960,6 +969,10 @@ class Doitasks extends CI_Model {
     	elseif(str_replace("kernel-2.2","",$theSchemaLocation)!=$theSchemaLocation)
     	{
     		return "2.2";
+    	}
+    	elseif(str_replace("kernel-3","",$theSchemaLocation)!=$theSchemaLocation)
+    	{
+    		return "3";
     	}
     	else 
     	{
