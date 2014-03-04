@@ -25,6 +25,6 @@ class Bulk_tag extends MX_Controller {
 
 	function __construct(){
 		parent::__construct();
-		acl_enforce('ORCA_TAG_MANAGER');
+		acl_enforce('ORCA_SOURCE_ADMIN');
 	}
 }
