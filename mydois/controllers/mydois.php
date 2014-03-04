@@ -223,8 +223,8 @@ class Mydois extends MX_Controller {
 		$client_obj = array_pop($client_obj);
 		$client_id = $client_obj->client_id;
 		$pythonBin = $this->config->item('PYTHON_BIN');
-		$doiLinkChgeckerScrpt = $this->config->item('DOI_LINK_CHECKER_SCRPT');
-		$command = escapeshellcmd($pythonBin.' '.$doiLinkChgeckerScrpt.' -c '.$client_id);
+		$doiLinkCheckerScript = $this->config->item('DOI_LINK_CHECKER_SCRIPT');
+		$command = escapeshellcmd($pythonBin.' '.$doiLinkCheckerScript.' -c '.$client_id);
 		$result = shell_exec($command);
 		$message = '<div>'.$result.'</div>';
 		$message .=  '<p class="alert">An Email was sent to: ('.$client_obj->client_contact_email.') and an activity was logged containing the result.</p>';

@@ -7,7 +7,9 @@ $(document).on('click', '#linkChecker', function(){
 		type: 'POST',
 		data: {app_id:app_id},
 		success: function(data){
-			$('#viewLinkCheckerLogModal .modal-body').html(data.message);																				
+			if(data.status=='SUCCESS'){
+				$('#viewLinkCheckerLogModal .modal-body').html(data.message);																				
+			}
 		},
 	});
 });
