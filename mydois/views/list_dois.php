@@ -26,9 +26,10 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 				
 				    <a class="brand" href="<?=base_url('mydois');?>">DOI Query Tool</a>
 				    <ul class="nav pull-right">
-				      <li class="active"><a href="#">List My DOIs</a></li>
-				      <li><?=anchor('mydois/getActivityLog?app_id=' . rawurlencode($client->app_id), 'View Activity Log', array("role"=>"button", "data-target"=>"#viewActivityLogModal", "data-toggle"=>"modal"));?></li>
-				      <li><?=anchor('mydois/getAppIDConfig?app_id=' . rawurlencode($client->app_id), 'App ID Configuration', array("role"=>"button", "data-target"=>"#viewAppIDConfigModal", "data-toggle"=>"modal"));?></li>
+				      	<li class="active"><a href="#">List My DOIs</a></li>
+				      	<li><?=anchor('mydois/getActivityLog?app_id=' . rawurlencode($client->app_id), 'View Activity Log', array("role"=>"button", "data-target"=>"#viewActivityLogModal", "data-toggle"=>"modal"));?></li>
+				      	<li><?=anchor('mydois/getAppIDConfig?app_id=' . rawurlencode($client->app_id), 'App ID Configuration', array("role"=>"button", "data-target"=>"#viewAppIDConfigModal", "data-toggle"=>"modal"));?></li>
+				      	<li><a href="javascript:;" id="linkChecker" role="button" app_id="<?= rawurlencode($client->app_id) ?>"?>Check DOI Links</a></li>
 				    </ul>
 				
 				</div>
@@ -127,6 +128,22 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3>Activity Log for <?=$client->client_name;?> <small>(<?=$client->app_id;?>)</small></h3>
+  </div>
+  <div class="modal-body">
+    <p>Loading...</p>
+    <div class="progress progress-striped active">
+		<div class="bar" style="width: 100%;"></div>
+	</div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+<div class="bigModal modal hide fade" id="viewLinkCheckerLogModal" tabindex="-1" role="dialog" aria-labelledby="viewLinkCheckerLogModal" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>DOI Broken Link Report for <?=$client->client_name;?> <small>(<?=$client->app_id;?>)</small></h3>
   </div>
   <div class="modal-body">
     <p>Loading...</p>
