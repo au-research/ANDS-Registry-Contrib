@@ -38,7 +38,7 @@
 						</thead>
 						<tbody>				
 							<tr>
-								<td colspan="2"><pre><?php print_r($authentication) ?></pre></td>
+								<td colspan="2"><pre><?php // print_r($authentication) ?></pre></td>
 							</tr>																									
 						</tbody>
 						<thead>
@@ -51,7 +51,33 @@
 						</thead>
 						<tbody>				
 							<tr>
-								<td colspan="2"><pre><?php print_r($valid_xml) ?></pre></td>
+								<td colspan="2"><pre><?php // print_r($valid_xml) ?></pre></td>
+							</tr>																									
+						</tbody>
+						<thead>
+							<tr>
+								<th>
+									Version Service points 
+								</th>
+
+							</tr>
+						</thead>
+						<tbody>				
+							<tr>
+								<td colspan="2"><pre><?php //print_r($service_point) ?></pre></td>
+							</tr>																									
+						</tbody>
+						<thead>
+							<tr>
+								<th>
+									Result type
+								</th>
+
+							</tr>
+						</thead>
+						<tbody>				
+							<tr>
+								<td colspan="2"><pre><?php print_r($result_type) ?></pre></td>
 							</tr>																									
 						</tbody>
 						</table>
