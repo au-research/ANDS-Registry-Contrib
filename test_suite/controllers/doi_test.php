@@ -23,13 +23,9 @@ class Doi_test extends MX_Controller {
 
 		$doiversion_service_points = array('v1.0'=>'https://services.ands.org.au/home/dois/doi_' , 'v1.1'=>'https://services.ands.org.au/doi/1.1/', 'test' => apps_url().'/mydois/');
 
-		/* first we mint a DOI using the latest version of the CMD API*/
-		//$testDOI = test_mint($app_id,$shared_secret,$goodurl);
-
-		$testDOI = '10.5072/00/530FB71A47EFD';
 		$validxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 <resource xmlns="http://datacite.org/schema/kernel-2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-2.1 http://schema.datacite.org/meta/kernel-2.1/metadata.xsd">
-  <identifier identifierType="DOI">'.$testDOI.'</identifier>
+  <identifier identifierType="DOI"></identifier>
   <creators>
     <creator>
       <creatorName>Woods, Liz</creatorName>
@@ -44,7 +40,7 @@ class Doi_test extends MX_Controller {
 
 $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 <resource xmlns="http://datacite.org/schema/kernel-2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-2.1 http://schema.datacite.org/meta/kernel-2.1/metadata.xsd">
-  <identifier identifierType="DOI">'.$testDOI.'</identifier>
+  <identifier identifierType="DOI">adoitotest</identifier>
   <anelement>dsfdsfgS</anelement>
   <creators>
     <creator>
@@ -58,28 +54,61 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
   <publicationYear>2014</publicationYear>
 </resource>';
 
-
-
-
-		/* Now use the just minted test DOI to test autentication function using the update DOI API call */
-		$this->load->library('unit_test');
-		/**
-		 * A series of test case
-		 * @var in the form of array(test_name, 1st argument, 2nd argument, expected_result)
-		 */
 		$requestURI = $doiversion_service_points['v1.1'];
 		$requestURI = $doiversion_service_points['test'];
 		$v1_service_url = $doiversion_service_points['v1.0'];
 
-		$data['authentication'] = $this->test_doi_authentication($app_id,$incorrect_app_id,$shared_secret, $incorrect_shared_secret,$url,$testDOI,$requestURI);
-		unset($this->unit->results);
-		$data['valid_xml'] = $this->test_doi_xml($app_id,$shared_secret,$url,$testDOI,$validxml,$invalidxml,$requestURI);
-		unset($this->unit->results);
-		$data['service_point'] = $this->test_doi_service_point($app_id,$shared_secret,$url,$testDOI,$validxml,$v1_service_url,$requestURI);
-		unset($this->unit->results);
-		$data['result_type'] = $this->test_result_type($app_id,$shared_secret,$url,$testDOI,$validxml,$requestURI);		
-		$this->load->view('doi_test',$data);
+		/* first we mint a DOI using the latest version of the CMD API*/
 
+		$testDOI = $this->test_mint($app_id,$shared_secret,$url,$requestURI,'mint','json',$validxml);
+
+		if($testDOI)
+		{
+			$validxml = (str_replace('<identifier identifierType="DOI"></identifier>','<identifier identifierType="DOI">'.$testDOI.'</identifier>',$validxml));
+			
+			$data['test_mint']="   <span style='color: #0C0;'>Passed </span> ".$testDOI." minted successfully.";
+
+			/* Now use the just minted test DOI to test autentication function using the update DOI API call */
+
+			$this->load->library('unit_test');
+			/**
+		 	* A series of test case
+		 	* @var in the form of array(test_name, 1st argument, 2nd argument, 3rd argument, 4th argument, 5th argument, 6th argument, 7th argument, expected_result)
+		 	*/
+
+			$data['test_functions'] = $this->test_doi_api_functions($app_id,$shared_secret, $url,$testDOI,$validxml, $requestURI);
+			unset($this->unit->results);
+			$data['authentication'] = $this->test_doi_authentication($app_id,$incorrect_app_id,$shared_secret, $incorrect_shared_secret,$url,$testDOI,$requestURI);
+			unset($this->unit->results);
+			$data['valid_xml'] = $this->test_doi_xml($app_id,$shared_secret,$url,$testDOI,$validxml,$invalidxml,$requestURI);
+			unset($this->unit->results);
+			$data['service_point'] = $this->test_doi_service_point($app_id,$shared_secret,$url,$testDOI,$validxml,$v1_service_url,$requestURI);
+			unset($this->unit->results);
+			$data['response_type'] = $this->test_response_type($app_id,$shared_secret,$url,$testDOI,$validxml,$requestURI);		
+		}else{
+			$data['test_mint'] = "<span style='color: #C00;'>Failed </span> -  System could not perform initial mint - testing cannot continue.<br />";
+			$data['authentication'] = '';
+			$data['valid_xml'] = '';
+			$data['service_point'] = ''; 
+			$data['response_type'] =  '';
+		}
+
+		$this->load->view('doi_test',$data);
+	}
+
+	function test_doi_api_functions($app_id,$shared_secret, $url,$testDOI='',$validxml, $requestURI)
+	{
+		$test_cases = array(
+			array('Update a doi', $app_id, $shared_secret, $url,$testDOI,'update', 'string',$requestURI, '[MT002]'),			
+			array('Deactivate a doi', $app_id, $shared_secret, $url,$testDOI,'deactivate','string',$requestURI, '[MT003]'),
+			array('Activate a doi', $app_id, $shared_secret, $url,$testDOI,'activate','string',$requestURI, '[MT004]'),			
+		);
+
+		foreach($test_cases as $case){
+			$test = $this->test_doi_api($case[1], $case[2], $case[3],$case[4],$case[5],$case[6],$case[7]);
+			$this->unit->run($test, $case[8], $case[0].':  Expected message '. $case[8]);
+		} 
+		return $this->unit->report(); 
 
 	}
 
@@ -93,7 +122,7 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 
 		foreach($test_cases as $case){
 			$test = $this->test_doi_api($case[1], $case[2], $case[3],$case[4],$case[5],$case[6],$case[7]);
-			$this->unit->run($test, $case[8], $case[0].':  Expected message'. $case[8]);
+			$this->unit->run($test, $case[8], $case[0].':  Expected message '. $case[8]);
 		} 
 		return $this->unit->report(); 
 
@@ -112,7 +141,7 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 
 		foreach($test_xml_cases as $case){
 			$test = $this->test_doi_api($case[1], $case[2], $case[3],$case[4],$case[5],$case[6],$case[7],$case[8]);
-			$this->unit->run($test, $case[9], $case[0].':  Expected message'. $case[9]);
+			$this->unit->run($test, $case[9], $case[0].':  Expected message '. $case[9]);
 		} 
 
 		return $this->unit->report(); 
@@ -122,37 +151,38 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 	{
 
 		$test_xml_cases = array(
-			array('Update a doi - v1.0 service url', $app_id, $shared_secret, $url,$testDOI,'update', 'string',$v1_service_url,$validxml, '[MT009]'),	
+			array('Update a doi - v1.0 service url', $app_id, $shared_secret, $url,$testDOI,'update', 'string',$v1_service_url,$validxml, '[MT002]'),	
 			array('Update a doi - v1.1 service url', $app_id, $shared_secret, $url,$testDOI,'update', 'string',$requestURI ,$validxml,'[MT002]'),	
 	
 		);
 
 		foreach($test_xml_cases as $case){
 			$test = $this->test_doi_api($case[1], $case[2], $case[3],$case[4],$case[5],$case[6],$case[7],$case[8]);
-			$this->unit->run($test, $case[9], $case[0].':  '.$case[7].' Expected message'. $case[9]);
+			$this->unit->run($test, $case[9], $case[0].':  '.$case[7].' Expected message '. $case[9]);
 		} 
 
 		return $this->unit->report(); 
 	}
 
-	function test_result_type($app_id,$shared_secret,$url,$testDOI,$validxml,$requestURI)
+	function test_response_type($app_id,$shared_secret,$url,$testDOI,$validxml,$requestURI)
 	{
 
 		$test_xml_cases = array(
-			array('Update a doi - v1.0 service url', $app_id, $shared_secret, $url,$testDOI,'update', 'string',$requestURI ,$validxml, '[MT002]'),	
-			array('Update a doi - v1.1 service url', $app_id, $shared_secret, $url,$testDOI,'update', 'json',$requestURI ,$validxml,'[MT002]'),	
-			//array('Update a doi - v1.1 service url', $app_id, $shared_secret, $url,$testDOI,'update', 'xml',$requestURI ,$validxml,'[MT002]'),		
+			array('String response type', $app_id, $shared_secret, $url,$testDOI,'update', 'string',$requestURI ,$validxml, '[MT002]'),	
+			array('json response type', $app_id, $shared_secret, $url,$testDOI,'update', 'json',$requestURI ,$validxml,'MT002'),	
+			array('XML response type', $app_id, $shared_secret, $url,$testDOI,'update', 'xml',$requestURI ,$validxml,'MT002'),		
 	
 		);
 
 		foreach($test_xml_cases as $case){
 			$test = $this->test_doi_api($case[1], $case[2], $case[3],$case[4],$case[5],$case[6],$case[7],$case[8]);
-			$this->unit->run($test, $case[9], $case[0].':  '.$case[7].' Expected message'. $case[9]);
+			$this->unit->run($test, $case[9], $case[0].':  '.$case[7].' Expected message '. $case[9]);
 		} 
 
 		return $this->unit->report(); 
 	}
-	function test_doi_api($app_id,$shared_secret,$url,$testDOI,$action,$result_type,$requestURI,$postdata='')
+
+	function test_doi_api($app_id,$shared_secret,$url,$testDOI,$action,$response_type,$requestURI,$postdata='')
 	{
 
 		$context  = array('Content-Type: application/xml;charset=UTF-8','Authorization: Basic '.base64_encode($app_id.":".$shared_secret));
@@ -161,7 +191,7 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 		{
 			$action= $action.".php";
 		}else{
-			$action = $action.".".$result_type;
+			$action = $action.".".$response_type;
 		}
 		$requestURI = $requestURI.$action.'/?url='.$url.'&app_id='.$app_id.'&doi='.$testDOI;
 		$newch = curl_init();
@@ -170,48 +200,27 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 		curl_setopt($newch, CURLOPT_POST, 1);
 		curl_setopt($newch, CURLOPT_POSTFIELDS,$postdata);				
 		curl_setopt($newch, CURLOPT_HTTPHEADER,$context);
+		curl_setopt($newch, CURLOPT_FOLLOWLOCATION, TRUE);
 
 		$result = curl_exec($newch);
 
 		$curlinfo = curl_getinfo($newch);
 		curl_close($newch);
 
-		/* if we identifiy that our request has been redirected, then lets request to the redirect */
-
-		if($curlinfo['redirect_url'])
-		{
-			$requestURI = $curlinfo['redirect_url'];
-
-			$newch2 = curl_init();
-			curl_setopt($newch2, CURLOPT_URL, $requestURI);
-			curl_setopt($newch2, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($newch2, CURLOPT_POST, 1);
-			curl_setopt($newch2, CURLOPT_POSTFIELDS,$postdata);				
-			curl_setopt($newch2, CURLOPT_HTTPHEADER,$context);
-
-			$result = curl_exec($newch2);
-
-			$curlinfo = curl_getinfo($newch2);
-
-			curl_close($newch2);
-		}
-
-		if($result_type=='string')
+		if($response_type=='string')
 		{
 			$message_code = substr($result,0,7);
-		}elseif($result_type=='json')
+
+		}elseif($response_type=='json')
 		{
 			$obj = json_decode( $result, true );
 			$message_code = $obj['response']['responsecode'];
 
-		}elseif($result_type=='xml')
+		}elseif($response_type=='xml')
 		{
-
 			$obj = simplexml_load_string($result);
+			$message_code = $obj->{'responsecode'};
 
-			//print_r($obj->{'responsecode'}[0]->text());
-
-			//$message_code = $obj->{'responsecode'}->{0};
 		}else
 		{
 			echo $result;
@@ -219,34 +228,15 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 
 		return $message_code;
 
-
 	}
 
-
-
-	function test_mint($app_id,$shared_secret,$url,$result_type,$postdata='')
+	function test_mint($app_id,$shared_secret,$url,$requestURI,$action,$response_type,$postdata)
 	{
 
 		$context  = array('Content-Type: application/xml;charset=UTF-8','Authorization: Basic '.base64_encode($app_id.":".$shared_secret));
-		//$context = array('Content-Type: application/xml;charset=UTF-8');		
-		$requestURI = 'http://devl.ands.org.au/workareas/liz/ands/apps/mydois/mint/?url='.$url.'&app_id='.$app_id;	
-
-		$postdata = 'xml=<?xml version="1.0" encoding="UTF-8"?>
-
-<resource xmlns="http://datacite.org/schema/kernel-2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-2.1 http://schema.datacite.org/meta/kernel-2.1/metadata.xsd">
-  <identifier identifierType="DOI"></identifier>
-  <creators>
-    <creator>
-      <creatorName>Woods, Liz</creatorName>
-    </creator>
-  </creators>
-  <titles>
-    <title>Data Test Example</title>
-  </titles>
-  <publisher>ANDS</publisher>
-  <publicationYear>2014</publicationYear>
-</resource>'; 
 	
+		$requestURI = $requestURI.$action.'.'.$response_type.'/?url='.$url.'&app_id='.$app_id;	
+
 		$newch = curl_init();
 		curl_setopt($newch, CURLOPT_URL, $requestURI);
 		curl_setopt($newch, CURLOPT_RETURNTRANSFER, true);
@@ -257,9 +247,13 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 		$result = curl_exec($newch);
 		$curlinfo = curl_getinfo($newch);
 		curl_close($newch);
-		return $result;
+
+		$obj = json_decode( $result, true );
+
+		$doi = $obj['response']['doi'];
+
+		return $doi;
 
 	}
-
 
 }

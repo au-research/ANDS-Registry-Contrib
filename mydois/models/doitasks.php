@@ -77,8 +77,7 @@ class Doitasks extends CI_Model {
 	}
 	
 	function update(){
-		global $dataciteSchema;
-		global $api_version;				
+			
 		$xml ='';	
 		$errorMessages = '';	
 		$notifyMessage = '';
@@ -536,9 +535,7 @@ class Doitasks extends CI_Model {
 	}
 	
 	function activate(){
-		global $api_version;
-		global $host, $doi_root;
-		$base_url	= 'http://'.$host.$doi_root;				
+			
 		$errorMessages = '';
 		$notifyMessage = '';
 		$outstr = '';
@@ -593,7 +590,7 @@ class Doitasks extends CI_Model {
 			$errorMessages = doisGetUserMessage("MT009", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
 
 		}else{				
-			if(!checkDoisClientDoi($doiValue,$client_id))
+			if(checkDoisClientDoi($doiValue,$client_id)===false)
 			{
 				$verbosemessage = '';
 				$errorMessages = doisGetUserMessage("MT008", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
@@ -679,7 +676,7 @@ class Doitasks extends CI_Model {
 	}
 	
 	function deactivate(){
-		global $api_version;			
+	//	global $api_version;			
 		$errorMessages = '';
 		$notifyMessage = '';
 		$outstr = '';
@@ -734,7 +731,7 @@ class Doitasks extends CI_Model {
 			$errorMessages = doisGetUserMessage("MT009", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
 
 		}else{				
-			if(!checkDoisClientDoi($doiValue,$client_id))
+			if(checkDoisClientDoi($doiValue,$client_id)===false)
 			{
 				$verbosemessage = '';
 				$errorMessages = doisGetUserMessage("MT008", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);

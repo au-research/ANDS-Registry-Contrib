@@ -28,6 +28,22 @@
 
 			    	<h3>Test results</h3>
 				    <table class="table table-condensed">
+				    	<thead>
+							<tr>
+								<th>
+									Basic function tests 
+								</th>
+
+							</tr>
+						</thead>
+						<tbody>				
+							<tr>
+								<td colspan="2"><pre><?php  print_r($test_mint) ?></pre></td>
+							</tr>	
+							<tr>
+								<td colspan="2"><pre><?php  print_r($test_functions) ?></pre></td>
+							</tr>																									
+						</tbody>
 						<thead>
 							<tr>
 								<th>
@@ -38,7 +54,7 @@
 						</thead>
 						<tbody>				
 							<tr>
-								<td colspan="2"><pre><?php // print_r($authentication) ?></pre></td>
+								<td colspan="2"><pre><?php  print_r($authentication) ?></pre></td>
 							</tr>																									
 						</tbody>
 						<thead>
@@ -51,7 +67,7 @@
 						</thead>
 						<tbody>				
 							<tr>
-								<td colspan="2"><pre><?php // print_r($valid_xml) ?></pre></td>
+								<td colspan="2"><pre><?php  print_r($valid_xml) ?></pre></td>
 							</tr>																									
 						</tbody>
 						<thead>
@@ -64,7 +80,7 @@
 						</thead>
 						<tbody>				
 							<tr>
-								<td colspan="2"><pre><?php //print_r($service_point) ?></pre></td>
+								<td colspan="2"><pre><?php print_r($service_point) ?></pre></td>
 							</tr>																									
 						</tbody>
 						<thead>
@@ -77,7 +93,7 @@
 						</thead>
 						<tbody>				
 							<tr>
-								<td colspan="2"><pre><?php print_r($result_type) ?></pre></td>
+								<td colspan="2"><pre><?php print_r($response_type) ?></pre></td>
 							</tr>																									
 						</tbody>
 						</table>
