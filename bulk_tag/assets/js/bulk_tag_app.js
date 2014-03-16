@@ -140,7 +140,11 @@ function index($scope, $http, search_factory){
 					}
 				});
 
-				if($scope.selected_ro.length == 0) $scope.tags_result = {data:$scope.facet_result.tag};
+				if ($scope.selected_ro.length == 0) {
+                    $scope.tags_result = {data:$scope.facet_result.tag};
+                } else {
+                    $scope.refreshSelectedFacet();
+                }
 				$scope.maxPage = Math.ceil($scope.search_result.data.numFound / $scope.perPage);
 			}
 		});
@@ -177,21 +181,21 @@ function index($scope, $http, search_factory){
 			var filters = $scope.constructSearchFilters();
 			if($scope.selected_ro.length > 0){
 				search_factory.tags_action_keys($scope.selected_ro, action, tag, $scope.newTagType).then(function(data){
-					$scope.tagToAdd = '';
-					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
+                    if(data.status=='ERROR') alert(data.message);
+                    $scope.tagToAdd = '';
+                    $('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
                     $scope.search();
 				});
 			}else{
 				if(action=='add') filters['rows'] = 99999;
 				search_factory.tags_action_solr(filters, action, tag, $scope.newTagType).then(function(data){
+                    if(data.status=='ERROR') alert(data.message);
 					$scope.tagToAdd = '';
 					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
                     $scope.search();
 				});
 			}
-            if( $scope.selected_ro.length ) {
-                $scope.refreshSelectedFacet();
-            }
+
 		}else{
 			$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
 		}
@@ -251,8 +255,8 @@ function index($scope, $http, search_factory){
 		return filters;
 	}
 
-	$scope.show = 10
-	$scope.filters = [],
+	$scope.show = 10;
+	$scope.filters = [];
 	$scope.currentPage = 1;
 	$scope.minpage = 'disabled';
 	$scope.perPage = 10;
