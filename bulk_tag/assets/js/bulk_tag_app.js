@@ -49,23 +49,27 @@ function index($scope, $http, search_factory){
 	$scope.selected_ro = [];
 	
 	$scope.$watch('selected_ro.length', function(){
-		if($scope.selected_ro.length > 0){
-			search_factory.tags_get_keys($scope.selected_ro).then(function(data){
-				var tags_array = [];
-				$.each(data, function(i, k){
-					tags_array.push(k);
-				});
-				$scope.tags_result = {data:tags_array};
-			});
-		}else{
-			if($scope.facet_result) $scope.tags_result = {data:$scope.facet_result.tag};
-			if($scope.search_result && $scope.search_result.data.result.docs){
-				$.each($scope.search_result.data.result.docs, function(){
-					this.selected = '';
-				});
-			}
-		}
+		$scope.refreshSelectedFacet();
 	});
+
+    $scope.refreshSelectedFacet = function(){
+        if($scope.selected_ro.length > 0){
+            search_factory.tags_get_keys($scope.selected_ro).then(function(data){
+                var tags_array = [];
+                $.each(data, function(i, k){
+                    tags_array.push(k);
+                });
+                $scope.tags_result = {data:tags_array};
+            });
+        }else{
+            if($scope.facet_result) $scope.tags_result = {data:$scope.facet_result.tag};
+            if($scope.search_result && $scope.search_result.data.result.docs){
+                $.each($scope.search_result.data.result.docs, function(){
+                    this.selected = '';
+                });
+            }
+        }
+    }
 
 	$scope.$watch('perPage', function(){
 		$scope.search();
@@ -74,7 +78,6 @@ function index($scope, $http, search_factory){
 	$scope.$watch('tags_result', function(newr, oldr){
 		if(newr && newr.data && newr.data.length > 0){
 			search_factory.tags_get_status($scope.tags_result).then(function(data){
-				console.log(data);
 				if(data.status=='OK') {
 					$scope.tags_result.data = data.content;
 				}
@@ -122,7 +125,7 @@ function index($scope, $http, search_factory){
 					$scope.facet_result = {};
 					for(var index in $scope.search_result.data.facet.facet_fields){
 						$scope.facet_result[index] = [];
-						for(i=0;i<$scope.search_result.data.facet.facet_fields[index].length;i+=2){
+						for(var i=0;i<$scope.search_result.data.facet.facet_fields[index].length;i+=2){
 							$scope.facet_result[index].push({
 								name: $scope.search_result.data.facet.facet_fields[index][i],
 								value: $scope.search_result.data.facet.facet_fields[index][i+1]
@@ -175,15 +178,20 @@ function index($scope, $http, search_factory){
 			if($scope.selected_ro.length > 0){
 				search_factory.tags_action_keys($scope.selected_ro, action, tag, $scope.newTagType).then(function(data){
 					$scope.tagToAdd = '';
-					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');$scope.search();
+					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
+                    $scope.search();
 				});
 			}else{
 				if(action=='add') filters['rows'] = 99999;
 				search_factory.tags_action_solr(filters, action, tag, $scope.newTagType).then(function(data){
 					$scope.tagToAdd = '';
-					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');$scope.search();
+					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
+                    $scope.search();
 				});
 			}
+            if( $scope.selected_ro.length ) {
+                $scope.refreshSelectedFacet();
+            }
 		}else{
 			$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
 		}
