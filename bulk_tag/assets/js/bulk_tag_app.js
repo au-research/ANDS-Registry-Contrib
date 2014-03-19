@@ -79,7 +79,13 @@ function index($scope, $http, search_factory){
 		if(newr && newr.data && newr.data.length > 0){
 			search_factory.tags_get_status($scope.tags_result).then(function(data){
 				if(data.status=='OK') {
-					$scope.tags_result.data = data.content;
+                    $.each($scope.tags_result.data, function(i, x){
+                        $.each(data.content, function(i, y){
+                            if (x.name== y.name){
+                                x.type = y.type;
+                            }
+                        });
+                    });
 				}
 			});
 		}
@@ -146,6 +152,7 @@ function index($scope, $http, search_factory){
                     $scope.refreshSelectedFacet();
                 }
 				$scope.maxPage = Math.ceil($scope.search_result.data.numFound / $scope.perPage);
+
 			}
 		});
 	}
@@ -171,6 +178,17 @@ function index($scope, $http, search_factory){
 		$('#add_form button').button('loading');$('#add_form input').attr('disabled', 'disabled');
 		var message = '';
 		var affected_num = ($scope.selected_ro.length > 0) ? $scope.selected_ro.length : $scope.search_result.data.numFound;
+
+        if($scope.selected_ro.length == 0){
+            if(action=='remove'){
+                $.each($scope.tags_result.data, function(){
+                   if(this.name==tag){
+                       affected_num = this.value;
+                       return false;
+                   }
+                });
+            }
+        }
 		if(action=='add'){
 			tag = $scope.tagToAdd;
 			message = 'Are you sure you want to add '+$scope.newTagType+' tag: ' + tag + ' to ' + affected_num + ' registry objects? ';
