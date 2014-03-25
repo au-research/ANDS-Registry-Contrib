@@ -106,6 +106,7 @@
 							<div class="alert alert-info" ng-show="tags_result.data.length == 0">No tags found in this search</div>
 							<hr>
 							<form class="form tag_form" ng-submit="tagAction('add')" id="add_form">
+								<div class="alert alert-info" ng-show="loading">Loading... Please wait</div>
 								<div class="input-prepend input-append">
 									<div class="btn-group" style="display:inline-block;">
 										<button class="btn dropdown-toggle" data-toggle="dropdown">{{newTagType}} <span class="caret"></span></button>

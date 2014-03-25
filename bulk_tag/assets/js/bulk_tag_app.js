@@ -175,7 +175,6 @@ function index($scope, $http, search_factory){
 	}
 
 	$scope.tagAction = function(action, tag){
-		$('#add_form button').button('loading');$('#add_form input').attr('disabled', 'disabled');
 		var message = '';
 		var affected_num = ($scope.selected_ro.length > 0) ? $scope.selected_ro.length : $scope.search_result.data.numFound;
 
@@ -196,12 +195,13 @@ function index($scope, $http, search_factory){
 			message = 'Are you sure you want to remove tag: ' + tag + ' from ' + affected_num + ' registry objects? ';
 		}
 		if(tag && confirm(message)){
+			$scope.loading = true;
 			var filters = $scope.constructSearchFilters();
 			if($scope.selected_ro.length > 0){
 				search_factory.tags_action_keys($scope.selected_ro, action, tag, $scope.newTagType).then(function(data){
                     if(data.status=='ERROR') alert(data.message);
                     $scope.tagToAdd = '';
-                    $('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
+					$scope.loading = false;
                     $scope.search();
 				});
 			}else{
@@ -209,13 +209,12 @@ function index($scope, $http, search_factory){
 				search_factory.tags_action_solr(filters, action, tag, $scope.newTagType).then(function(data){
                     if(data.status=='ERROR') alert(data.message);
 					$scope.tagToAdd = '';
-					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
+					$scope.loading = false;
                     $scope.search();
 				});
 			}
-
 		}else{
-			$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');
+			//nothing
 		}
 	}
 
@@ -281,6 +280,7 @@ function index($scope, $http, search_factory){
 	$scope.showHidden = false;
 	$scope.hiddenDS = 0;
 	$scope.newTagType = 'public';
+	$scope.loading = false;
 	// $scope.addFilter({name:'data_source_key', value:'acdata.unsw.edu.au'});
 	$('.ds-restrict').each(function(){
 		var k = $(this).attr('ds-key');
