@@ -15,6 +15,9 @@
 	<div id="breadcrumb" style="clear:both;">
 		<?php echo anchor(registry_url('auth/dashboard'), '<i class="icon-home"></i> Home'); ?>
 		<a href="#/" class="current">Bulk Tagging Tool</a>
+		<div class="pull-right">
+			<span class="label"><i class="icon-question-sign icon-white"></i> <a target="_blank" style="color:white;" href="http://services.ands.org.au/documentation/BulkTagHelp/"> Help</a></span>
+		</div>
 	</div>
 	<div class="container-fluid">
 		
