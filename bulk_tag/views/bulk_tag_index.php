@@ -99,7 +99,7 @@
 						<div ng-hide="loading_tags">
 							<div class="btn-toolbar tags" ng-show="tags_result.data.length > 0">
 								<div class="btn-group" ng-repeat="tag in tags_result.data">
-									<button class="btn btn-small" ng-click="addFilter({name:'tag', value:tag.name})" ng-class="{'secret': 'btn-warning'}[tag.type]">{{tag.name}} <small class="muted">({{tag.value}})</small></button>
+									<button class="btn btn-small" ng-click="addFilter({name:'tag', value:tag.name})" ng-class="{'secret': 'btn-warning'}[tag.type]">{{tag.name}} <small class="muted" ng-show="tag.value">({{tag.value}})</small></button>
 									<button class="btn btn-small btn-remove" ng-click="tagAction('remove', tag.name)" ng-class="{'secret': 'btn-warning'}[tag.type]"><i class="icon icon-trash" ng-class="{'secret': 'icon-white'}[tag.type]"></i></button>
 								</div>
 							</div>
