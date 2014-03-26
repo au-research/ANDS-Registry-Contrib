@@ -78,7 +78,17 @@ function doisGetUserMessage($responseCode, $doi_id,$response_type="string",$app_
 			$message = $verbosemessage;
 			$verbosemessage = strlen($verbosemessage) . " bytes";
 			$type = "success";					
-			break;			
+			break;		
+		case "MT090":
+			// Success response for status pings (verbose message should indicate ms turnaround time)
+			$message = "The rocket is ready to blast off -- all systems are go!";
+			$type = "success";
+			break;		
+		case "MT091":
+			// Failure response for status pings
+			$message = "Uh oh! DOI Service unavailable (unable to process upstream DOI request). Please try again in a few moments. ";
+			$type = "failure";					
+			break;		
 		default:
 			$message = "There has been an unidentified error processing your doi request. For more information please contact services@ands.org.au.";
 			$type = "failure";

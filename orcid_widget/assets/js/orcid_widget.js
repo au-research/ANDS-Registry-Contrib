@@ -215,7 +215,7 @@
 		resStr += "<div class='"+settings.info_box_class+"'>"
 		resStr += "<h6>ORCID Identifier</h6>";
 		var orcid = eval(obj['orcid-identifier']);
-		
+
 		resStr += orcid.path;
 
 		if(obj['orcid-bio']['biography'])

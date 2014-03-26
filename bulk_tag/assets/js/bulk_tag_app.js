@@ -7,20 +7,17 @@ angular.module('bulk_tag_app', ['slugifier', 'ui.sortable', 'ui.tinymce', 'ngSan
 			tags_get_solr: function(filters){
 				return promise = $http.post(real_base_url+'registry/services/registry/tags/solr/get', {'filters':filters}).then(function(response){ return response.data; });
 			},
-			tags_action_solr: function(filters, action, tag){
-				return promise = $http.post(real_base_url+'registry/services/registry/tags/solr/'+action, {'filters':filters, 'tag':tag}).then(function(response){ return response.data; });
+			tags_action_solr: function(filters, action, tag, tagType){
+				return promise = $http.post(real_base_url+'registry/services/registry/tags/solr/'+action, {'filters':filters, 'tag':tag, 'tag_type':tagType}).then(function(response){ return response.data; });
 			},
 			tags_get_keys: function(keys){
 				return promise = $http.post(real_base_url+'registry/services/registry/tags/keys/get', {'keys':keys}).then(function(response){ return response.data; });
 			},
-			tags_action_keys: function(keys, action, tag){
-				return promise = $http.post(real_base_url+'registry/services/registry/tags/keys/'+action, {'keys':keys, 'tag':tag}).then(function(response){ return response.data; });
+			tags_action_keys: function(keys, action, tag, tagType){
+				return promise = $http.post(real_base_url+'registry/services/registry/tags/keys/'+action, {'keys':keys, 'tag':tag, 'tag_type':tagType}).then(function(response){ return response.data; });
 			},
-			get_datasources_list: function(){
-				var promise = $http.get(real_base_url+'registry/services/registry/get_datasources_list').then(function(response){
-					return response.data;
-				});
-				return promise;
+			tags_get_status: function(tags){
+				return promise = $http.post(real_base_url+'registry/services/registry/tags_status/', {'tags':tags}).then(function(response){ return response.data; });	
 			}
 		}
 	}).
@@ -56,13 +53,13 @@ function index($scope, $http, search_factory){
 			search_factory.tags_get_keys($scope.selected_ro).then(function(data){
 				var tags_array = [];
 				$.each(data, function(i, k){
-					tags_array.push({name:k});
+					tags_array.push(k);
 				});
 				$scope.tags_result = {data:tags_array};
 			});
 		}else{
 			if($scope.facet_result) $scope.tags_result = {data:$scope.facet_result.tag};
-			if($scope.search_result.data.result.docs){
+			if($scope.search_result && $scope.search_result.data.result.docs){
 				$.each($scope.search_result.data.result.docs, function(){
 					this.selected = '';
 				});
@@ -73,6 +70,17 @@ function index($scope, $http, search_factory){
 	$scope.$watch('perPage', function(){
 		$scope.search();
 	});
+
+	$scope.$watch('tags_result', function(newr, oldr){
+		if(newr && newr.data && newr.data.length > 0){
+			search_factory.tags_get_status($scope.tags_result).then(function(data){
+				console.log(data);
+				if(data.status=='OK') {
+					$scope.tags_result.data = data.content;
+				}
+			});
+		}
+	}, true);
 
 	$scope.available_filters = [
 		{value:'class', title:'Class'},
@@ -98,6 +106,7 @@ function index($scope, $http, search_factory){
 		$scope.loading_search = true;
 
 		search_factory.search(filters).then(function(data){
+			
 			$scope.loading_search = false;
 			filter_query ='';
 			$.each(filters, function(i, k){
@@ -106,28 +115,31 @@ function index($scope, $http, search_factory){
 				}
 			});
 			$scope.search_result = {data:data, filter_query:filter_query};
-			//construct facet_fields for easy retrieval
-			if($scope.search_result.data.facet){
-				$scope.facet_result = {};
-				for(var index in $scope.search_result.data.facet.facet_fields){
-					$scope.facet_result[index] = [];
-					for(i=0;i<$scope.search_result.data.facet.facet_fields[index].length;i+=2){
-						$scope.facet_result[index].push({
-							name: $scope.search_result.data.facet.facet_fields[index][i],
-							value: $scope.search_result.data.facet.facet_fields[index][i+1]
-						});
+			if(data.result){
+				
+				//construct facet_fields for easy retrieval
+				if($scope.search_result.data.facet){
+					$scope.facet_result = {};
+					for(var index in $scope.search_result.data.facet.facet_fields){
+						$scope.facet_result[index] = [];
+						for(i=0;i<$scope.search_result.data.facet.facet_fields[index].length;i+=2){
+							$scope.facet_result[index].push({
+								name: $scope.search_result.data.facet.facet_fields[index][i],
+								value: $scope.search_result.data.facet.facet_fields[index][i+1]
+							});
+						}
 					}
 				}
+
+				$.each($scope.search_result.data.result.docs, function(){
+					if ($.inArray(this.key, $scope.selected_ro)!=-1) {
+						this.selected = 'ro_selected';
+					}
+				});
+
+				if($scope.selected_ro.length == 0) $scope.tags_result = {data:$scope.facet_result.tag};
+				$scope.maxPage = Math.ceil($scope.search_result.data.numFound / $scope.perPage);
 			}
-
-			$.each($scope.search_result.data.result.docs, function(){
-				if ($.inArray(this.key, $scope.selected_ro)!=-1) {
-					this.selected = 'ro_selected';
-				}
-			});
-
-			if($scope.selected_ro.length == 0) $scope.tags_result = {data:$scope.facet_result.tag};
-			$scope.maxPage = Math.ceil($scope.search_result.data.numFound / $scope.perPage);
 		});
 	}
 
@@ -154,20 +166,20 @@ function index($scope, $http, search_factory){
 		var affected_num = ($scope.selected_ro.length > 0) ? $scope.selected_ro.length : $scope.search_result.data.numFound;
 		if(action=='add'){
 			tag = $scope.tagToAdd;
-			message = 'Are you sure you want to add tag: ' + tag + ' to ' + affected_num + ' registry objects? ';
+			message = 'Are you sure you want to add '+$scope.newTagType+' tag: ' + tag + ' to ' + affected_num + ' registry objects? ';
 		}else{
 			message = 'Are you sure you want to remove tag: ' + tag + ' from ' + affected_num + ' registry objects? ';
 		}
 		if(tag && confirm(message)){
 			var filters = $scope.constructSearchFilters();
 			if($scope.selected_ro.length > 0){
-				search_factory.tags_action_keys($scope.selected_ro, action, tag).then(function(data){
+				search_factory.tags_action_keys($scope.selected_ro, action, tag, $scope.newTagType).then(function(data){
 					$scope.tagToAdd = '';
 					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');$scope.search();
 				});
 			}else{
 				if(action=='add') filters['rows'] = 99999;
-				search_factory.tags_action_solr(filters, action, tag).then(function(data){
+				search_factory.tags_action_solr(filters, action, tag, $scope.newTagType).then(function(data){
 					$scope.tagToAdd = '';
 					$('#add_form button').button('reset');$('#add_form input').removeAttr('disabled');$scope.search();
 				});
@@ -228,15 +240,22 @@ function index($scope, $http, search_factory){
 				}else filters[this.name] = this.value;
 			}
 		});
-		//console.log(filters);
 		return filters;
 	}
 
 	$scope.show = 10
 	$scope.filters = [],
 	$scope.currentPage = 1;
-	$scope.minpage = 'disabled'
-	$scope.perPage = 5;
+	$scope.minpage = 'disabled';
+	$scope.perPage = 10;
+	$scope.showHidden = false;
+	$scope.hiddenDS = 0;
+	$scope.newTagType = 'public';
 	// $scope.addFilter({name:'data_source_key', value:'acdata.unsw.edu.au'});
-	$scope.search()
+	$('.ds-restrict').each(function(){
+		var k = $(this).attr('ds-key');
+		$scope.filters.push({name:'data_source_key', value:k, disable:true});
+		$scope.hiddenDS++;
+	});
+	// $scope.search()
 }
