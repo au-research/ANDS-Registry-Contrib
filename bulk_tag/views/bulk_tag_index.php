@@ -15,6 +15,9 @@
 	<div id="breadcrumb" style="clear:both;">
 		<?php echo anchor(registry_url('auth/dashboard'), '<i class="icon-home"></i> Home'); ?>
 		<a href="#/" class="current">Bulk Tagging Tool</a>
+		<div class="pull-right">
+			<span class="label"><i class="icon-question-sign icon-white"></i> <a target="_blank" style="color:white;" href="http://services.ands.org.au/documentation/BulkTagHelp/"> Help</a></span>
+		</div>
 	</div>
 	<div class="container-fluid">
 		
@@ -96,13 +99,14 @@
 						<div ng-hide="loading_tags">
 							<div class="btn-toolbar tags" ng-show="tags_result.data.length > 0">
 								<div class="btn-group" ng-repeat="tag in tags_result.data">
-									<button class="btn btn-small" ng-click="addFilter({name:'tag', value:tag.name})" ng-class="{'secret': 'btn-warning'}[tag.type]">{{tag.name}}</button>
+									<button class="btn btn-small" ng-click="addFilter({name:'tag', value:tag.name})" ng-class="{'secret': 'btn-warning'}[tag.type]">{{tag.name}} <small class="muted" ng-show="tag.value">({{tag.value}})</small></button>
 									<button class="btn btn-small btn-remove" ng-click="tagAction('remove', tag.name)" ng-class="{'secret': 'btn-warning'}[tag.type]"><i class="icon icon-trash" ng-class="{'secret': 'icon-white'}[tag.type]"></i></button>
 								</div>
 							</div>
 							<div class="alert alert-info" ng-show="tags_result.data.length == 0">No tags found in this search</div>
 							<hr>
 							<form class="form tag_form" ng-submit="tagAction('add')" id="add_form">
+								<div class="alert alert-info" ng-show="loading">Loading... Please wait</div>
 								<div class="input-prepend input-append">
 									<div class="btn-group" style="display:inline-block;">
 										<button class="btn dropdown-toggle" data-toggle="dropdown">{{newTagType}} <span class="caret"></span></button>
