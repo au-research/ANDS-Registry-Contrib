@@ -186,7 +186,7 @@
 		 * the map and associated controls.
 		 */
 		function makeMapWidget() {
-		    loadFeatureTypes();
+		    // loadFeatureTypes();
 		    getMapControl();
 		}
 
@@ -1043,14 +1043,14 @@
 		    var searchResultsDiv = $("#" + ADDRESS_SEARCH_RESULTS_ID_PREFIX + $this.attr('id'));
 		    if( searchText !== '' ) {
 			searchResultsDiv.html('Searching...');
-  			if($("input[name=geocoderSelector]:checked").val() === 'geocoderSelector.gazetteer') {
-  			    gazetteerGeocoder(searchText);
-  			}
-  			else{
+  			// if($("input[name=geocoderSelector]:checked").val() === 'geocoderSelector.gazetteer') {
+  			//     gazetteerGeocoder(searchText);
+  			// }
+  			// else{
 			    widget_data.geocoder.geocode({ 'address': searchText},
 							 function(results, status) {
   							     addAddressToMap(results, status);});
-  			}
+  			// }
 		    }
 		    else {
 			searchResultsDiv.html('Nothing to search on! Try entering some terms in the text box above');
@@ -1182,12 +1182,6 @@
 			       function() {
 				   $(this).css('overflow', 'hidden');
 				   return '<div class="alw_dialog_text"><i>Search for a region or place to mark on the map</i></div>' +
-				       '<label style="cursor:hand">' +
-				       '<input type="radio" id="geocoderSelector.gazetteer" name="geocoderSelector" checked="checked" value="geocoderSelector.gazetteer" /> ' +
-				       'Australian Gazetteer</label>' +
-				       '<label style="cursor:hand">' +
-				       '<input type="radio" id="geocoderSelector.google" name="geocoderSelector" value="geocoderSelector.google" /> ' +
-				       'Google</label>' +
 				       '<div class="alw_dialog_text">' +
 				       '<input type="text" id="' + searchResultsTextfieldId + '" style="margin: 0px; width: 210px;" />' +
 				       '&nbsp;<button type="button" class="alw_button search">search</button></div>' +

@@ -1,14 +1,15 @@
 <?php
 	
-	class Doitasks extends CI_Model {
+class Doitasks extends CI_Model {
 	private $_CI; 
+	const DATACITE_WAIT_TIMEOUT_SECONDS = 5;
   
     function __construct()
     {
         // Call the Model constructor
         parent::__construct();
- 		$this->_CI =& get_instance();       
-        $this->doi_db = $this->load->database('dois', TRUE);
+ 		$this->_CI =& get_instance();
+ 		$this->doi_db = $this->load->database('dois', TRUE);
     }
 
 	function putxml(){
@@ -76,8 +77,7 @@
 	}
 	
 	function update(){
-		global $dataciteSchema;
-		global $api_version;				
+			
 		$xml ='';	
 		$errorMessages = '';	
 		$notifyMessage = '';
@@ -95,7 +95,7 @@
 		{
 			$this->debugOn();
 		}		
-		//$app_id = $this->input->get('app_id');		//passed as a parameter
+	
 		$app_id = $this->getAppId();
 		if(substr($app_id,0,4)=='TEST')
 		{
@@ -132,12 +132,12 @@
 		{
 			$client_id = checkDoisValidClient($ip,$app_id);
 
-			if(!$client_id)
+			if($client_id===false)
 			{
 				$errorMessages = doisGetUserMessage("MT009", $doiValue,$response_type,$app_id, $verbosemessage,$urlValue);
 
 			}else{				
-				if(!checkDoisClientDoi($doiValue,$client_id))
+				if(checkDoisClientDoi($doiValue,$client_id)===false)
 				{
 					$errorMessages = doisGetUserMessage("MT008", $doiValue,$response_type,$app_id, $verbosemessage,$urlValue);
 				} 				
@@ -149,15 +149,14 @@
 
 
 		if($doidata->num_rows() > 0){
-			//we need to get the xml if that is to be updated as well
-			//if($_POST){
-				//$xml = trim(implode($_POST));				// passed as posted content
-			//}
+
 			$xml = $this->getXmlInput();
+
 			//first up, lets check that this client is permitted to update this doi.
 
 			if(isset($xml) && $xml) // if the client has posted xml to be updated
 			{
+			
 				$doiObjects = new DOMDocument();
 						
 				$result = $doiObjects->loadXML($xml);
@@ -167,6 +166,7 @@
 				if( $errors )
 				{
 					$errorMessages = "Document Load Error: ".$errors['message']."\n";
+
 				}
 				else 
 				{
@@ -189,7 +189,7 @@
 					$xml = $doiObjects->saveXML();
 
 					$errors = error_get_last();
-					if( $errors )
+					if( $errors || !$result)
 					{
 						$verbosemessage = "Document Validation Error: ".$errors['message']."\n";						
 						$errorMessages = doisGetUserMessage("MT007", doiValue,$response_type,$app_id, $verbosemessage,$urlValue);
@@ -198,10 +198,32 @@
 			}
 			else
 			{
-				$xml = $doidata->row();
-				$xml = $xml->datacite_xml;
+				$xml_row = $doidata->row();
+				$xml = $xml_row->datacite_xml;
 				$doiObjects = new DOMDocument();
-				$doiObjects->loadXML($xml);	
+				$result = $doiObjects->loadXML($xml);
+				$errors = error_get_last();
+			
+				if( $errors )
+				{
+					$errorMessages = "Document Load Error: ".$errors['message']."\n";
+				}else{
+					error_reporting(0);
+					// Create temporary file and save manually created DOMDocument.
+					$tempFile = "/tmp/" . time() . '-' . rand() . '-document.tmp';	
+					  
+					$doiObjects->save($tempFile);	
+					$doiObjects = new DOMDocument();			 
+					// Create temporary DOMDocument and re-load content from file.
+
+					$doiObjects = new DOMDocument();
+					$doiObjects->load($tempFile);
+					if (is_file($tempFile))
+					{
+						unlink($tempFile);
+					}
+
+				}
 			}
 			
 			if( $errorMessages == '' )
@@ -277,10 +299,8 @@
 	}
 	
 	function mint(){
-		global $dataciteSchema;
-		global $api_version;	
-		global $gDOIS_PREFIX_TYPES;	
-
+	
+		$dataciteSchema = $this->config->item('gCMD_SCHEMA_URIS');
 
 		if ( isset($_SERVER["HTTP_X_FORWARDED_FOR"]) )    {
 			$ip=$_SERVER["HTTP_X_FORWARDED_FOR"];
@@ -313,17 +333,6 @@
 			$this->debugOn();
 		}
 		
-	/*	$app_id = $this->input->get('app_id');		//passed as a parameter
-		//or app_id might be passed as part of the authstr
-		if(!$app_id)
-		{
-   			$shared_secret = (str_replace("Basic ",'',$_SERVER['REDIRECT_HTTP_AUTHORIZATION']));
-   			if($shared_secret)
-   			{
-   				$theapp_id = explode(":",base64_decode($shared_secret));
-   				$app_id = $theapp_id[0];
-   			} 			
-		} */
 		$app_id = $this->getAppId();
 		if(substr($app_id,0,4)=='TEST')
 		{
@@ -350,7 +359,7 @@
 		if($errorMessages == '')
 		{
 			$client_id = checkDoisValidClient($ip,trim($app_id));
-			if(!$client_id)
+			if($client_id===false)
 			{
 				$verbosemessage = 'Client with app_id '.$app_id.' from ip address '.$ip. ' is not a registered doi client.';
 				$errorMessages = doisGetUserMessage("MT009", $doi_id=NULL, $response_type,$app_id, $verbosemessage,$urlValue);
@@ -458,7 +467,7 @@
 				$xml = $doiObjects->saveXML();
 			
 				$errors = error_get_last();
-				if( $errors )
+				if( $errors || !$result)
 				{
 					$verbosemessage = "Document Validation Error: ".$errors['message'];
 					$errorMessages = doisGetUserMessage("MT006", $doi_id=NULL, $response_type, $app_id, $verbosemessage,$urlValue);
@@ -526,9 +535,7 @@
 	}
 	
 	function activate(){
-		global $api_version;
-		global $host, $doi_root;
-		$base_url	= 'http://'.$host.$doi_root;				
+			
 		$errorMessages = '';
 		$notifyMessage = '';
 		$outstr = '';
@@ -577,13 +584,13 @@
 		if($errorMessages =='')
 		{
 		$client_id = checkDoisValidClient($ip,$app_id);
-		if(!$client_id)
+		if($client_id===false)
 		{
 			$verbosemessage = '';
 			$errorMessages = doisGetUserMessage("MT009", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
 
 		}else{				
-			if(!checkDoisClientDoi($doiValue,$client_id))
+			if(checkDoisClientDoi($doiValue,$client_id)===false)
 			{
 				$verbosemessage = '';
 				$errorMessages = doisGetUserMessage("MT008", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
@@ -669,7 +676,7 @@
 	}
 	
 	function deactivate(){
-		global $api_version;			
+	//	global $api_version;			
 		$errorMessages = '';
 		$notifyMessage = '';
 		$outstr = '';
@@ -718,13 +725,13 @@
 		if($errorMessages =='')
 		{
 		$client_id = checkDoisValidClient($ip,$app_id);
-		if(!$client_id)
+		if($client_id===false)
 		{
 			$verbosemessage = '';
 			$errorMessages = doisGetUserMessage("MT009", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
 
 		}else{				
-			if(!checkDoisClientDoi($doiValue,$client_id))
+			if(checkDoisClientDoi($doiValue,$client_id)===false)
 			{
 				$verbosemessage = '';
 				$errorMessages = doisGetUserMessage("MT008", $doiValue, $response_type,$app_id, $verbosemessage,$urlValue);
@@ -795,6 +802,69 @@
 		echo $outstr;		
 		
 	}
+
+
+	/**
+	 * Check the availability of the DOI service and upstream DataCite service
+	 * Note: this is an indication of service availability, not a guarantee
+	 *       that subsequent mints will be processed successfully. 
+	 *
+	 * @author Ben Greenwood <ben.greenwood@anu.edu.au>
+	 */
+	function status()
+	{	
+		// XXX: These parameter getters should be in a constructor somewhere 
+		$response_type = $this->input->get('response_type') ?: "string";
+		$api_version = $this->input->get('api_version') ?: "1.0";
+
+		$response_status = true;
+		$timer_start = microtime(true);
+
+		// Ping the local DOI database
+		if (!$this->doi_db->simple_query("SELECT 1;"))
+		{
+			$response_status = false;
+		}
+
+		// Ping DataCite DOI HTTPS service
+		if (!$this->_isDataCiteAlive(self::DATACITE_WAIT_TIMEOUT_SECONDS))
+		{
+			$response_status = false;
+		}
+
+		// Send back our response
+		if ($response_status)
+		{
+			$response_time = round(microtime(true) - $timer_start, 3) * 1000;
+			echo doisGetUserMessage("MT090", NULL, $response_type, NULL, "(took " . $response_time . "ms)");
+			return;
+		}
+		else
+		{
+			echo doisGetUserMessage("MT091", NULL, $response_type);
+			return;
+		}
+
+
+	}	
+
+	/* Ping the DataCite HTTP API, timeout after ~5 seconds (or other if specified) */
+	private function _isDataCiteAlive($timeout = 5)
+	{
+		$curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, gDOIS_SERVICE_BASE_URI);
+        curl_setopt($curl, CURLOPT_FILETIME, true);
+        curl_setopt($curl, CURLOPT_NOBODY, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $timeout);
+		curl_setopt($curl, CURLOPT_TIMEOUT, $timeout);
+		curl_exec($curl);
+
+		return !(curl_errno($curl) || curl_getinfo($curl, CURLINFO_HTTP_CODE) != "200");
+	}
+
+
+
 	
 	function checkurl(){	
 		$unavailableCount = 0;
@@ -897,6 +967,10 @@
     	{
     		return "2.2";
     	}
+    	elseif(str_replace("kernel-3","",$theSchemaLocation)!=$theSchemaLocation)
+    	{
+    		return "3";
+    	}
     	else 
     	{
     		return "unknown";
@@ -958,5 +1032,4 @@
 
 	 		
 	}   
-	}
- ?>
+}

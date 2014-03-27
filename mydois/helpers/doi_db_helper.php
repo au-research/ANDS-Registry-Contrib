@@ -255,6 +255,7 @@
 				if($shared_secret && $shared_secret == $row->shared_secret) return $row->client_id;
 				if($ip_address && test_ip($ip_address, $row->ip_address)) return $row->client_id;	
 			}
+			return false;
 	
 		}else{
 			return false;

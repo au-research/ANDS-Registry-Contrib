@@ -33,8 +33,8 @@
 								<p ng-show="page.desc">{{page.desc}}</p>
 								<p>
 									<a href="#/view/{{page.slug}}" class="btn btn-primary">View</a>
-									<span class="label label-success" ng-show="page.visible=='true'">Visible</span>
-									<span class="label label-important" ng-show="page.visible=='false'">Not Visible</span>
+									<span class="label label-success" ng-show="page.visible=='1'">Visible</span>
+									<span class="label label-important" ng-show="page.visible=='0'">Not Visible</span>
 								</p>
 							</div>
 						</div>
@@ -82,6 +82,7 @@
 							<label for="">Description: </label>
 							<textarea name="new_page_desc" id="" cols="30" rows="10" placeholder="Theme Page Description" ng-model="new_page_desc"></textarea>
 						</div>
+						
 						<button type="submit" class="btn btn-primary">Add New Page</button>
 					</fieldset>
 					<div class="alert alert-success" ng-show="ok">{{ok.msg}} <a href="#/view/{{ok.slug}}">Click here</a> to view your page</div>
@@ -126,7 +127,7 @@
 				<div class="alert alert-info">
 					<p>Changing the Theme Page Title will not change the page slug: <b>{{page.slug}}</b></p>
 				</div>
-				<form class="form" ng-submit="">
+				<form class="form form-horizontal" ng-submit="">
 					<fieldset>
 						<div class="control-group">
 							<label for="">Theme Page Title: </label>
@@ -143,9 +144,14 @@
 						<div class="control-group">
 							<label for="">Visible: </label>
 							<select ng-model="page.visible">
-								<option value="true">Visible</option>
-								<option value="false">Not Visible</option>
+								<option value="1">Visible</option>
+								<option value="0">Not Visible</option>
 							</select>
+						</div>
+						<div class="control-group">
+							<label for="">Secret Tag</label>
+							<input type="text" placeholder="Secret Tag" ng-model="page.secret_tag">
+							<button class="btn btn-small" ng-click="generateSecretTag()">Generate</button>
 						</div>
 						<a href="" ng-click="config=false" class="btn">Close</a>
 					</fieldset>
