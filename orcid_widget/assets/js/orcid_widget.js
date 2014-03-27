@@ -209,13 +209,13 @@
 	 * @param  {orcid['orcid-profile']} obj orcid-profile array of the returned object
 	 * @return {string}     HTML string
 	 */
+
 	function _constructORCIDHTML(obj,settings) {
 
 		var resStr = '';
 		resStr += "<div class='"+settings.info_box_class+"'>"
 		resStr += "<h6>ORCID Identifier</h6>";
 		var orcid = eval(obj['orcid-identifier']);
-
 		resStr += orcid.path;
 
 		if(obj['orcid-bio']['biography'])
