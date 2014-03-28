@@ -7,10 +7,14 @@ class Theme_pages extends CI_Model {
 	function get($slug='') {
 		if($slug==''){
 			$result = $this->db->get($this->table);
-			return $result->result_array();
+			if($result){
+				return $result->result_array();
+			}else return array();
 		}else{
 			$result = $this->db->get_where($this->table, array('slug'=>$slug), 1, 0);
-			return $result->result_array();
+			if($result) {
+				return $result->result_array();
+			}else return array();
 		}
 	}
 
