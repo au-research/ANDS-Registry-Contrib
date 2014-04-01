@@ -40,15 +40,13 @@ function index($scope, tests) {
 	});
 
 	$scope.do_test = function(test) {
-		if($scope.currentTest!=test){
-			$scope.currentTest = test;
-			$scope.currentTest.result = {};
-			tests.do_test(test.name).then(function(data) {
-				if(data.status=='OK'){
-					console.log(data);
-					test.result = data.content;
-				}
-			});
-		}
+		$scope.currentTest = test;
+		$scope.currentTest.result = {};
+		tests.do_test(test.name).then(function(data) {
+			if(data.status=='OK'){
+				console.log(data);
+				test.result = data.content;
+			}
+		});
 	}
 }
