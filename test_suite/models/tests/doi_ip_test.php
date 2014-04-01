@@ -1,10 +1,10 @@
 <?php
-class Doi_ip_test extends CI_Model {
+require_once(APP_PATH. 'test_suite/models/_GenericTest.php');
+class Doi_ip_test extends _GenericTest {
 
 
-	function test() {
-		$this->load->library('unit_test');
-		$this->unit->use_strict(TRUE);
+	function run_test() {
+
 		require(APP_PATH.'mydois/helpers/doi_db_helper.php');
 
 		/**
@@ -37,8 +37,6 @@ class Doi_ip_test extends CI_Model {
 			$this->unit->run($test, $case[3], $case[0].':  <b>'.$case[1]. '</b> and <b>'.$case[2].'</b> expected '. (($case[3]) ? 'true' : 'false'));
 		}
 
-		//returns the test result
-		return $this->unit->report();
 	}
 
 }
