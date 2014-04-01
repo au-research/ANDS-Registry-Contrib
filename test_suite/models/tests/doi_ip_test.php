@@ -1,8 +1,16 @@
 <?php
 require_once(APP_PATH. 'test_suite/models/_GenericTest.php');
+
+/**
+ * Class Doi_ip_test
+ * @author Minh Duc Nguyen <minh.nguyen@ands.org.au>
+ */
 class Doi_ip_test extends _GenericTest {
 
 
+	/**
+	 * @author Minh Duc Nguyen <minh.nguyen@ands.org.au>
+	 */
 	function run_test() {
 
 		require(APP_PATH.'mydois/helpers/doi_db_helper.php');

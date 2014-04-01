@@ -42,10 +42,13 @@ function index($scope, tests) {
 	$scope.do_test = function(test) {
 		$scope.currentTest = test;
 		$scope.currentTest.result = {};
+		$scope.currentTest.result.status = 'Testing...';
 		tests.do_test(test.name).then(function(data) {
 			if(data.status=='OK'){
-				console.log(data);
 				test.result = data.content;
+			} else {
+				$scope.currentTest.result.status = 'Failed';
+				$scope.currentTest.result.report = data;
 			}
 		});
 	}
