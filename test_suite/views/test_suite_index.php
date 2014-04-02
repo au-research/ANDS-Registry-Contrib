@@ -26,7 +26,6 @@
 					</div>
 
 					<div class="widget-content">
-
 						<div class="alert alert-info" ng-hide="currentTest.result">
 							Select a test to run
 						</div>
@@ -43,12 +42,11 @@
 								<dd>{{currentTest.result.memory_usage | bytes}}</dd>
 							</dl>
 							<hr/>
-							<div style="height:360px;overflow:auto;">
+							<div>
 								<span bind-html-unsafe="currentTest.result.report"></span>
 							</div>
 
 						</div>
-
 					</div>
 				</div>
 			</div>
