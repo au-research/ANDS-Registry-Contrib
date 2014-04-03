@@ -882,11 +882,11 @@
 	        	var e = bnds.getNorthEast().lng().toFixed(6);
 	        	var s = bnds.getSouthWest().lat().toFixed(6);
 	        	var w = bnds.getSouthWest().lng().toFixed(6);
-	            var val = w + ' ' + s + ' ' + e + ' ' + n;
-	            resetTools();
-	            $target.val(val);
+                var polyString = w + ',' + n + ' ' + e + ',' + n + " " + e + ',' + s + ' ' + w + ',' + s + ' ' +  w + ',' + n;
+
+                $target.val(polyString);
                 if(settings.return_callback && (typeof settings.return_callback === 'function')){
-            		settings.return_callback(val);
+            		settings.return_callback(polyString);
             	}
 	        });
 		}
