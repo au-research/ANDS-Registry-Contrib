@@ -853,7 +853,7 @@
 		}
 
 		function beginDrawingBox(){
-			clearMap();
+
 		    var widget_data = $this.data(WIDGET_NS);
 		    // Remove any existing temporary polygon.
 		    $.each(widget_data.marker_listeners, function(idx, listener) {
@@ -882,12 +882,22 @@
 	        	var e = bnds.getNorthEast().lng().toFixed(6);
 	        	var s = bnds.getSouthWest().lat().toFixed(6);
 	        	var w = bnds.getSouthWest().lng().toFixed(6);
-	            var val = w + ' ' + s + ' ' + e + ' ' + n;
-	            resetTools();
-	            $target.val(val);
-                if(settings.return_callback && (typeof settings.return_callback === 'function')){
-            		settings.return_callback(val);
-            	}
+                var polyString = w + ',' + n + ' ' + e + ',' + n + " " + e + ',' + s + ' ' + w + ',' + s + ' ' +  w + ',' + n;
+                clearMap();
+                var coords = getCoordsFromString(polyString);
+                var polygon = new google.maps.Polygon({
+                    paths: coords,
+                    map : widget_data.map,
+                    strokeColor: POLY_COLOUR,
+                    strokeOpacity: 0.7,
+                    strokeWeight: 2,
+                    fillColor: POLY_COLOUR,
+                    fillOpacity: 0.2,
+                    editable : false
+                });
+
+            widget_data.polygon = polygon;
+            $this.data(WIDGET_NS, widget_data);
 	        });
 		}
 
