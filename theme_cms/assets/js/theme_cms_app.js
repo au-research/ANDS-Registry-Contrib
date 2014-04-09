@@ -379,6 +379,8 @@ function ViewPage($scope, $http, $routeParams, pages_factory, $location, search_
 		var placeholder = '';
 		filters['include_facet'] = true;
 		filters['fl'] = 'id, display_title, slug, key';
+		if(c.search.limit) filters['rows'] = c.search.limit;
+		if(c.search.random) filters['sort'] = 'random_'+Math.random().toString(36).substring(10)+' desc';
 		if(c.search.query) filters['q'] = c.search.query;
 		$(c.search.fq).each(function(){
 			if(this.name){
