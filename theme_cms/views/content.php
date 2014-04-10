@@ -100,10 +100,7 @@
 									<div class="control-group">
 										<label class="control-label" for="">Limit</label>
 										<div class="controls">
-											<select name="" id="" ng-model="c.search.limit">
-												<option value="0">0</option>
-												<option value="5">5</option>
-												<option value="10">10</option>
+											<input type="number" min="0" max="30" ng-model="c.search.limit"/>
 											</select>
 										</div>
 									</div>
