@@ -35,7 +35,11 @@
 									<li ng-repeat="doc in search_result[c.search.id].data.result.docs"><a href="<?php echo portal_url();?>{{doc.slug}}" target="_blank">{{doc.display_title}}</a></li>
 								</ul>
 
-								<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">{{c.search.view_search_text}} ({{search_result[c.search.id].data.result.numFound}} results)</a>
+								<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">
+									<span ng-show="c.search.view_search_text">{{c.search.view_search_text}} </span>
+									<span ng-hide="c.search.view_search_text">View Full Search </span>
+									({{search_result[c.search.id].data.result.numFound}} results)
+								</a>
 							</div>
 						</div>
 
@@ -98,7 +102,7 @@
 
 								<div class="form-horizontal">
 									<div class="control-group">
-										<label class="control-label" for="">Limit</label>
+										<label class="control-label" for="">Limit number of records to display</label>
 										<div class="controls">
 											<input type="number" min="0" max="30" ng-model="c.search.limit"/>
 											</select>
@@ -158,7 +162,11 @@
 												<a href="" tip="Boost This Record" ng-click="addBoost(c, doc.key)"><i class="icon icon-arrow-up"></i></a>
 											</li>
 										</ul>
-										<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">{{c.search.view_search_text}} ({{search_result[c.search.id].data.result.numFound}} results)</a>
+										<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">
+											<span ng-show="c.search.view_search_text">{{c.search.view_search_text}} </span>
+											<span ng-hide="c.search.view_search_text">View Full Search </span>
+											({{search_result[c.search.id].data.result.numFound}} results)
+										</a>
 									</div>
 									<div ng-show="search_result[c.search.id].data.numFound == 0">
 										There are no search result!
