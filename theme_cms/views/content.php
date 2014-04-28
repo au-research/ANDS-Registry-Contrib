@@ -35,7 +35,11 @@
 									<li ng-repeat="doc in search_result[c.search.id].data.result.docs"><a href="<?php echo portal_url();?>{{doc.slug}}" target="_blank">{{doc.display_title}}</a></li>
 								</ul>
 
-								<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">View Full Search ({{search_result[c.search.id].data.result.numFound}} results)</a>
+								<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">
+									<span ng-show="c.search.view_search_text">{{c.search.view_search_text}} </span>
+									<span ng-hide="c.search.view_search_text">View Full Search </span>
+									({{search_result[c.search.id].data.result.numFound}} results)
+								</a>
 							</div>
 						</div>
 
@@ -95,6 +99,40 @@
 							</div>
 
 							<div ng-show="c.type == 'search'">
+
+								<div class="form-horizontal">
+									<div class="control-group">
+										<label class="control-label" for="">Limit number of records to display</label>
+										<div class="controls">
+											<input type="number" min="0" max="30" ng-model="c.search.limit"/>
+											</select>
+										</div>
+									</div>
+									<div class="control-group">
+										<label class="control-label" for="">Style</label>
+										<div class="controls">
+											<select name="" id="" ng-model="c.search.style">
+												<option value="tile">Tile</option>
+												<option value="list">List</option>
+											</select>
+										</div>
+									</div>
+									<div class="control-group">
+										<label class="control-label" for="">View Full Search Text</label>
+										<div class="controls">
+											<input type="text" ng-model="c.search.view_search_text" placeholder="View Full Search"/>
+										</div>
+									</div>
+									<div class="control-group">
+										<div class="controls">
+											<label class="checkbox">
+												<input type="checkbox" ng-model="c.search.random"/> Randomize Result
+											</label>
+										</div>
+									</div>
+
+								</div>
+
 								<form class="form-search" ng-submit="preview_search(c)">
 									<div class="input-append">
 										<input type="text" name="search-query" class="" ng-model="c.search.query" placeholder="Search Query" ui-keypress="{13:'preview_search(c)'}">
@@ -124,7 +162,11 @@
 												<a href="" tip="Boost This Record" ng-click="addBoost(c, doc.key)"><i class="icon icon-arrow-up"></i></a>
 											</li>
 										</ul>
-										<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">View Full Search ({{search_result[c.search.id].data.result.numFound}} results)</a>
+										<a target="_blank" href="<?php echo portal_url('search') ?>#!/{{search_result[c.search.id].filter_query}}">
+											<span ng-show="c.search.view_search_text">{{c.search.view_search_text}} </span>
+											<span ng-hide="c.search.view_search_text">View Full Search </span>
+											({{search_result[c.search.id].data.result.numFound}} results)
+										</a>
 									</div>
 									<div ng-show="search_result[c.search.id].data.numFound == 0">
 										There are no search result!

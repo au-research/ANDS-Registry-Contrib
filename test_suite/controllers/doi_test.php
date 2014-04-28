@@ -84,7 +84,7 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 			unset($this->unit->results);
 			$data['service_point'] = $this->test_doi_service_point($app_id,$shared_secret,$url,$testDOI,$validxml,$v1_service_url,$requestURI);
 			unset($this->unit->results);
-			$data['response_type'] = $this->test_response_type($app_id,$shared_secret,$url,$testDOI,$validxml,$requestURI);		
+			$data['response_type'] = $this->test_response_type($app_id,$shared_secret,$url,$testDOI,$validxml,$requestURI);
 		}else{
 			$data['test_mint'] = "<span style='color: #C00;'>Failed </span> -  System could not perform initial mint - testing cannot continue.<br />";
 			$data['authentication'] = '';

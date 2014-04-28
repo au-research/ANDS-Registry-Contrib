@@ -884,6 +884,7 @@
 	        	var w = bnds.getSouthWest().lng().toFixed(6);
                 var polyString = w + ',' + n + ' ' + e + ',' + n + " " + e + ',' + s + ' ' + w + ',' + s + ' ' +  w + ',' + n;
                 clearMap();
+                $target.val(polyString);
                 var coords = getCoordsFromString(polyString);
                 var polygon = new google.maps.Polygon({
                     paths: coords,
