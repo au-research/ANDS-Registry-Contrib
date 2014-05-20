@@ -87,8 +87,8 @@ class Doitasks extends CI_Model {
 		$doiObjects = null;
 		$response1 = "OK";
 		$response2 = "OK";
-		$testing = 'no';	
-
+		$testing = 'no';
+        $dataciteSchema = $this->config->item('gCMD_SCHEMA_URIS');
 		$debug = $this->input->get('debug');
 		
 		if($debug && $debug == 'true')	
@@ -183,8 +183,16 @@ class Doitasks extends CI_Model {
 					{
 						unlink($tempFile);
 					}
-		  
-					$result = $doiObjects->schemaValidate(gCMD_SCHEMA_URI);
+                    $resources = $doiObjects->getElementsByTagName('resource');
+                    $theSchema = 'unknown';
+                    if($resources->length>0)
+                    {
+                        if(isset($resources->item(0)->attributes->item(0)->name))
+                        {
+                            $theSchema = $this->getXmlSchema($resources->item(0)->attributes->item(0)->nodeValue);
+                        }
+                    }
+					$result = $doiObjects->schemaValidate($dataciteSchema[$theSchema]);
 
 					$xml = $doiObjects->saveXML();
 
