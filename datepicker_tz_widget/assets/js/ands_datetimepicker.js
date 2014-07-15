@@ -469,6 +469,7 @@ return n()&&r(),{name:function(){return e}}},jstz.olson={},jstz.olson.timezones=
       this.$element.trigger('change.datepicker.ands',
 			    {utc: this._walltime.utc.toISOString(),
 			     tz: this._timezone});
+      this.$element.trigger('input');
     },
 
     notifyError: function(msg) {

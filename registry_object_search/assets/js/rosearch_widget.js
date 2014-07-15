@@ -391,6 +391,7 @@
 			    else {
 				handler._input.val(record[handler.settings.target_field]);
 			    }
+			    handler._input.trigger('input');
 			    modal.modal('hide');
 			});
 		    })
