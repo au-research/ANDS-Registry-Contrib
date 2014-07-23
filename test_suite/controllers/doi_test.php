@@ -32,7 +32,7 @@ class Doi_test extends MX_Controller {
     </creator>
   </creators>
   <titles>
-    <title>Data Test Example</title>
+    <title>Data &amp; Test Example</title>
   </titles>
   <publisher>ANDS</publisher>
   <publicationYear>2014</publicationYear>
