@@ -23,7 +23,7 @@ class Doi_test extends MX_Controller {
 
 		$doiversion_service_points = array('v1.0'=>'https://services.ands.org.au/home/dois/doi_' , 'v1.1'=>'https://services.ands.org.au/doi/1.1/', 'test' => apps_url().'/mydois/');
 
-		$validxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
+		$validxml = 'xml='.urlencode('<?xml version="1.0" encoding="UTF-8"?>
 <resource xmlns="http://datacite.org/schema/kernel-2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-2.1 http://schema.datacite.org/meta/kernel-2.1/metadata.xsd">
   <identifier identifierType="DOI"></identifier>
   <creators>
@@ -36,9 +36,9 @@ class Doi_test extends MX_Controller {
   </titles>
   <publisher>ANDS</publisher>
   <publicationYear>2014</publicationYear>
-</resource>';
+</resource>');
 
-$invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
+$invalidxml = 'xml='.urlencode('<?xml version="1.0" encoding="UTF-8"?>
 <resource xmlns="http://datacite.org/schema/kernel-2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-2.1 http://schema.datacite.org/meta/kernel-2.1/metadata.xsd">
   <identifier identifierType="DOI">adoitotest</identifier>
   <anelement>dsfdsfgS</anelement>
@@ -52,7 +52,7 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
   </titles>
   <publisher>ANDS</publisher>
   <publicationYear>2014</publicationYear>
-</resource>';
+</resource>');
 
 		$requestURI = $doiversion_service_points['v1.1'];
 		$requestURI = $doiversion_service_points['test'];
@@ -64,7 +64,7 @@ $invalidxml = 'xml=<?xml version="1.0" encoding="UTF-8"?>
 
 		if($testDOI)
 		{
-			$validxml = (str_replace('<identifier identifierType="DOI"></identifier>','<identifier identifierType="DOI">'.$testDOI.'</identifier>',$validxml));
+			$validxml = (str_replace(urlencode('<identifier identifierType="DOI"></identifier>'),urlencode('<identifier identifierType="DOI">'.$testDOI.'</identifier>'),$validxml));
 			
 			$data['test_mint']="   <span style='color: #0C0;'>Passed </span> ".$testDOI." minted successfully.";
 
