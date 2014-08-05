@@ -31,7 +31,6 @@
 /* the styles below will be applied if the orcid widget is invoked with custom display paramters set to true */
 .custom_search_div{
 	background-color:#fff;
-	background-image:url('../img/grant_tagline_small.png');
 	background-repeat:no-repeat;
 	background-position:95% top; 
     width:550px;
