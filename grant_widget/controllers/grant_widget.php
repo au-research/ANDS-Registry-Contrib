@@ -29,4 +29,9 @@ class Grant_widget extends MX_Controller {
 		}
 		$this->zip->download('Grant_widget.zip');
 	}
+
+    private function JSONP($callback, $r){
+        echo ($callback) . '(' . json_encode($r) . ')';
+    }
+
 }

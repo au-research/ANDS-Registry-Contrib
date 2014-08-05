@@ -36,8 +36,8 @@
                 Put the following code snippet into your document's &lt;head&gt; segment
                 <pre class="prettyprint pre-scrollable">
 &lt;script src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.js'&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="<?php echo apps_url('assets/grant_widget/css/grant_widget.js');?> ?>"&gt;&lt;/script&gt;
-&lt;link rel="stylesheet" type="text/css" href="<?php echo apps_url('assets/grant_widget/css/grant_widget.css');?> ?>" /&gt;
+&lt;script type="text/javascript" src="<?php echo apps_url('assets/grant_widget/css/grant_widget.js');?>"&gt;&lt;/script&gt;
+&lt;link rel="stylesheet" type="text/css" href="<?php echo apps_url('assets/grant_widget/css/grant_widget.css');?>" /&gt;
                 </pre>
             </p>
             <p>
@@ -45,7 +45,7 @@
                 <pre class="prettyprint">
 &lt;input type="text" class="grant_widget"&gt;
                 </pre>
-                the plugin will automatically binds to all element that has the class of <code>.grant_widget</code>
+                The plugin will automatically bind to all elements that have the class of <code>.grant_widget</code>
             </p>
 
 
@@ -79,7 +79,9 @@ $('#custom_settings_grant').grant_widget({
     lookup_text: 'Custom Lookup',
     search_text: 'Custom Search',
     before_html: 'Enter Here: ',
-    auto_close_search: true
+    auto_close_search: true,
+    funder_lists: true,
+    funders: '{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}'
 });
                 </pre>
                 <input type="text" name="name" id="custom_settings_grant" value="1031221" size="40" class=""/>
@@ -111,7 +113,9 @@ $('#custom_settings_grant').grant_widget({
         array('lookup_error_handler', 'false', 'overwrite function for error lookup <code>function(xhr, message)</code>'),
         array('lookup_success_handler', 'false', 'overwrite function when a successful lookup returns <code>function(data, obj, settings)</code>'),
         array('lookup_success_hook', 'false', 'a function hook after a successful lookup returns <code>function()</code>'),
-        array('auto_close_search', 'false', 'boolean, To automatically close the search box after a value is selected')
+        array('auto_close_search', 'false', 'boolean, To automatically close the search box after a value is selected'),
+        array('funder_lists', 'false', 'boolean, To allow for user provided lists of funders to search against'),
+        array('funders','', 'json string providing list of funders in the funding_list element eg. funders: &#39;{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}&#39;')
     );
 ?>
 

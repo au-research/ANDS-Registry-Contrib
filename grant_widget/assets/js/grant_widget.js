@@ -63,7 +63,9 @@
 		    post_lookup_success_handler: false,
 
 		    //auto close the search box once a value is chosen
-		    auto_close_search: true
+		    auto_close_search: true,
+            funder_lists: false,
+            funders: ''
 
 		};
 		//bind and merge the defaults with the given options
@@ -122,9 +124,22 @@
 
 		//use settings
 		if(settings.search){
-			 
+            var funders_list = '';
+			 if(settings.funder_lists)
+             {
+                 //alert(settings.funders);
+                funders_list = '<select name="funders" class="funder"><option value="All">All</option>'
+
+                var theList = jQuery.parseJSON((settings.funders));
+                for(i=0;i<theList.funder_list.length;i++){
+                    funders_list = funders_list + '<option value="'+theList.funder_list[i]+'">'+theList.funder_list[i]+'</option>';
+                }
+
+                funders_list = funders_list +'</select>'
+
+             }
 			var search_btn = $('<button>').addClass(settings.search_class).html(settings.search_text);
-			var search_html = settings.query_text+' <input type="text" class="grant_search_input"/> <a class="search_grant">'+settings.search_text_btn+'</a><div class="grant_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a>';
+			var search_html = settings.query_text+' <input type="text" class="grant_search_input"/> '+funders_list+' <a class="search_grant">'+settings.search_text_btn+'</a><div class="grant_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a>';
 			var search_div = $('<div>').addClass(settings.search_div_class).html(search_html);
 
 			if(!settings.pre_open_search) $(search_div).hide();
@@ -135,8 +150,17 @@
 			});
 			$('input.grant_search_input', p).on('keypress', function(e){
 				//enter key
+
 				if(e.keyCode==13){
-					_search($(this).val(), obj, settings); return false;
+                    console.log($(this).next().prop("tagName"))
+                    if($(this).next().prop("tagName")=='A')
+                    {
+                        var funder = 'All'
+                    }else{
+                        var funder = $('select.funder').val()
+                    }
+
+					_search($(this).val(), funder,obj, settings); return false;
 				}
 			});
 			$('.search_grant', p).on('click', function(e){
@@ -144,7 +168,14 @@
 				e.preventDefault();
 				e.stopPropagation();
 				var query = $('.grant_search_input', p).val();
-				_search(query, obj, settings);
+              console.log($(this).next().prop("tagName"))
+                if($(this).next().prop("tagName")=='A')
+                {
+                    var funder = 'All'
+                }else{
+                    var funder = $('select.funder').val()
+                }
+				_search(query,funder, obj, settings);
 			});
 			$('.close_search', p).on('click', function(){
 				//close button
@@ -261,10 +292,10 @@
                 }
                 if(typeof(obj[0]['relations']['isParticipantIn'])=='string')
                 {
-                    resStr +="<p>Is participant in</p>";
+                    resStr +="<p>Has participant</p>";
                     resStr +="<p>"+obj[0]['relations']['isParticipantIn']+"</p>";
                 }else if(typeof(obj[0]['relations']['isParticipantIn'])=='array'){
-                    resStr +="<p>Is participant in</p><p>";
+                    resStr +="<p>Has participant</p><p>";
                     for(i=0;i<obj[0]['relations']['isParticipantIn'].length;i++)
                     {
                         resStr +=obj[0]['relations']['isParticipantIn'][i]+", ";
@@ -274,10 +305,10 @@
                 }
                 if(typeof(obj[0]['relations']['isPrincipalInvestigatorOf'])=='string')
                 {
-                    resStr +="<p>Is principal investigator of </p>";
+                    resStr +="<p>Has principal investigator</p>";
                     resStr +="<p>"+obj[0]['relations']['isPrincipalInvestigatorOf']+"</p>";
                 }else if (typeof(obj[0]['relations']['isPrincipalInvestigatorOf'])=='array'){
-                    resStr +="<p>Is principal investigator of</p><p>";
+                    resStr +="<p>Has principal investigator</p><p>";
                     for(i=0;i<obj[0]['relations']['isPrincipalInvestigatorOf'].length;i++)
                     {
                         resStr +=obj[0]['relations']['isPrincipalInvestigatorOf'][i]+", ";
@@ -316,15 +347,21 @@
 	 * @param  {object} settings local settings of the plugin
 	 * @return {void}            this will modify the DOM based on the search result
 	 */
-	function _search(query, obj, settings){
+	function _search(query, funder, obj, settings){
 		var p = obj.p;
 		var result_div = p.find('.'+settings.grant_search_result);
+
+        var funder_list = '';
+        if(funder!='All')
+        {
+            funder_list = '&groups='+funder;
+        }
 		if($.trim(query)==""){
 			$('.grant_search_result', p).html('Please enter a search string');
 		}else{
 			$('.grant_search_result', p).html('Loading...');
 			$.ajax({
-				url:settings.search_endpoint+encodeURIComponent(query)+'&start=0&rows=10',
+				url:settings.search_endpoint+encodeURIComponent(query)+funder_list+'&start=0&rows=10',
 				dataType: 'json',
 				success: function(data){
 					if(settings.success_handler && (typeof settings.success_handler === 'function')){
@@ -404,7 +441,7 @@
 		obj.p.children('.'+settings.search_div_class).slideToggle();
 	}
 	
-	//catch all .orcid_widget and apply orcid_widget() with default settings on
+	//catch all .grant_widget and apply grant_widget() with default settings on
 
 	$('.grant_widget').each(function(){
 	   	var elem = $(this);

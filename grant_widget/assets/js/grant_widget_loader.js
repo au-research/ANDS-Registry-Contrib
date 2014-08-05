@@ -7,6 +7,8 @@ $(function(){
 		lookup_text: 'Custom Lookup',
 		search_text: 'Custom Search',
 		before_html: 'Enter Here: ',
-		auto_close_search: true
+		auto_close_search: true,
+        funder_lists: true,
+        funders: '{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}'
 	});
 });
