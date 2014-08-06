@@ -31,8 +31,8 @@
 
 		var defaults = {
 		    //location (absolute URL) of the jsonp proxy
-		    search_endpoint: 'http://devl.ands.org.au/workareas/liz/ands/registry/services/api/getGrants/?title=',
-		   	lookup_endpoint: 'http://devl.ands.org.au/workareas/liz/ands/registry/services/api/getGrants?id=',
+		    search_endpoint: 'http://researchdata.ands.org.au/registry/services/api/getGrants/?title=',
+		   	lookup_endpoint: 'http://researchdata.ands.org.au/registry/services/api/getGrants/?id=',
 
 		    //auto _lookup once init
 		    pre_lookup: false,
@@ -68,7 +68,16 @@
             funders: ''
 
 		};
-		//bind and merge the defaults with the given options
+
+
+
+        //ANDS Environment
+        if (typeof(window.real_base_url) !== 'undefined'){
+            defaults['search_endpoint'] = window.real_base_url + 'registry/services/api/getGrants/?title=';
+            defaults['lookup_endpoint'] = window.real_base_url + 'registry/services/api/getGrants/?id=';
+        }
+
+        //bind and merge the defaults with the given options
 		var settings;
 		var handler;
 		if (typeof(options) !== 'string') {
@@ -168,7 +177,6 @@
 				e.preventDefault();
 				e.stopPropagation();
 				var query = $('.grant_search_input', p).val();
-              console.log($(this).next().prop("tagName"))
                 if($(this).next().prop("tagName")=='A')
                 {
                     var funder = 'All'
@@ -203,8 +211,8 @@
 	function _lookup(obj, settings){
 		var value = obj.val().replace('http://','');
 		$.ajax({
-			url:settings.lookup_endpoint+encodeURIComponent(value),
-			dataType: 'json',
+			url:settings.lookup_endpoint+encodeURIComponent(value)+'&callback=?',
+			dataType: 'JSONP',
 			timeout: 1000,
 			success: function(data){
 				if(settings.lookup_success_handler && (typeof settings.lookup_success_handler === 'function')){
@@ -361,8 +369,8 @@
 		}else{
 			$('.grant_search_result', p).html('Loading...');
 			$.ajax({
-				url:settings.search_endpoint+encodeURIComponent(query)+funder_list+'&start=0&rows=10',
-				dataType: 'json',
+				url:settings.search_endpoint+encodeURIComponent(query)+funder_list+'&start=0&rows=10&callback=?',
+				dataType: 'JSONP',
 				success: function(data){
 					if(settings.success_handler && (typeof settings.success_handler === 'function')){
 						settings.success_handler(data, obj, settings);
@@ -418,7 +426,7 @@
 					if(settings.error_handler && (typeof settings.error_handler === 'function')){
 						settings.error_handler(xhr);
 					}else{
-						console.error(xhr);
+						console.error(xhr.responseText);
 					}
 				}
 			});
