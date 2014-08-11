@@ -1024,20 +1024,21 @@ class Doitasks extends CI_Model {
 	} 
 
 	function getXmlInput(){
-		$output= '';
-		$data = file_get_contents("php://input");
 
-		parse_str($data, $output);
-		if(isset($output['xml']) )
-		{
-			return trim($output['xml']);
-		}elseif(count($output)>1)
-		{
-			return trim(implode($output));	
-		}else{
-			return trim($data);	
-		}
+        $output= '';
+        $data = file_get_contents("php://input");
 
-	 		
-	}   
+        parse_str($data, $output);
+        if(isset($output['xml']) )
+        {
+            return trim($output['xml']);
+        }elseif(count($output)>1)
+        {
+            return trim(implode($output));
+        }else{
+            return trim($data);
+        }
+
+
+    }
 }

@@ -1,6 +1,7 @@
 module.exports = function(grunt){
 	//configuration goes here
 	var yeomanConfig = {
+        grant_widget: 'grant_widget/assets',
 		orcid_widget: 'orcid_widget/assets',
 		registry_widget: 'registry_widget/assets',
 		vocab_widget: 'vocab_widget/assets',
@@ -22,6 +23,9 @@ module.exports = function(grunt){
 			location_widget:{
 				files:{'<%= yeoman.location_widget %>/dist/location_capture_widget.min.js':['<%= yeoman.location_widget %>/js/location_capture_widget.js']}
 			},
+            grant_widget:{
+                files:{'<%= yeoman.grant_widget %>/dist/grant_widget.min.js':['<%= yeoman.grant_widget %>/js/grant_widget.js']}
+            }
 		},
 		cssmin:{
 			options:{report:'min'},
@@ -40,8 +44,12 @@ module.exports = function(grunt){
 			location_widget:{
 				src:'<%= yeoman.location_widget %>/css/location_capture_widget.css',
 				dest:'<%= yeoman.location_widget %>/dist/location_capture_widget.min.css'
-			}
-		},
+			},
+            grant_widget:{
+                src:'<%= yeoman.grant_widget %>/css/grant_widget.css',
+                dest:'<%= yeoman.grant_widget %>/dist/grant_widget.min.css'
+            }
+		}
 	});
 	require('load-grunt-tasks')(grunt);
 
