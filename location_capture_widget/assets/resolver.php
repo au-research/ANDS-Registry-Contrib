@@ -39,11 +39,11 @@ header('Content-type: application/json');
 $jsonData['status'] = 'ERROR';
 $jsonData['message'] = 'searchText must be defined';
 $searchText = '';
-$limit = 3000;
+$limit = 100;
 $recCount = 0;
 $feature = '';
 $callback = "function";
-
+$wfsg_host = 'http://www.ga.gov.au/gazetteer-australia-wfsg-gws/';
 // Parse parameters
 if (isset($_GET['searchText'])) {
 	$searchText = $_GET['searchText'];
@@ -71,33 +71,60 @@ if(isset($_GET['debug']))
 
 // Design the XML query
 if ($searchText) {
-	$mctGazetteerGeocoderUrl = 'http://gazetteer.mymaps.gov.au/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typename=iso19112:SI_LocationInstance&maxFeatures='.$limit.'';
-	$filterText = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc"><ogc:PropertyIsLike wildCard="*" singleChar="#" escapeChar="\\"><ogc:PropertyName>iso19112:alternativeGeographicIdentifiers/iso19112:alternativeGeographicIdentifier/iso19112:name</ogc:PropertyName><ogc:Literal>' . $searchText . '</ogc:Literal></ogc:PropertyIsLike></ogc:Filter>';
+	$mctGazetteerGeocoderUrl = $wfsg_host.'/wfs?service=wfs&version=1.1.0&request=GetFeature&typename=iso19112:SI_LocationInstance&maxFeatures='.$limit.'';
+	$filterText = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc"><ogc:PropertyIsLike wildCard="*" singleChar="#" escapeChar="\\" matchCase="false"><ogc:PropertyName>iso19112:alternativeGeographicIdentifiers/iso19112:alternativeGeographicIdentifier/iso19112:name</ogc:PropertyName><ogc:Literal>' . $searchText . '</ogc:Literal></ogc:PropertyIsLike></ogc:Filter>';
 }
 if ($feature) {
-	$mctGazetteerGeocoderUrl = 'http://gazetteer.mymaps.gov.au/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typename=iso19112:SI_LocationType';
-	$filterText = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc"><ogc:PropertyIsLike wildCard="%" singleChar="#" escapeChar="\\"><ogc:PropertyName>@gml:id</ogc:PropertyName><ogc:Literal>' . $feature . '%</ogc:Literal></ogc:PropertyIsLike></ogc:Filter>';
+	$mctGazetteerGeocoderUrl = $wfsg_host.'/wfs?service=wfs&version=1.1.0&request=GetFeature&typename=iso19112:SI_LocationType';
+    $filterText = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc"><ogc:PropertyIsLike wildCard="%" singleChar="#" escapeChar="\\"><ogc:PropertyName>@gml:id</ogc:PropertyName><ogc:Literal>%</ogc:Literal></ogc:PropertyIsLike></ogc:Filter>';
 }
 
 // Send the query (curl)
 $jsonData = array();
-$jsonData['status'] = 'OK';
-$ch = curl_init() or die(curl_error());
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, "filter=" . rawurlencode($filterText));
-curl_setopt($ch, CURLOPT_URL, $mctGazetteerGeocoderUrl);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-$data = curl_exec($ch) or die(curl_error());
 
-// Parse the response 
-$gazetteerDoc = new DOMDocument();
-$gazetteerDoc -> loadXML($data);
-$gXPath = new DOMXpath($gazetteerDoc);
+try{
+    $ch = curl_init();
+    if(!$ch)
+    {
+        $jsonData['status'] = 'ERROR';
+        $jsonData['exception'] = curl_error($ch);
+        $jsonData = json_encode($jsonData);
+        echo $callback . "(" . $jsonData . ");";
+        exit();
+    }
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, "filter=" . rawurlencode($filterText));
+    curl_setopt($ch, CURLOPT_URL, $mctGazetteerGeocoderUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $data = curl_exec($ch);
+    if($data)
+    {
+        $jsonData['status'] = 'ERROR';
+        $jsonData['exception'] = "EXCEPTION:".curl_error($ch);
+        $jsonData = json_encode($jsonData);
+        echo $callback . "(" . $jsonData . ");";
+        exit();
+    }
+    $gazetteerDoc = new DOMDocument();
+
+    $gazetteerDoc -> loadXML($data);
+
+    $gXPath = new DOMXpath($gazetteerDoc);
+    $jsonData['status'] = 'OK';
+}
+catch (Exception $e)
+{
+    $jsonData['status'] = 'ERROR';
+    $jsonData['exception'] = $e->getMessage();
+    $jsonData = json_encode($jsonData);
+    echo $callback . "(" . $jsonData . ");";
+    exit();
+}
 
 if ($searchText) {
 	// Resolve and order the results (we only want a few of the feature types to avoid a massive list)
-	$featureMemberListTOP = $gXPath -> evaluate('gml:featureMember[descendant::node()[contains(@xlink:href,"STAT")] or descendant::node()[contains(@xlink:href,"SUB")] or descendant::node()[contains(@xlink:href,"URBN")]]');
-	$featureMemberListBOTTOM = $gXPath -> evaluate('gml:featureMember[not(descendant::node()[contains(@xlink:href,"STAT")] or descendant::node()[contains(@xlink:href,"SUB")] or descendant::node()[contains(@xlink:href,"URBN")])]');
+	$featureMemberListTOP = $gXPath -> evaluate('gml:featureMember[descendant::node()[contains(@codeSpace,"STAT")] or descendant::node()[contains(@codeSpace,"SUB")] or descendant::node()[contains(@codeSpace,"URBN")]]');
+	$featureMemberListBOTTOM = $gXPath -> evaluate('gml:featureMember[not(descendant::node()[contains(@codeSpace,"STAT")] or descendant::node()[contains(@codeSpace,"SUB")] or descendant::node()[contains(@codeSpace,"URBN")])]');
 	$jsonData['items_count'] = ($featureMemberListTOP -> length) + ($featureMemberListBOTTOM -> length);
 	$items = array();
 	for ($i = 0; $i < $featureMemberListTOP -> length; $i++) {
@@ -110,10 +137,10 @@ if ($searchText) {
 		$item['lat'] = substr($coordsStr, 0, $spPos);
 		$item['lng'] = substr($coordsStr, $spPos + 1);
 		$typeArray = array();
-		$featureTypes = $gXPath -> evaluate('.//@xlink:href', $featureMember);
-		for ($j = 0; $j < $featureTypes -> length - 1; $j++) {
+		$featureTypes = $gXPath -> evaluate('iso19112:SI_LocationInstance/iso19112:locationType/@codeSpace', $featureMember);
+		for ($j = 0; $j < $featureTypes -> length; $j++) {
 			$attrvalue = $featureTypes -> item($j) -> nodeValue;
-			$trimPos = strpos($attrvalue, ':AUSOSP:') + 8;
+			$trimPos = strpos($attrvalue, ':GA:') + 4;
 			array_push($typeArray, substr($attrvalue, $trimPos));
 		}
 		if ($featureTypes -> length > 0) {
@@ -136,10 +163,10 @@ if ($searchText) {
 		$item['lat'] = substr($coordsStr, 0, $spPos);
 		$item['lng'] = substr($coordsStr, $spPos + 1);
 		$typeArray = array();
-		$featureTypes = $gXPath -> evaluate('.//@xlink:href', $featureMember);
-		for ($j = 0; $j < $featureTypes -> length - 1; $j++) {
+		$featureTypes = $gXPath -> evaluate('iso19112:SI_LocationInstance/iso19112:locationType/@codeSpace', $featureMember);
+		for ($j = 0; $j < $featureTypes -> length; $j++) {
 			$attrvalue = $featureTypes -> item($j) -> nodeValue;
-			$trimPos = strpos($attrvalue, ':AUSOSP:') + 8;
+			$trimPos = strpos($attrvalue, ':GA:') + 4;
 			array_push($typeArray, substr($attrvalue, $trimPos));
 		}
 		if ($featureTypes -> length > 0) {
@@ -152,15 +179,14 @@ if ($searchText) {
 
 }
 
-// Resolve the feature type
 if ($feature) {
-	$featureMemberList = $gXPath -> evaluate('gml:featureMember');
+	$featureMemberList = $gXPath -> evaluate('//gml:featureMember');
 	$jsonData['items_count'] = $featureMemberList -> length;
 	$items = array();
 	for ($i = 0; $i < $featureMemberList -> length; $i++) {
 		$item = array();
 		$featureMember = $featureMemberList -> item($i);
-		$item['title'] = $gXPath -> evaluate('.//iso19112:name', $featureMember) -> item(0) -> nodeValue;
+		$item['title'] = $gXPath -> evaluate('.//iso19112:definition', $featureMember) -> item(0) -> nodeValue;
 		$item['id'] = $gXPath -> evaluate('./iso19112:SI_LocationType/@gml:id', $featureMember) -> item(0) -> nodeValue;
 		array_push($items, $item);
 	}
