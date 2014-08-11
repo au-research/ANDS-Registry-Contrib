@@ -23,7 +23,7 @@
     // 	"http://";
     var DEFAULT_SERVICE_POINT = DEFAULT_PROTOCOL +
 	'services.ands.org.au/api/resolver/';
-    var ENABLE_GAZETTEER = true;
+    var ENABLE_GAZETTEER = false;
     //some display constants
     var POLY_COLOUR      = '#008dce';
     var EDIT_POLY_COLOUR = '#ff5b00';
@@ -223,10 +223,9 @@
 				   type + '&callback=?';
 			       $.getJSON(source,
 					 function(data) {
-                         if(data.status == 'OK')
+                         if(data.status == 'OK'){
+                            ENABLE_GAZETTEER = true;
 					        addFeatureTypes(data);
-                         else{
-                            ENABLE_GAZETTEER = false;
                          }
 					 });
 			   });

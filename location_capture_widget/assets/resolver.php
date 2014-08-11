@@ -97,18 +97,24 @@ try{
     curl_setopt($ch, CURLOPT_URL, $mctGazetteerGeocoderUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $data = curl_exec($ch);
-    if($data)
+    if(!$data)
     {
         $jsonData['status'] = 'ERROR';
-        $jsonData['exception'] = "EXCEPTION:".curl_error($ch);
+        $jsonData['exception'] = "NO DATA";
         $jsonData = json_encode($jsonData);
         echo $callback . "(" . $jsonData . ");";
         exit();
     }
     $gazetteerDoc = new DOMDocument();
-
-    $gazetteerDoc -> loadXML($data);
-
+    $result = $gazetteerDoc -> loadXML($data);
+    if($result === false)
+    {
+        $jsonData['status'] = 'ERROR';
+        $jsonData['exception'] = 'not well formed xml';
+        $jsonData = json_encode($jsonData);
+        echo $callback . "(" . $jsonData . ");";
+        exit();
+    }
     $gXPath = new DOMXpath($gazetteerDoc);
     $jsonData['status'] = 'OK';
 }
