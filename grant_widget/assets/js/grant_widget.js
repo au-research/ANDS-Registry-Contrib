@@ -281,7 +281,7 @@
                 description = description.replace(/"/g,'&quot;');
                 resStr +="<p>"+description+"</p>";
             }
-            if(obj[0]['identifier'])
+            if(obj[0]['identifiers'])
             {
                 var i;
                 var identifier = '';
@@ -292,11 +292,11 @@
                     }
                 }
 
-                for (i in obj[0]['identifier_type']) {
-                    if (obj[0]['identifier_type'].hasOwnProperty(i)) {
-                        if(i=='purl')
+                for (j in obj[0]['identifier_type']) {
+                    if (obj[0]['identifier_type'].hasOwnProperty(j)) {
+                        if(j=='purl')
                         {
-                           identifier = obj[0]['identifier_type'][i]
+                           identifier = obj[0]['identifier_type'][j]
                         }
                     }
                 }
@@ -304,6 +304,7 @@
                 resStr += "<h6>Identifier</h6>";
 
                 resStr +="<p>"+identifier+"</p>";
+                obj[0]['identifier'] = identifier
             }
             if(obj[0]['relations'])
             {
@@ -425,7 +426,7 @@
                                 var obj = new Array(this);
                                 if(settings.tooltip) titleStr = 'title="'+_constructGrantHTML(obj,settings)+'"';
 								html+='<li>';
-								html+='<a class="select_grant_search_result preview" grant-id="'+this.key+'" '+titleStr+' >'+this.title+'</a>';
+								html+='<a class="select_grant_search_result preview" grant-id="'+this.identifier+'" '+titleStr+' >'+this.title+'</a>';
 								html+='</li>';
 							});
 							html+='</ul></div>';
@@ -434,6 +435,7 @@
 					}
 					$('.select_grant_search_result', p).on('click', function(){
 						obj.val($(this).attr('grant-id'));
+                        console.log(p)
 						_lookup(obj, settings);
 						if(settings.auto_close_search) _search_form(obj, settings);
 					});
@@ -530,13 +532,13 @@
 
         if($('#div_'+theUl).css('display')=='block')
         {
-            $('#div_'+theUl).slideUp("slow");
+            $('#div_'+theUl).slideUp();
             $(this).html(" + ")
         }
 
         if($('#div_'+theUl).css('display')=='none' || $('#div_'+theUl).css('visibility')=='hidden' )
         {
-            $('#div_'+theUl).slideDown("slow");
+            $('#div_'+theUl).slideDown();
             $(this).html(" - ")
         }
 
