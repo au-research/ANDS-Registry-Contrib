@@ -23,7 +23,7 @@
     // 	"http://";
     var DEFAULT_SERVICE_POINT = DEFAULT_PROTOCOL +
 	'services.ands.org.au/api/resolver/';
-
+    var ENABLE_GAZETTEER = false;
     //some display constants
     var POLY_COLOUR      = '#008dce';
     var EDIT_POLY_COLOUR = '#ff5b00';
@@ -186,7 +186,7 @@
 		 * the map and associated controls.
 		 */
 		function makeMapWidget() {
-		    // loadFeatureTypes();
+            loadFeatureTypes();
 		    getMapControl();
 		}
 
@@ -214,15 +214,24 @@
 		 * the ANDS resolver
 		 */
 		function loadFeatureTypes() {
-		    $.each(['state.', 'feature'],
+            $.ajaxSetup({
+                async: false
+            });
+		    $.each(['feature'],
 			   function(idx, type) {
 			       var source = settings.endpoint + '?feature=' +
 				   type + '&callback=?';
 			       $.getJSON(source,
 					 function(data) {
-					     addFeatureTypes(data);
+                         if(data.status == 'OK'){
+                            ENABLE_GAZETTEER = true;
+					        addFeatureTypes(data);
+                         }
 					 });
 			   });
+            $.ajaxSetup({
+                async: true
+            });
 		}
 
 		/**
@@ -266,7 +275,6 @@
 		function getMapControl() {
 		    var map = null;
 		    var widget_data = $this.data(WIDGET_NS);
-
 		    try {
 			// Set up for reset map.
 			setOriginalInputFieldValue($target.val());
@@ -1054,14 +1062,14 @@
 		    var searchResultsDiv = $("#" + ADDRESS_SEARCH_RESULTS_ID_PREFIX + $this.attr('id'));
 		    if( searchText !== '' ) {
 			searchResultsDiv.html('Searching...');
-  			// if($("input[name=geocoderSelector]:checked").val() === 'geocoderSelector.gazetteer') {
-  			//     gazetteerGeocoder(searchText);
-  			// }
-  			// else{
+  			 if($("input[name=geocoderSelector]:checked").val() === 'geocoderSelector.gazetteer') {
+  			     gazetteerGeocoder(searchText);
+  			 }
+  			 else{
 			    widget_data.geocoder.geocode({ 'address': searchText},
 							 function(results, status) {
   							     addAddressToMap(results, status);});
-  			// }
+  			 }
 		    }
 		    else {
 			searchResultsDiv.html('Nothing to search on! Try entering some terms in the text box above');
@@ -1133,7 +1141,7 @@
 			// Loop through the results
 			for( var i=0; i < data.items.length; i++ ) {
 			    var pointStr = data.items[i].coords;
-			    coordString = data.items[i].lng +","+ data.items[i].lat ;
+			    coordString = data.items[i].lat +","+ data.items[i].lng ;
 			    var	typetext = '';
 			    for( var j=0; j < data.items[i].types.length; j++ ) {
 				if(j !== 0)
@@ -1192,12 +1200,28 @@
 			       mapDialogId,
 			       function() {
 				   $(this).css('overflow', 'hidden');
-				   return '<div class="alw_dialog_text"><i>Search for a region or place to mark on the map</i></div>' +
-				       '<div class="alw_dialog_text">' +
-				       '<input type="text" id="' + searchResultsTextfieldId + '" style="margin: 0px; width: 210px;" />' +
-				       '&nbsp;<button type="button" class="alw_button search">search</button></div>' +
-				       '<div id="' + searchResultsDivId + '" style="padding: 0px 0px 0px 8px; margin: 0px 0px 0px 0px; height: 138px; overflow:auto;">' +
-				       '</div></div>';
+                   if(ENABLE_GAZETTEER){
+                       return '<div class="alw_dialog_text"><i>Search for a region or place to mark on the map</i></div>' +
+                           '<label style="cursor:hand">' +
+                           '<input type="radio" id="geocoderSelector.gazetteer" name="geocoderSelector" checked="checked" value="geocoderSelector.gazetteer" /> ' +
+                           'Australian Gazetteer</label>' +
+                           '<label style="cursor:hand">' +
+                           '<input type="radio" id="geocoderSelector.google" name="geocoderSelector" value="geocoderSelector.google" /> ' +
+                           'Google</label>' +
+                           '<div class="alw_dialog_text">' +
+                           '<input type="text" id="' + searchResultsTextfieldId + '" style="margin: 0px; width: 210px;" />' +
+                           '&nbsp;<button type="button" class="alw_button search">search</button></div>' +
+                           '<div id="' + searchResultsDivId + '" style="padding: 0px 0px 0px 8px; margin: 0px 0px 0px 0px; height: 138px; overflow:auto;">' +
+                           '</div></div>';
+                   }
+                   else{
+                       return '<div class="alw_dialog_text"><i>Search for a region or place to mark on the map</i></div>' +
+                           '<div class="alw_dialog_text">' +
+                           '<input type="text" id="' + searchResultsTextfieldId + '" style="margin: 0px; width: 210px;" />' +
+                           '&nbsp;<button type="button" class="alw_button search">search</button></div>' +
+                           '<div id="' + searchResultsDivId + '" style="padding: 0px 0px 0px 8px; margin: 0px 0px 0px 0px; height: 138px; overflow:auto;">' +
+                           '</div></div>';
+                   }
 			       });
 
 		    $this.on("click",
