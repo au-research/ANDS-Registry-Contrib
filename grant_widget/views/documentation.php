@@ -62,7 +62,7 @@ $('input').grant_widget();
 &lt;input type="text" name="name" id="default_settings_grant" value="" size="40" class=""/&gt;
                 </pre>
                 <pre class="prettyprint">
-$('#default_settings_orcid').grant_widget();
+$('#default_settings_grant').grant_widget();
                 </pre>
                 <input type="text" name="name" id="default_settings_grant" value="1031221" size="40" class=""/>
             </form>
@@ -81,7 +81,8 @@ $('#custom_settings_grant').grant_widget({
     before_html: 'Enter Here: ',
     auto_close_search: true,
     funder_lists: true,
-    funders: '{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}'
+    funders: '{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}',
+    search_fields: '{"search_fields":["title","person","institution","description","id"]}'
 });
                 </pre>
                 <input type="text" name="name" id="custom_settings_grant" value="1031221" size="40" class=""/>

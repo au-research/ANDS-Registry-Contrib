@@ -18,7 +18,8 @@
  * @author Liz Woods <liz.woods@ands.org.au>
  */
 ;(function($) {
-	
+
+
 	//settings
     var WIDGET_NAME = "ANDS Grant service";
     var WIDGET_ID = "_grant_widget_list";
@@ -31,7 +32,7 @@
 
 		var defaults = {
 		    //location (absolute URL) of the jsonp proxy
-		    search_endpoint: 'http://researchdata.ands.org.au/registry/services/api/getGrants/?title=',
+		    search_endpoint: 'http://researchdata.ands.org.au/registry/services/api/getGrants/?',
 		   	lookup_endpoint: 'http://researchdata.ands.org.au/registry/services/api/getGrants/?id=',
 
 		    //auto _lookup once init
@@ -53,7 +54,8 @@
 		    result_error_class: 'grant_error_div',
 		    search_div_class: 'grant_search_div',
 		    nohits_msg: '<p>No matches found.</p>',
-		    query_text: 'Search Query:',
+		    query_text: '<span class="form_label">Search Query:</span>',
+
 		    search_text_btn: 'Search',
 		    close_search_text_btn: '[x]',
 
@@ -65,7 +67,8 @@
 		    //auto close the search box once a value is chosen
 		    auto_close_search: true,
             funder_lists: false,
-            funders: ''
+            funders: '',
+            search_fields: '{"search_fields":["title","person","principalInvestigator","institution","description","id"]}'
 
 		};
 
@@ -73,7 +76,7 @@
 
         //ANDS Environment
         if (typeof(window.real_base_url) !== 'undefined'){
-            defaults['search_endpoint'] = window.real_base_url + 'registry/services/api/getGrants/?title=';
+            defaults['search_endpoint'] = window.real_base_url + 'registry/services/api/getGrants/?';
             defaults['lookup_endpoint'] = window.real_base_url + 'registry/services/api/getGrants/?id=';
         }
 
@@ -133,22 +136,28 @@
 
 		//use settings
 		if(settings.search){
-            var funders_list = '';
+             var funders_list = '';
 			 if(settings.funder_lists)
              {
-                 //alert(settings.funders);
-                funders_list = '<select name="funders" class="funder"><option value="All">All</option>'
-
+                funders_list = '<span class="form_label">Funding Orgs:</span> <select name="funders" class="funder"><option value="All">All</option>'
                 var theList = jQuery.parseJSON((settings.funders));
                 for(i=0;i<theList.funder_list.length;i++){
                     funders_list = funders_list + '<option value="'+theList.funder_list[i]+'">'+theList.funder_list[i]+'</option>';
                 }
-
-                funders_list = funders_list +'</select>'
+                funders_list = funders_list +'</select><br />'
 
              }
+            if(settings.search_fields)
+            {
+                var field_list = '<span class="form_label">Fields:</span>';
+                var fields = jQuery.parseJSON(settings.search_fields)
+                for(i=0;i<fields['search_fields'].length;i++)
+                {
+                    field_list += fields['search_fields'][i]+'<input type="checkbox" name="'+fields['search_fields'][i]+'" value="'+fields['search_fields'][i]+'" class="search_fields"/> &nbsp; &nbsp;';
+                }
+             }
 			var search_btn = $('<button>').addClass(settings.search_class).html(settings.search_text);
-			var search_html = settings.query_text+' <input type="text" class="grant_search_input"/> '+funders_list+' <a class="search_grant">'+settings.search_text_btn+'</a><div class="grant_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a>';
+			var search_html = '<p>'+settings.query_text+' <span class="indent"><input type="text" class="grant_search_input"/></p><p>'+funders_list+'</p><p>'+field_list+' </span></p><p><a class="search_grant"><button>'+settings.search_text_btn+'</button></a><div class="grant_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a></p>';
 			var search_div = $('<div>').addClass(settings.search_div_class).html(search_html);
 
 			if(!settings.pre_open_search) $(search_div).hide();
@@ -161,7 +170,7 @@
 				//enter key
 
 				if(e.keyCode==13){
-                    console.log($(this).next().prop("tagName"))
+                    var fields = _get_fields();
                     if($(this).next().prop("tagName")=='A')
                     {
                         var funder = 'All'
@@ -169,7 +178,7 @@
                         var funder = $('select.funder').val()
                     }
 
-					_search($(this).val(), funder,obj, settings); return false;
+					_search($(this).val(), funder, fields,obj, settings); return false;
 				}
 			});
 			$('.search_grant', p).on('click', function(e){
@@ -177,18 +186,21 @@
 				e.preventDefault();
 				e.stopPropagation();
 				var query = $('.grant_search_input', p).val();
+                var fields = _get_fields()
+
                 if($(this).next().prop("tagName")=='A')
                 {
                     var funder = 'All'
                 }else{
                     var funder = $('select.funder').val()
                 }
-				_search(query,funder, obj, settings);
+				_search(query,funder,fields, obj, settings);
 			});
 			$('.close_search', p).on('click', function(){
 				//close button
 				$('.'+settings.search_div_class, p).slideUp();
 			});
+
 		}
 		
 		//before_html
@@ -268,6 +280,30 @@
                 var description = $('<textarea />').html(obj[0]['description']).text();
                 description = description.replace(/"/g,'&quot;');
                 resStr +="<p>"+description+"</p>";
+            }
+            if(obj[0]['identifier'])
+            {
+                var i;
+                var identifier = '';
+
+                for (i in obj[0]['identifier_type']) {
+                    if (obj[0]['identifier_type'].hasOwnProperty(i)) {
+                        identifier = obj[0]['identifier_type'][i]
+                    }
+                }
+
+                for (i in obj[0]['identifier_type']) {
+                    if (obj[0]['identifier_type'].hasOwnProperty(i)) {
+                        if(i=='purl')
+                        {
+                           identifier = obj[0]['identifier_type'][i]
+                        }
+                    }
+                }
+
+                resStr += "<h6>Identifier</h6>";
+
+                resStr +="<p>"+identifier+"</p>";
             }
             if(obj[0]['relations'])
             {
@@ -355,29 +391,35 @@
 	 * @param  {object} settings local settings of the plugin
 	 * @return {void}            this will modify the DOM based on the search result
 	 */
-	function _search(query, funder, obj, settings){
+	function _search(query, funder, fields, obj, settings){
 		var p = obj.p;
 		var result_div = p.find('.'+settings.grant_search_result);
-
+        var thefields = jQuery.parseJSON(fields)
+        var matches = '0';
         var funder_list = '';
         if(funder!='All')
         {
-            funder_list = '&groups='+funder;
+            funder_list = '&group='+funder;
         }
 		if($.trim(query)==""){
 			$('.grant_search_result', p).html('Please enter a search string');
 		}else{
 			$('.grant_search_result', p).html('Loading...');
-			$.ajax({
-				url:settings.search_endpoint+encodeURIComponent(query)+funder_list+'&start=0&rows=10&callback=?',
-				dataType: 'JSONP',
-				success: function(data){
+            var html = '';
+            for(i=0;i<thefields['search_fields'].length;i++)
+            {       $.ajax({
+				    url:settings.search_endpoint+thefields['search_fields'][i]+"="+encodeURIComponent(query)+funder_list+'&start=0&rows=10&callback=?',
+                    indexValue: i,
+				    dataType: 'JSONP',
+				    success: function(data){
 					if(settings.success_handler && (typeof settings.success_handler === 'function')){
 						settings.success_handler(data, obj, settings);
 					}else{
-
 						if(data.message['numFound']>0){
-							var html='<ul>';
+                            matches = data.message['numFound']
+                            html += '<a class="show_list" id="'+this.indexValue+'"> + </a>'+data.message['numFound']+" found in <i>"+ thefields['search_fields'][this.indexValue]+"</i><br />";
+							html +='<div id="div_'+this.indexValue+'" style="display:none"><ul>';
+
 							$.each(data.message['recordData'], function(){
  								var titleStr = "";
                                 var obj = new Array(this);
@@ -386,10 +428,8 @@
 								html+='<a class="select_grant_search_result preview" grant-id="'+this.key+'" '+titleStr+' >'+this.title+'</a>';
 								html+='</li>';
 							});
-							html+='</ul>';
+							html+='</ul></div>';
 							$('.grant_search_result', p).html(html);
-						}else{
-							$('.grant_search_result', p).html(settings.nohits_msg);
 						}
 					}
 					$('.select_grant_search_result', p).on('click', function(){
@@ -430,7 +470,14 @@
 					}
 				}
 			});
+        }
+
+        if(matches == '0')
+            {
+                $('.grant_search_result', p).html(settings.nohits_msg);
+            }
 		}
+
 	}
 
 	//remove (if exist) error and result
@@ -448,12 +495,52 @@
 	function _search_form(obj, settings){
 		obj.p.children('.'+settings.search_div_class).slideToggle();
 	}
-	
+
+    function _get_fields()
+    {
+        var fields = '';
+        $.each($('.search_fields'),function()
+        {
+            if($(this).attr('checked'))
+            {
+                if(fields==''){
+                    fields += '{"search_fields":["'+$(this).attr('name')+'"'
+                }else{
+                    fields += ', "'+$(this).attr('name')+'"'
+                }
+            }
+        })
+        if(fields=='')
+        {
+            fields= '{"search_fields":["title","person","principalInvestigator","institution","description","id"'
+        }
+        fields += ']}'
+        return fields;
+    }
+
 	//catch all .grant_widget and apply grant_widget() with default settings on
 
 	$('.grant_widget').each(function(){
 	   	var elem = $(this);
 	   	var widget = elem.grant_widget();
     });
+
+    $(document).on("click", ".show_list", function(e) {
+        var theUl = $(this).attr('id');
+
+        if($('#div_'+theUl).css('display')=='block')
+        {
+            $('#div_'+theUl).slideUp("slow");
+            $(this).html(" + ")
+        }
+
+        if($('#div_'+theUl).css('display')=='none' || $('#div_'+theUl).css('visibility')=='hidden' )
+        {
+            $('#div_'+theUl).slideDown("slow");
+            $(this).html(" - ")
+        }
+
+    });
+
 
 })( jQuery );
