@@ -168,9 +168,8 @@
 			});
 			$('input.grant_search_input', p).on('keypress', function(e){
 				//enter key
-
 				if(e.keyCode==13){
-                    var fields = _get_fields();
+                    var searching_fields = _get_fields(fields);
                     if($(this).next().prop("tagName")=='A')
                     {
                         var funder = 'All'
@@ -178,23 +177,22 @@
                         var funder = $('select.funder').val()
                     }
 
-					_search($(this).val(), funder, fields,obj, settings); return false;
+					_search($(this).val(), funder, searching_fields ,obj, settings); return false;
 				}
 			});
 			$('.search_grant', p).on('click', function(e){
 				//click grant search
-				e.preventDefault();
+ 				e.preventDefault();
 				e.stopPropagation();
 				var query = $('.grant_search_input', p).val();
-                var fields = _get_fields()
-
+                var searching_fields = _get_fields(fields);
                 if($(this).next().prop("tagName")=='A')
                 {
                     var funder = 'All'
                 }else{
                     var funder = $('select.funder').val()
                 }
-				_search(query,funder,fields, obj, settings);
+				_search(query,funder,searching_fields, obj, settings);
 			});
 			$('.close_search', p).on('click', function(){
 				//close button
@@ -393,6 +391,7 @@
 	 * @return {void}            this will modify the DOM based on the search result
 	 */
 	function _search(query, funder, fields, obj, settings){
+        alert(fields);
 		var p = obj.p;
 		var result_div = p.find('.'+settings.grant_search_result);
         var thefields = jQuery.parseJSON(fields)
@@ -435,11 +434,8 @@
 					}
 					$('.select_grant_search_result', p).on('click', function(){
 						obj.val($(this).attr('grant-id'));
-                        $('.listdiv').each(function(){
-                            $(this).slideUp();
-                        });
 						_lookup(obj, settings);
-						if(settings.auto_close_search) _search_form(obj, settings);
+						if(settings.auto_close_search) $('.'+settings.search_div_class).slideUp();
 					});
 					if(settings.tooltip){
 						$('.preview').each(function(){       
@@ -498,12 +494,12 @@
 	//open the search form
 	function _search_form(obj, settings){
 		$('.'+settings.search_div_class).slideToggle();
-       // console.log(obj.p.children(":first"))
 	}
 
-    function _get_fields()
+    function _get_fields(searching_fields)
     {
-        var fields = '';
+        var fields ='';
+
         $.each($('.search_fields'),function()
         {
             if($(this).attr('checked'))
@@ -517,8 +513,16 @@
         })
         if(fields=='')
         {
-            fields= '{"search_fields":["title","person","principalInvestigator","institution","description","id"'
+            fields= '{"search_fields":[';
+            for(field in searching_fields.search_fields)
+            {
+                if(searching_fields.search_fields.hasOwnProperty(field))
+                {
+                    fields += '"'+searching_fields.search_fields[field]+'",'
+                }
+            }
         }
+        fields = fields.replace(/(^,)|(,$)/g, "")
         fields += ']}'
         return fields;
     }
