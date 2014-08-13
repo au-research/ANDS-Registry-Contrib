@@ -92,7 +92,7 @@ $('#custom_settings_grant').grant_widget({
 
 <?php 
     $config = array(
-        array('search_endpoint', 'http://researchdata.ands.org.au/registry/services/api/getGrants/?title=', 'JSONP search API for Grants'),
+        array('search_endpoint', 'http://researchdata.ands.org.au/registry/services/api/getGrants/', 'JSONP search API for Grants'),
         array('lookup_endpoint','http://researchdata.ands.org.au/registry/services/api/getGrants/?id=','JSONP API for Grants Lookup service'),
         array('pre_lookup', 'false','Automatically Do a lookup on the current value of the input field'),
         array('search','true', 'Display Search Button, enable searching functionality'),
@@ -116,7 +116,8 @@ $('#custom_settings_grant').grant_widget({
         array('lookup_success_hook', 'false', 'a function hook after a successful lookup returns <code>function()</code>'),
         array('auto_close_search', 'false', 'boolean, To automatically close the search box after a value is selected'),
         array('funder_lists', 'false', 'boolean, To allow for user provided lists of funders to search against'),
-        array('funders','', 'json string providing list of funders in the funding_list element eg. funders: &#39;{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}&#39;')
+        array('funders','', 'json string providing list of funders in the funding_list element eg. funders: &#39;{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}&#39;'),
+        array('search_fields','', 'json string providing list of searchable fields of the api &#39;{"search_fields":["title","person","institution","description","id"]} &#39;')
     );
 ?>
 

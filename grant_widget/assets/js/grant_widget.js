@@ -419,7 +419,7 @@
 						if(data.message['numFound']>0){
                             matches = data.message['numFound']
                             html += '<a class="show_list" id="'+this.indexValue+'"> + </a>'+data.message['numFound']+" found in <i>"+ thefields['search_fields'][this.indexValue]+"</i><br />";
-							html +='<div id="div_'+this.indexValue+'" style="display:none"><ul>';
+							html +='<div id="div_'+this.indexValue+'" class="listdiv" style="display:none"><ul>';
 
 							$.each(data.message['recordData'], function(){
  								var titleStr = "";
@@ -435,7 +435,9 @@
 					}
 					$('.select_grant_search_result', p).on('click', function(){
 						obj.val($(this).attr('grant-id'));
-                        console.log(p)
+                        $('.listdiv').each(function(){
+                            $(this).slideUp();
+                        });
 						_lookup(obj, settings);
 						if(settings.auto_close_search) _search_form(obj, settings);
 					});
@@ -495,7 +497,8 @@
 
 	//open the search form
 	function _search_form(obj, settings){
-		obj.p.children('.'+settings.search_div_class).slideToggle();
+		$('.'+settings.search_div_class).slideToggle();
+       // console.log(obj.p.children(":first"))
 	}
 
     function _get_fields()
@@ -529,18 +532,7 @@
 
     $(document).on("click", ".show_list", function(e) {
         var theUl = $(this).attr('id');
-
-        if($('#div_'+theUl).css('display')=='block')
-        {
-            $('#div_'+theUl).slideUp();
-            $(this).html(" + ")
-        }
-
-        if($('#div_'+theUl).css('display')=='none' || $('#div_'+theUl).css('visibility')=='hidden' )
-        {
-            $('#div_'+theUl).slideDown();
-            $(this).html(" - ")
-        }
+        $('#div_'+theUl).slideToggle();
 
     });
 
