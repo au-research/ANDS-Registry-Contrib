@@ -391,8 +391,7 @@
 	 * @return {void}            this will modify the DOM based on the search result
 	 */
 	function _search(query, funder, fields, obj, settings){
-        alert(fields);
-		var p = obj.p;
+ 		var p = obj.p;
 		var result_div = p.find('.'+settings.grant_search_result);
         var thefields = jQuery.parseJSON(fields)
         var matches = '0';
