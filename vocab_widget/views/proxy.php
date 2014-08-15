@@ -26,13 +26,15 @@ if (isset($solr_base) && !empty($solr_base)) {
     define("SOLR_URL", $solr_base . "select?wt=phps&rows=0&q=subject_vocab_uri%%3A(%%22%s%%22)+%s+%s");
 }
 else {
-    define("SOLR_URL", "http://ands3.anu.edu.au:8080/solr1/collection1/select?wt=phps&rows=0&q=subject_vocab_uri%%3A(%%22%s%%22)+%s+%s");
+	throw new Exception('SOLR must be configured and installed correctly');
+    // define("SOLR_URL", "http://researchdata.ands.org.au:8080/solr/select?wt=phps&rows=0&q=subject_vocab_uri%%3A(%%22%s%%22)+%s+%s");
 }
 if (isset($sissvoc_base) && !empty($sissvoc_base)) {
     define("BASE_URL", $sissvoc_base);
 }
 else {
-    define("BASE_URL", "http://researchdata.ands.org.au:8080/vocab/api/");
+	throw new Exception('Vocab Server must be configured and installed correctly');
+    // define("BASE_URL", "http://researchdata.ands.org.au:8080/vocab/api/");
 }
 
 define("SEARCH_URL", "/concepts.json?anycontains=");
@@ -241,7 +243,7 @@ class VocabProxy
 					    is_array($i['broader']))
 
 					{
-					    $i['broader'] = $i['broader']['_about'];
+					    $i['broader'] = $i['_about'];
 					}
 
 

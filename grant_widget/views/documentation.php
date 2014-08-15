@@ -62,7 +62,7 @@ $('input').grant_widget();
 &lt;input type="text" name="name" id="default_settings_grant" value="" size="40" class=""/&gt;
                 </pre>
                 <pre class="prettyprint">
-$('#default_settings_orcid').grant_widget();
+$('#default_settings_grant').grant_widget();
                 </pre>
                 <input type="text" name="name" id="default_settings_grant" value="1031221" size="40" class=""/>
             </form>
@@ -81,7 +81,8 @@ $('#custom_settings_grant').grant_widget({
     before_html: 'Enter Here: ',
     auto_close_search: true,
     funder_lists: true,
-    funders: '{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}'
+    funders: '{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}',
+    search_fields: '{"search_fields":["title","person","institution","description","id"]}'
 });
                 </pre>
                 <input type="text" name="name" id="custom_settings_grant" value="1031221" size="40" class=""/>
@@ -91,7 +92,7 @@ $('#custom_settings_grant').grant_widget({
 
 <?php 
     $config = array(
-        array('search_endpoint', 'http://researchdata.ands.org.au/registry/services/api/getGrants/?title=', 'JSONP search API for Grants'),
+        array('search_endpoint', 'http://researchdata.ands.org.au/registry/services/api/getGrants/', 'JSONP search API for Grants'),
         array('lookup_endpoint','http://researchdata.ands.org.au/registry/services/api/getGrants/?id=','JSONP API for Grants Lookup service'),
         array('pre_lookup', 'false','Automatically Do a lookup on the current value of the input field'),
         array('search','true', 'Display Search Button, enable searching functionality'),
@@ -115,7 +116,8 @@ $('#custom_settings_grant').grant_widget({
         array('lookup_success_hook', 'false', 'a function hook after a successful lookup returns <code>function()</code>'),
         array('auto_close_search', 'false', 'boolean, To automatically close the search box after a value is selected'),
         array('funder_lists', 'false', 'boolean, To allow for user provided lists of funders to search against'),
-        array('funders','', 'json string providing list of funders in the funding_list element eg. funders: &#39;{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}&#39;')
+        array('funders','', 'json string providing list of funders in the funding_list element eg. funders: &#39;{"funder_list":["Australian Research Council","National Health and Medical Research Council"]}&#39;'),
+        array('search_fields','', 'json string providing list of searchable fields of the api &#39;{"search_fields":["title","person","institution","description","id"]} &#39;')
     );
 ?>
 

@@ -409,6 +409,7 @@ return n()&&r(),{name:function(){return e}}},jstz.olson={},jstz.olson.timezones=
         if (this.component){
           var input = this.$element.find('input');
           input.val(formatted);
+          input.trigger('input');
         }
       } else {
         this.$element.val(formatted);

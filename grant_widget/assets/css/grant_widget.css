@@ -56,3 +56,13 @@
 .custom_info_box h6{
 	font-size: 1.2em;
 }
+
+.form_label{
+    float:left;
+    width:100px;
+    font-weight:bold;
+}
+.show_list{
+    position:relative;
+    display:inline;
+}
