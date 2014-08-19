@@ -41,7 +41,7 @@
 		    //Text Settings
 		    search: true,
 		    pre_open_search: false,
-		    tooltip:true,
+		    tooltip:false,
 		    info_box_class:'info-box',
 		    search_text: '<i class="icon-search"></i> Search',
 		    search_class: 'grant_search btn btn-default btn-small',
@@ -59,6 +59,11 @@
 		    search_text_btn: 'Search',
 		    close_search_text_btn: '[x]',
 
+            //allow custom settings for the funders and search fields
+            funder_lists: false,
+            funders: '',
+            search_fields: '{"search_fields":["title","person","principalInvestigator","institution","description","id"]}',
+
 		    //custom hooks and handlers
 		    lookup_error_handler: false,
 		    lookup_success_handler: false,
@@ -66,9 +71,7 @@
 
 		    //auto close the search box once a value is chosen
 		    auto_close_search: true,
-            funder_lists: false,
-            funders: '',
-            search_fields: '{"search_fields":["title","person","principalInvestigator","institution","description","id"]}'
+
 
 		};
 
@@ -170,11 +173,11 @@
 				//enter key
 				if(e.keyCode==13){
                     var searching_fields = _get_fields(fields);
-                    if($(this).next().prop("tagName")=='A')
+                    if($('select.funder').val())
                     {
-                        var funder = 'All'
-                    }else{
                         var funder = $('select.funder').val()
+                    }else{
+                        var funder = 'All'
                     }
 
 					_search($(this).val(), funder, searching_fields ,obj, settings); return false;
@@ -186,11 +189,12 @@
 				e.stopPropagation();
 				var query = $('.grant_search_input', p).val();
                 var searching_fields = _get_fields(fields);
-                if($(this).next().prop("tagName")=='A')
+                if($('select.funder').val())
                 {
-                    var funder = 'All'
-                }else{
+
                     var funder = $('select.funder').val()
+                }else{
+                    var funder = 'All'
                 }
 				_search(query,funder,searching_fields, obj, settings);
 			});
@@ -307,11 +311,12 @@
             if(obj[0]['relations'])
             {
                 resStr += "<h6>Relationships</h6>";
+
                 if(typeof(obj[0]['relations']['isFundedBy'])=='string')
                 {
                     resStr +="<p>Is funded by</p>";
                     resStr +="<p>"+obj[0]['relations']['isFundedBy']+"</p>";
-                }else if (typeof(obj[0]['relations']['isFundedBy'])=='array'){
+                }else if (typeof(obj[0]['relations']['isFundedBy'])=='object'){
                     resStr +="<p>Is funded by</p><p>";
                     for(i=0;i<obj[0]['relations']['isFundedBy'].length;i++)
                     {
@@ -324,7 +329,7 @@
                 {
                     resStr +="<p>Is managed by</p>";
                     resStr +="<p>"+obj[0]['relations']['isManagedBy']+"</p>";
-                }else if (typeof(obj[0]['relations']['isManagedBy'])=='array'){
+                }else if (typeof(obj[0]['relations']['isManagedBy'])=='object'){
                     resStr +="<p>Is managed by</p><p>";
                     for(i=0;i<obj[0]['relations']['isManagedBy'].length;i++)
                     {
@@ -337,7 +342,7 @@
                 {
                     resStr +="<p>Has participant</p>";
                     resStr +="<p>"+obj[0]['relations']['isParticipantIn']+"</p>";
-                }else if(typeof(obj[0]['relations']['isParticipantIn'])=='array'){
+                }else if(typeof(obj[0]['relations']['isParticipantIn'])=='object'){
                     resStr +="<p>Has participant</p><p>";
                     for(i=0;i<obj[0]['relations']['isParticipantIn'].length;i++)
                     {
@@ -350,7 +355,7 @@
                 {
                     resStr +="<p>Has principal investigator</p>";
                     resStr +="<p>"+obj[0]['relations']['isPrincipalInvestigatorOf']+"</p>";
-                }else if (typeof(obj[0]['relations']['isPrincipalInvestigatorOf'])=='array'){
+                }else if (typeof(obj[0]['relations']['isPrincipalInvestigatorOf'])=='object'){
                     resStr +="<p>Has principal investigator</p><p>";
                     for(i=0;i<obj[0]['relations']['isPrincipalInvestigatorOf'].length;i++)
                     {
@@ -371,6 +376,40 @@
 		resStr += "</div>"
 		return resStr;
 	}
+
+    /**
+     * construct a string out from an Grant object to obtain identifier value
+     * @param  {grant['grant-profile']} obj grant-profile array of the returned object
+     * @return {string}    identifier value
+     */
+    function _getIdentifier(obj,settings) {
+        if(obj.length==1)
+        {
+            if(obj[0]['identifiers'])
+            {
+                var i;
+                var identifier = '';
+
+                for (i in obj[0]['identifier_type']) {
+                    if (obj[0]['identifier_type'].hasOwnProperty(i)) {
+                        identifier = obj[0]['identifier_type'][i]
+                    }
+                }
+
+                for (j in obj[0]['identifier_type']) {
+                    if (obj[0]['identifier_type'].hasOwnProperty(j)) {
+                        if(j=='purl')
+                        {
+                            identifier = obj[0]['identifier_type'][j]
+                        }
+                    }
+                }
+
+            }
+
+        }
+        return identifier;
+    }
 
 	/**
 	 * isset equivalent for javascript
@@ -422,9 +461,11 @@
 							$.each(data.message['recordData'], function(){
  								var titleStr = "";
                                 var obj = new Array(this);
+                                var identifier = _getIdentifier(obj,settings);
                                 if(settings.tooltip) titleStr = 'title="'+_constructGrantHTML(obj,settings)+'"';
+
 								html+='<li>';
-								html+='<a class="select_grant_search_result preview" grant-id="'+this.identifier+'" '+titleStr+' >'+this.title+'</a>';
+								html+='<a class="select_grant_search_result preview" grant-id="'+identifier+'" '+titleStr+' >'+this.title+'</a>';
 								html+='</li>';
 							});
 							html+='</ul></div>';
@@ -498,10 +539,9 @@
     function _get_fields(searching_fields)
     {
         var fields ='';
-
         $.each($('.search_fields'),function()
         {
-            if($(this).attr('checked'))
+            if($(this).prop('checked'))
             {
                 if(fields==''){
                     fields += '{"search_fields":["'+$(this).attr('name')+'"'

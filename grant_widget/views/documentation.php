@@ -26,7 +26,7 @@
 
             <h2>What is this widget?</h2>
             <p>
-                The ANDS Grant Widget allows you to lookup grant id and search for one.
+                The ANDS Grant Widget allows you to verify a research grant ID against the grant information supplied by research funders to ANDS, or alternatively to search for a grant using keywords in the following fields - Title, Lead Institution, Investigrators, Principal Investigator, Description.
             </p>
             <p>
                 This widget is a jQuery plugin with extensible options over styling and functionality. Hence the widget is dependent on the jQuery plugin to function correctly.
