@@ -156,7 +156,7 @@
                 var fields = jQuery.parseJSON(settings.search_fields)
                 for(i=0;i<fields['search_fields'].length;i++)
                 {
-                    field_list += fields['search_fields'][i]+'<input type="checkbox" name="'+fields['search_fields'][i]+'" value="'+fields['search_fields'][i]+'" class="search_fields"/> &nbsp; &nbsp;';
+                    field_list += fields['search_fields'][i]+'<span class="space"> </span><input type="checkbox" name="'+fields['search_fields'][i]+'" value="'+fields['search_fields'][i]+'" class="search_fields"/> &nbsp; &nbsp;';
                 }
              }
 			var search_btn = $('<button>').addClass(settings.search_class).html(settings.search_text);
@@ -575,6 +575,12 @@
 
     $(document).on("click", ".show_list", function(e) {
         var theUl = $(this).attr('id');
+        if($('#div_'+theUl).css('display')=='none')
+        {
+            $('#'+theUl).html(' - ')
+        }else{
+            $('#'+theUl).html(' + ')
+        }
         $('#div_'+theUl).slideToggle();
 
     });

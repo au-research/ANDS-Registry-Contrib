@@ -63,6 +63,10 @@
     font-weight:bold;
 }
 .show_list{
-    position:relative;
-    display:inline;
+    float:left;
+    left:15px;
+    width:15px;
+}
+.space{
+    width:15px;
 }
