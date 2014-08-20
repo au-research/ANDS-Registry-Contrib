@@ -167,6 +167,7 @@
 			p.append(search_btn).append(search_div);
 			$(search_btn).on('click', function(e){
 				e.preventDefault();
+                $('.grant_success_div').hide()
 				_search_form(obj, settings);
 			});
 			$('input.grant_search_input', p).on('keypress', function(e){
@@ -223,6 +224,7 @@
 	 * @return {void}            this will modify the DOM based on the return value
 	 */
 	function _lookup(obj, settings){
+        $('.'+settings.search_div_class).slideUp()
 		var value = obj.val().replace('http://','');
 		$.ajax({
 			url:settings.lookup_endpoint+encodeURIComponent(value)+'&callback=?',
