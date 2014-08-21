@@ -87,6 +87,7 @@
 						</div>
 				</div>
 				<div id="item_preview" class="span3">
+					<?php if(isset($items)): ?>
 					<?php foreach($items as $i):?>
 					<div class="flexslider hide" id="<?php echo $i['id'];?>-preview">
 						<img src="<?php echo $i['img_url'];?>" alt="" />
@@ -97,6 +98,7 @@
 						<a target="_blank" href="<?php echo $i['url'];?>"><strong><?php echo (isset($i['url_text']) && $i['url_text'] ? $i['url_text'] : $i['url']);?></strong></a>
 					</div>
 					<?php endforeach;?>
+					<?php endif; ?>
 				</div>
 			</div>
 		</div>
