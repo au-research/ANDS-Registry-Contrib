@@ -485,7 +485,7 @@
 						_lookup(obj, settings);
 						if(settings.auto_close_search) $('#'+settings._wid).slideUp();
 
-                        $(document.body).scrollTop($('#return'+settings._wid).offset().top);
+                        $(document.body).scrollTop($('#return'+settings._wid).offset().top -100);
 
 					});
 					if(settings.tooltip){
