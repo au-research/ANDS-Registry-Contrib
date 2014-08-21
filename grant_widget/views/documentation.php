@@ -99,6 +99,7 @@ $('#custom_settings_grant').grant_widget({
         array('pre_open_search','false','Open Search Box by default'),
         array('search_text','&lt;i class="icon-search"&gt;&lt;/i&gt; Search','Text to display on the open search box button'),
         array('search_class','grant_search btn btn-small','CSS class to apply on the open search box button'),
+        array('tooltip','Boolean to have hover tool tip or not','false,'),
         array('lookup','true','Display the Lookup button, enable Lookup functionality'),
         array('lookup_text', 'Look up','Text for the lookup button'),
         array('lookup_class', 'grant_lookup btn btn-small','Lookup button CSS class'),
