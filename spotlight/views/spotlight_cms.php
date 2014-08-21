@@ -17,6 +17,7 @@
 					</ul>
 				</div>
 				<div id="item_detail" class="span5">
+					<?php if(isset($items)): ?>
 					<?php foreach($items as $i):?>
 						<div id="<?php echo $i['id'];?>-content" class="item-content hide">
 							<form _id="<?php echo $i['id'];?>">
@@ -52,6 +53,7 @@
 							</form>
 						</div>
 					<?php endforeach;?>
+					<?php endif; ?>
 						<div id="new-content" class="item-content hide">
 							<form _id="new">
 							<fieldset>
