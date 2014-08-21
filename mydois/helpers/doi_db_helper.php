@@ -147,6 +147,7 @@
 		'doi_id'=> $doi_id, 
 		'publisher' => $publisher,
 		'publication_year' => $publicationYear,
+        'updated_when' => $updateTime,
 		'client_id'=> $client_id,
 		'created_who'=>$created_who,
 		'status'=>$status,
@@ -202,7 +203,8 @@
 
 	function updateDoiObjectAttributes($doi_id,$publisher,$publish_year,$languageValue,$versionValue,$rightsValue,$xml)
 	{
-		$data = array('publisher' => $publisher,'publication_year' => $publish_year,'language' => $languageValue,'version' => $versionValue,'rights' => $rightsValue,'datacite_xml'=>$xml);
+        $updateTime = date("Y-m-d H:i:s");
+        $data = array('publisher' => $publisher,'publication_year' => $publish_year,'updated_when'=> $updateTime,'language' => $languageValue,'version' => $versionValue,'rights' => $rightsValue,'datacite_xml'=>$xml);
 		$where = "doi_id = '".$doi_id."'";
 		$CI =& get_instance();
 		$db = $CI->load->database('dois', TRUE);

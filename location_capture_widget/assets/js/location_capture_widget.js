@@ -22,7 +22,7 @@
     // 	"https://" :
     // 	"http://";
     var DEFAULT_SERVICE_POINT = DEFAULT_PROTOCOL +
-	'services.ands.org.au/api/resolver/';
+	'services.ands.org.au/api/resolver';
     var ENABLE_GAZETTEER = false;
     //some display constants
     var POLY_COLOUR      = '#008dce';
@@ -187,7 +187,6 @@
 		 */
 		function makeMapWidget() {
             loadFeatureTypes();
-		    getMapControl();
 		}
 
 		/**
@@ -214,9 +213,6 @@
 		 * the ANDS resolver
 		 */
 		function loadFeatureTypes() {
-            $.ajaxSetup({
-                async: false
-            });
 		    $.each(['feature'],
 			   function(idx, type) {
 			       var source = settings.endpoint + '?feature=' +
@@ -226,12 +222,10 @@
                          if(data.status == 'OK'){
                             ENABLE_GAZETTEER = true;
 					        addFeatureTypes(data);
+                            getMapControl();
                          }
 					 });
 			   });
-            $.ajaxSetup({
-                async: true
-            });
 		}
 
 		/**
