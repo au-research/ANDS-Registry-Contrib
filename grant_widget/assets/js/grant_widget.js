@@ -123,8 +123,8 @@
 			var p = obj.parent();
 			obj.p = p;
 		}
-        obj.top = obj.p[0].offsetTop;
-        obj.left = obj.p[0].offsetLeft
+        obj[0].name = '#'+settings._wid;
+
 
 		//init a lookup if settings told you to
 		if(settings.pre_lookup || (obj.attr('data-autolookup')==='true')) _lookup(obj, settings);
@@ -162,11 +162,12 @@
                     field_list += field_display+'<span class="space"> </span><input type="checkbox" name="'+fields['search_fields'][i]+'" value="'+fields['search_fields'][i]+'" checked class="search_fields'+settings._wid+'"/> &nbsp; &nbsp;';
                 }
              }
+            var return_spot = $('<a name="'+settings._wid+'" id="return'+settings._wid+'"></a>')
 			var search_btn = $('<button>').addClass(settings.search_class).html(settings.search_text);
 			var search_html = '<p>'+settings.query_text+' <span class="indent"><input type="text" class="grant_search_input"/></p><p>'+funders_list+'</p><p>'+field_list+' </span></p><p><a class="search_grant"><button>'+settings.search_text_btn+'</button></a><div class="grant_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a></p>';
 			var search_div = $('<div id="'+settings._wid+'">').addClass(settings.search_div_class).html(search_html);
 
-
+            p.append(return_spot)
 			p.append(search_btn).append(search_div);
             if(!settings.pre_open_search)  $('#'+settings._wid).hide()
 			$(search_btn).on('click', function(e){
@@ -483,9 +484,9 @@
 						obj.val($(this).attr('grant-id'));
 						_lookup(obj, settings);
 						if(settings.auto_close_search) $('#'+settings._wid).slideUp();
-                       //go to anchor tag
-                        //console.log
-                        //window.scrollTo(obj.top,obj.left)
+
+                        $(document.body).scrollTop($('#return'+settings._wid).offset().top);
+
 					});
 					if(settings.tooltip){
 						$('.preview').each(function(){       
@@ -587,6 +588,10 @@
         });
         return uuid;
     };
+
+    function scrollTo(hash) {
+        location.hash = "#" + hash;
+    }
 	//catch all .grant_widget and apply grant_widget() with default settings on
 
 	$('.grant_widget').each(function(){
