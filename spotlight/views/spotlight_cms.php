@@ -8,9 +8,11 @@
 			<div class="row">
 				<div id="item_list" class="span3">
 					<ul>
+					<?php if(isset($items)): ?>
 					<?php foreach($items as $i):?>
 						<li id="<?php echo $i['id'];?>"><a href="javascript:;"><?php echo $i['title'];?></a></li>
 					<?php endforeach;?>
+					<?php endif; ?>
 					<li id="new"><a href="javascript:;"><i class="icon-plus"></i> <b>Add New</b></a>
 					</ul>
 				</div>
