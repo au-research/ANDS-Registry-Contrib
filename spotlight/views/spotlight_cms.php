@@ -8,13 +8,16 @@
 			<div class="row">
 				<div id="item_list" class="span3">
 					<ul>
+					<?php if(isset($items)): ?>
 					<?php foreach($items as $i):?>
 						<li id="<?php echo $i['id'];?>"><a href="javascript:;"><?php echo $i['title'];?></a></li>
 					<?php endforeach;?>
+					<?php endif; ?>
 					<li id="new"><a href="javascript:;"><i class="icon-plus"></i> <b>Add New</b></a>
 					</ul>
 				</div>
 				<div id="item_detail" class="span5">
+					<?php if(isset($items)): ?>
 					<?php foreach($items as $i):?>
 						<div id="<?php echo $i['id'];?>-content" class="item-content hide">
 							<form _id="<?php echo $i['id'];?>">
@@ -50,6 +53,7 @@
 							</form>
 						</div>
 					<?php endforeach;?>
+					<?php endif; ?>
 						<div id="new-content" class="item-content hide">
 							<form _id="new">
 							<fieldset>
@@ -83,6 +87,7 @@
 						</div>
 				</div>
 				<div id="item_preview" class="span3">
+					<?php if(isset($items)): ?>
 					<?php foreach($items as $i):?>
 					<div class="flexslider hide" id="<?php echo $i['id'];?>-preview">
 						<img src="<?php echo $i['img_url'];?>" alt="" />
@@ -93,6 +98,7 @@
 						<a target="_blank" href="<?php echo $i['url'];?>"><strong><?php echo (isset($i['url_text']) && $i['url_text'] ? $i['url_text'] : $i['url']);?></strong></a>
 					</div>
 					<?php endforeach;?>
+					<?php endif; ?>
 				</div>
 			</div>
 		</div>

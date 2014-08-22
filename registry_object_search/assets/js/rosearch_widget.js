@@ -393,6 +393,7 @@
 			    }
 			    handler._input.trigger('input');
 			    modal.modal('hide');
+			   	handler._input.trigger('input');
 			});
 		    })
 		    .fail(function() {
