@@ -54,13 +54,22 @@
 					</div>
 				</div>
 			</fieldset>
-			<fielset>
+			<fieldset>
 				<legend>Add Format</legend>
 
 				<div class="control-group">
 					<label class="control-label" for="format">File Format: </label>
 					<div class="controls">
-						<input type="text" class="input-xlarge typeahead" name="format" value="" placeholder="Enter File Format" required>
+						<!-- <input type="text" class="input-xlarge typeahead" name="format" value="" placeholder="Enter File Format" required> -->
+						<select name="format" id="">
+							<option value="SKOS">SKOS</option>
+							<option value="OWL">OWL</option>
+							<option value="TEXT">TEXT</option>
+							<option value="CSV">CSV</option>
+							<option value="ZTHES">ZTHES</option>
+							<option value="RDF">RDF</option>
+							<option value="OTHER">OTHER</option>
+						</select>
 						<p class="help-inline"><small></small></p>
 					</div>
 				</div>
@@ -497,7 +506,16 @@
 					<div class="control-group">
 						<label class="control-label" for="format">File Format: </label>
 						<div class="controls">
-							<input type="text" class="input-xlarge typeahead" name="format" value="" placeholder="Enter File Format" required>
+							// <input type="text" class="input-xlarge typeahead" name="format" value="" placeholder="Enter File Format" required>
+							<select name="format" id="">
+								<option value="SKOS">SKOS</option>
+								<option value="OWL">OWL</option>
+								<option value="TEXT">TEXT</option>
+								<option value="CSV">CSV</option>
+								<option value="ZTHES">ZTHES</option>
+								<option value="RDF">RDF</option>
+								<option value="OTHER">OTHER</option>
+							</select>
 							<p class="help-inline"><small></small></p>
 						</div>
 					</div>
