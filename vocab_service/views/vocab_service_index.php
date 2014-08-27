@@ -387,7 +387,7 @@
 	<div class="box {{#noVersions}}box-error{{/noVersions}}" vocab_id="{{id}}">
 		<div class="box-header"><h3>Versions</h3><div class="clearfix"/></div>
 		<div class="box-content">
-			<ul class="ro-list">
+			<ul class="ro-list" style="margin:-10px;">
 			{{#hasVersions}}
 				{{#versions}}
 					<li><a href="javascript:;" class="version" version_id="{{id}}"><span class="name">{{title}}</span></a><span class="num">{{status}}</span></li>
@@ -440,6 +440,7 @@
 		</tbody>
 	</table>
 	{{/hasItems}}
+	<a href="javascript:;" class="closeTip">Close</a>
 </script>
 
 <script type="text/x-mustache" id="vocab-format-downloadable-template-by-version">
@@ -495,7 +496,9 @@
   			<button class="btn addFormat" version_id="{{id}}"><i class="icon-plus"></i> Add a Format</button>
   			<button class="btn editVersion" version_id="{{id}}" tip="Edit this Version"><i class="icon-edit"></i></button>
 	  		<button class="btn deleteVersion" version_id="{{id}}" tip="Delete this Version"><i class="icon-trash"></i></button>
+	  		
 		</div>
+		
 
 
 		<div class="addFormatForm hide" version_id="{{id}}"><hr/>
@@ -506,7 +509,7 @@
 					<div class="control-group">
 						<label class="control-label" for="format">File Format: </label>
 						<div class="controls">
-							// <input type="text" class="input-xlarge typeahead" name="format" value="" placeholder="Enter File Format" required>
+							<!--input type="text" class="input-xlarge typeahead" name="format" value="" placeholder="Enter File Format" required-->
 							<select name="format" id="">
 								<option value="SKOS">SKOS</option>
 								<option value="OWL">OWL</option>
@@ -571,6 +574,7 @@
 		</div>
 	{{/editable}}
 	{{/owned}}
+	<a href="javascript:;" class="btn btn-link closeTip">Close</a>
 </script>
 
 
