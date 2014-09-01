@@ -335,27 +335,21 @@ class Vocab_services extends CI_Model {
 	 * @param the vocab version format ID
 	 * @return NULL
 	 */	
-	function addFormat($version_id,$format,$type,$value)
-	{
-		$qry = 'INSERT INTO vocab_version_formats (`version_id`,`type`,`value`,`format`) VALUES (\''.$version_id.'\',\''.$type.'\',\''.$value.'\',\''.$format.'\')';
-		$query = $this->vocab_db->query($qry);
-		
-		if ($query){
+	function addFormat($version_id,$format,$type,$value) {
+		$insert = $this->vocab_db->insert('vocab_version_formats', 
+			array(
+				'version_id' => $version_id,
+				'format' => $format,
+				'type' => $type,
+				'value' => $value
+			)
+		);
+		if ($insert) {
 			return true;
-		}
-		return false;
+		} else return false;
 	}	
 
 	function addVersion($vocab_id, $version){
-
-		//if adding a current version, all other versions must be superceded
-		/*$data = array(
-           'status' => 'superseded'
-        );
-        $this->vocab_db->where('status !=', 'RETIRED');
-		$this->vocab_db->update('vocab_versions', $data);*/
-		
-		//and then we add the version
 		$data = array(
 			'title'=>$version['title'],
 			'status'=>'pending-add',
