@@ -818,9 +818,39 @@ private function getUserStatistics($from,$to)
             }
 
         }
-        echo "We have found ".$pubs." related publications";
 
     }
+
+    function collectObjectCountStatistics()
+    {
+        $statistics_db = $this->load->database('statistics', TRUE);
+
+        $this->load->library('solr');
+
+        $this->solr->setOpt('start', 0);
+        $this->solr->setOpt('rows', 1);
+        $this->solr->setFacetOpt('field','data_source_id');
+        $this->solr->setFacetOpt('sort','index');
+        $this->solr->setFacetOpt('limit',-1);
+        $data['solr_result'] = $this->solr->executeSearch();
+        $data['result'] = $this->solr->getResult();
+        $datasource = $this->solr->getFacetResult('data_source_id');
+
+        $timestamp = time();
+
+        foreach($datasource as $data_source_id=>$total){
+
+            $this->solr->setOpt('q', '+data_source_id:'.$data_source_id);
+            $this->solr->setFacetOpt('field','class');
+            $data['solr_result'] = $this->solr->executeSearch();
+            $class = $this->solr->getFacetResult('class');
+
+            //put it in the db
+           $query = $statistics_db->query("INSERT INTO  `object_counts` (`timestamp`,`data_source_id`,`total`,`collection`,`party`,`activity`,`service`) VALUES (".$timestamp.",".$data_source_id.",".$total.", ".$class['collection'].", ".$class['party'].", ".$class['activity'].", ".$class['service'].")");
+
+        }
+    }
+
 	// Initialise
 	function __construct()
 	{
