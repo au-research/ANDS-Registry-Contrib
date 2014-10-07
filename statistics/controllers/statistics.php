@@ -30,6 +30,113 @@ class Statistics extends MX_Controller {
 		$this->load->view('statistics', $data);
 	}
 
+    function getPublicationRelations(){
+        //This function was written to produce an adhoc report about the numbers of collections with related publications Sept 2-14
+
+        //Input csv is the result of the following query run on the production database
+
+       // $query = $db->query("SELECT  DISTINCT(`record_data`.`registry_object_id`),`registry_objects`.`slug`, CONVERT(`record_data`.`data` USING utf8), `data_sources`.`title`
+       // FROM `dbs_registry`.`record_data`,`dbs_registry`.`registry_objects`, `dbs_registry`.`data_sources`
+       // WHERE `record_data`.`data` like '%<relatedInfo type="publication">%'
+       // AND `record_data`.`current` = TRUE
+       // AND `record_data`.`scheme` = 'rif'
+       // AND `record_data`.`registry_object_id` = `registry_objects`.`registry_object_id`
+       // AND `registry_objects`.`data_source_id` = `data_sources`.`data_source_id`
+       // AND `registry_objects`.`status` = 'PUBLISHED'");
+
+       $handle = fopen("http://devl.ands.org.au/workareas/liz/publication_by_ds.csv", "r");
+       $handle2 = fopen("../pubs/publication_by_ds_out.csv", "w+") or die("Unable to open file!");
+       $row=0;
+       $pubs = 0;
+       $collections = 0;
+       while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
+            $row++;
+             if($row>1)
+             {
+
+                 $xml = simplexml_load_string($data[2]);
+                 $json = json_encode($xml);
+                 $array = json_decode($json,true);
+                 $type = '';
+
+                 if(isset($array['registryObject']['collection'])){
+                     $type='collection';
+                     $collections++;
+
+                     if(isset($array['registryObject'][$type]['relatedInfo'][0]))
+                     {
+                     for($i=0;$i<count($array['registryObject'][$type]['relatedInfo']);$i++){
+                         $out[0] = $data[3];
+                         $out[1] = "http://researchdata.ands.org.au/".$data[1]."/".$data[0];
+
+                         if($array['registryObject'][$type]['relatedInfo'][$i]['@attributes']['type']=='publication'){
+
+                             if(is_string($array['registryObject'][$type]['relatedInfo'][$i]['notes'])){
+                                 $out[2] = $array['registryObject'][$type]['relatedInfo'][$i]['notes']."\r\n";
+                             }else{
+                                 $out[2] = '';
+                             }
+
+                            if(is_string($array['registryObject'][$type]['relatedInfo'][$i]['title'])){
+                                $out[3] = $array['registryObject'][$type]['relatedInfo'][$i]['title']."\r\n";
+                            }else{
+                                $out[3] = '';
+                            }
+
+                            if(is_string($array['registryObject'][$type]['relatedInfo'][$i]['identifier'])){
+                                $out[4] = $array['registryObject'][$type]['relatedInfo'][$i]['identifier']."\r\n";
+                            }else{
+                                $out[4] = '';
+                            }
+
+                        }
+                        $pubs++;
+                        fputcsv($handle2,$out);
+                     }
+                    }else{
+                        $out[0] = $data[3];
+                        $out[1] = "http://researchdata.ands.org.au/".$data[1]."/".$data[0];
+
+                        if(is_string($array['registryObject'][$type]['relatedInfo']['notes'])){
+                            $out[2] = $array['registryObject'][$type]['relatedInfo']['notes']."\r\n";
+                        }else{
+                            $out[2] = '';
+                        }
+                        if(is_string($array['registryObject'][$type]['relatedInfo']['title'])){
+                            $out[3] = $array['registryObject'][$type]['relatedInfo']['title']."\r\n";
+                        }else{
+                            $out[3] = '';
+                        }
+                        if(is_string($array['registryObject'][$type]['relatedInfo']['identifier'])){
+                            $out[4] = $array['registryObject'][$type]['relatedInfo']['identifier']."\r\n";
+                        }else{
+                            $out[4] = '';
+                        }
+
+                        $pubs++;
+                        fputcsv($handle2,$out);
+
+                     }
+                    }
+
+                    }else{
+                    $out[0] = "Data source";
+                    $out[1] = "Collection URL";
+                    $out[2] = "Publication Notes";
+                    $out[3] = "Publication Title";
+                    $out[4] = "Publication Identifier";
+                    fputcsv($handle2,$out);
+                }
+
+            }
+        echo $row." is the objects found<br />";
+        echo $collections." is the collection count<br />";
+        echo $pubs." is publications listed<br />";
+
+       fclose($handle);
+       fclose($handle2);
+    }
+
 	function GetQuarterlyStats()
 	{
 
@@ -621,6 +728,128 @@ private function getUserStatistics($from,$to)
 
 	}
 
+    function collectRelPubStatistics()
+    {
+        $compareStr = '%<relatedInfo type="publication">%';
+
+        $statistics_db = $this->load->database('statistics', TRUE);
+
+        $db = $this->load->database('registry', TRUE);
+
+        $pubs = 0;
+
+        $query = $db->query("SELECT  DISTINCT(`record_data`.`registry_object_id`),CONVERT(`record_data`.`data` USING utf8) as theRif, `data_sources`.`data_source_id`
+        FROM `dbs_registry`.`record_data`,`dbs_registry`.`registry_objects`, `dbs_registry`.`data_sources`
+        WHERE `record_data`.`data` like '".$compareStr."'
+        AND `record_data`.`current` = TRUE
+        AND `record_data`.`scheme` = 'rif'
+        AND `record_data`.`registry_object_id` = `registry_objects`.`registry_object_id`
+        AND `registry_objects`.`data_source_id` = `data_sources`.`data_source_id`
+        AND `registry_objects`.`status` = 'PUBLISHED' ORDER BY `data_sources`.`data_source_id`");
+
+        foreach($query->result() as $key=>$row)
+        {
+
+            $xml = simplexml_load_string($row->theRif);
+            $json = json_encode($xml);
+            $array = json_decode($json,true);
+            $timestamp = time();
+
+            if(isset($array['registryObject']['collection'])){
+                $type='collection';
+
+                if(isset($array['registryObject'][$type]['relatedInfo'][0]))
+                {
+                    for($i=0;$i<count($array['registryObject'][$type]['relatedInfo']);$i++){
+                        $data_source_id = $row->data_source_id;
+                        $registry_object_id = $row->registry_object_id;
+                        if($array['registryObject'][$type]['relatedInfo'][$i]['@attributes']['type']=='publication'){
+
+                            if(is_string($array['registryObject'][$type]['relatedInfo'][$i]['notes'])){
+                                $notes = $statistics_db->escape($array['registryObject'][$type]['relatedInfo'][$i]['notes']);
+                            }else{
+                                $notes = "''";
+                            }
+
+                            if(is_string($array['registryObject'][$type]['relatedInfo'][$i]['title'])){
+                                $title = $statistics_db->escape($array['registryObject'][$type]['relatedInfo'][$i]['title']);
+                            }else{
+                                $title = "''";
+                            }
+
+                            if(is_string($array['registryObject'][$type]['relatedInfo'][$i]['identifier'])){
+                                $identifier = $statistics_db->escape($array['registryObject'][$type]['relatedInfo'][$i]['identifier']);
+                            }else{
+                                $identifier = "''";
+                            }
+
+                        }
+                        //put it in the db
+                        $query = $statistics_db->query("INSERT INTO  `related_publications` (`timestamp`,`data_source_id`,`registry_object_id`,`notes`,`title`,`identifier`) VALUES (".$timestamp.",".$data_source_id.",".$registry_object_id.", ".$notes.", ".$title.", ".$identifier.")");
+                         $pubs++;
+
+                    }
+                }else{
+                    $data_source_id = $row->data_source_id;
+                    $registry_object_id = $row->registry_object_id;
+                    if(is_string($array['registryObject'][$type]['relatedInfo']['notes'])){
+                        $notes = $statistics_db->escape($array['registryObject'][$type]['relatedInfo']['notes']);
+                    }else{
+                        $notes = "''";
+                    }
+                    if(is_string($array['registryObject'][$type]['relatedInfo']['title'])){
+                        $title = $statistics_db->escape($array['registryObject'][$type]['relatedInfo']['title']);
+                    }else{
+                        $title = "''";
+                    }
+                    if(is_string($array['registryObject'][$type]['relatedInfo']['identifier'])){
+                        $identifier = $statistics_db->escape($array['registryObject'][$type]['relatedInfo']['identifier']);
+                    }else{
+                        $identifier = "''";
+                    }
+                    //put it in the db
+                    $query = $statistics_db->query("INSERT INTO  `related_publications` (`timestamp`,`data_source_id`,`registry_object_id`,`notes`,`title`,`identifier`) VALUES (".$timestamp.",".$data_source_id.",".$registry_object_id.", ".$notes.", ".$title.", ".$identifier.")");
+
+                    $pubs++;
+
+
+                }
+
+            }
+
+        }
+
+    }
+
+    function collectObjectCountStatistics()
+    {
+        $statistics_db = $this->load->database('statistics', TRUE);
+
+        $this->load->library('solr');
+
+        $this->solr->setOpt('start', 0);
+        $this->solr->setOpt('rows', 1);
+        $this->solr->setFacetOpt('field','data_source_id');
+        $this->solr->setFacetOpt('sort','index');
+        $this->solr->setFacetOpt('limit',-1);
+        $data['solr_result'] = $this->solr->executeSearch();
+        $data['result'] = $this->solr->getResult();
+        $datasource = $this->solr->getFacetResult('data_source_id');
+
+        $timestamp = time();
+
+        foreach($datasource as $data_source_id=>$total){
+
+            $this->solr->setOpt('q', '+data_source_id:'.$data_source_id);
+            $this->solr->setFacetOpt('field','class');
+            $data['solr_result'] = $this->solr->executeSearch();
+            $class = $this->solr->getFacetResult('class');
+
+            //put it in the db
+           $query = $statistics_db->query("INSERT INTO  `object_counts` (`timestamp`,`data_source_id`,`total`,`collection`,`party`,`activity`,`service`) VALUES (".$timestamp.",".$data_source_id.",".$total.", ".$class['collection'].", ".$class['party'].", ".$class['activity'].", ".$class['service'].")");
+
+        }
+    }
 
 	// Initialise
 	function __construct()
