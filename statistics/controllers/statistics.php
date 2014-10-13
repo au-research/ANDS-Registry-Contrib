@@ -782,11 +782,10 @@ private function getUserStatistics($from,$to)
                             }else{
                                 $identifier = "''";
                             }
-
+                            //put it in the db
+                            $query = $statistics_db->query("INSERT INTO  `related_publications` (`timestamp`,`data_source_id`,`registry_object_id`,`notes`,`title`,`identifier`) VALUES (".$timestamp.",".$data_source_id.",".$registry_object_id.", ".$notes.", ".$title.", ".$identifier.")");
+                            $pubs++;
                         }
-                        //put it in the db
-                        $query = $statistics_db->query("INSERT INTO  `related_publications` (`timestamp`,`data_source_id`,`registry_object_id`,`notes`,`title`,`identifier`) VALUES (".$timestamp.",".$data_source_id.",".$registry_object_id.", ".$notes.", ".$title.", ".$identifier.")");
-                         $pubs++;
 
                     }
                 }else{
