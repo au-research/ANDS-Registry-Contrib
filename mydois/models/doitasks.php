@@ -192,7 +192,7 @@ class Doitasks extends CI_Model {
                             $theSchema = $this->getXmlSchema($resources->item(0)->attributes->item(0)->nodeValue);
                         }
                     }
-					$result = $doiObjects->schemaValidate($dataciteSchema[$theSchema]);
+					$result = $doiObjects->schemaValidate(asset_url('schema').$dataciteSchema[$theSchema]);
 
 					$xml = $doiObjects->saveXML();
 
@@ -307,8 +307,10 @@ class Doitasks extends CI_Model {
 	}
 	
 	function mint(){
-	
+
+
 		$dataciteSchema = $this->config->item('gCMD_SCHEMA_URIS');
+        $base_url = $this->config->item('default_base_url')."applications/apps/mydois/";
 
 		if ( isset($_SERVER["HTTP_X_FORWARDED_FOR"]) )    {
 			$ip=$_SERVER["HTTP_X_FORWARDED_FOR"];
@@ -387,12 +389,16 @@ class Doitasks extends CI_Model {
 
 			foreach($clientDetails->result() as $clientDetail)
 			{
-				if($clientDetail->client_id<'10')
+
+                if($clientDetail->client_id<'10')
 				{
 					$client_id2 = "0".$clientDetail->client_id;
 				}else{
 					$client_id2 = $clientDetail->client_id;
 				}
+
+                $client_domains = getClientDomains($clientDetail->client_id);
+
 			}
 			if($testing=='yes')
 			{
@@ -401,11 +407,8 @@ class Doitasks extends CI_Model {
 				$datacite_prefix = $clientDetail->datacite_prefix;
 			}
 
-				
 			$doiValue = strtoupper($datacite_prefix.$client_id2.'/'.uniqid());	//generate a unique suffix for this doi for this client 
-			
 
-		
 			$doiObjects = new DOMDocument();
 						
 			$result = $doiObjects->loadXML($xml);
@@ -442,8 +445,7 @@ class Doitasks extends CI_Model {
 				$newdoi = $doiObjects->createElement('identifier',$doiValue);
 				$newdoi->setAttribute('identifierType',"DOI");	
 				$doiObjects->getElementsByTagName('resource')->item(0)->insertBefore($newdoi,$doiObjects->getElementsByTagName('resource')->item(0)->firstChild);
-		
-				//$xml = $doiObjects->saveXML();
+
 			}
 
 			if( $errors )
@@ -470,18 +472,29 @@ class Doitasks extends CI_Model {
 					unlink($tempFile);
 				}
 
-				$result = $doiObjects->schemaValidate($dataciteSchema[$theSchema]);
-				
+				$result = $doiObjects->schemaValidate(asset_url('schema').$dataciteSchema[$theSchema]);
+
 				$xml = $doiObjects->saveXML();
 			
 				$errors = error_get_last();
+
 				if( $errors || !$result)
 				{
 					$verbosemessage = "Document Validation Error: ".$errors['message'];
 					$errorMessages = doisGetUserMessage("MT006", $doi_id=NULL, $response_type, $app_id, $verbosemessage,$urlValue);
 				}			
 				
-			}					
+			}
+            if(!$errors){
+                //ensure provided url is valid with registered top level domain
+
+                if(!$this->validDomain($urlValue,$client_domains)){
+                    $verbosemessage = 'URL not permitted.';
+                    $errorMessages = doisGetUserMessage("MT014", $doi_id=NULL, $response_type,$app_id, $verbosemessage,$urlValue);
+                }
+
+            }
+
 			
 		}	
 			
@@ -1040,5 +1053,17 @@ class Doitasks extends CI_Model {
         }
 
 
+    }
+
+    function validDomain($urlValue,$client_domains){
+
+        $theDomain = parse_url($urlValue);
+        foreach($client_domains as $domain){
+            $check =  strpos($theDomain['host'], $domain->client_domain);
+            if($check||$check===0){
+                return true;
+            }
+        }
+        return false;
     }
 }
