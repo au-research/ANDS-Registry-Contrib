@@ -308,9 +308,7 @@ class Doitasks extends CI_Model {
 	
 	function mint(){
 
-
 		$dataciteSchema = $this->config->item('gCMD_SCHEMA_URIS');
-        $base_url = $this->config->item('default_base_url')."applications/apps/mydois/";
 
 		if ( isset($_SERVER["HTTP_X_FORWARDED_FOR"]) )    {
 			$ip=$_SERVER["HTTP_X_FORWARDED_FOR"];
@@ -1023,7 +1021,8 @@ class Doitasks extends CI_Model {
 				print $name. "=".$value."<br />";
 			}	
 		}		
-	} 
+	}
+
 	function getAppId(){
 		$app_id= '';
 		$app_id = $this->input->get('app_id');		//passed as a parameter
@@ -1052,11 +1051,10 @@ class Doitasks extends CI_Model {
             return trim($data);
         }
 
-
     }
 
     function validDomain($urlValue,$client_domains){
-
+        //check that the host component of a given url belings to one of the clients registered domains
         $theDomain = parse_url($urlValue);
         foreach($client_domains as $domain){
             $check =  strpos($theDomain['host'], $domain->client_domain);
