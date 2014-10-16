@@ -359,8 +359,8 @@
 		}else{
 			return false;
 		}
-	}	
-	
+	}
+
     function doisDomainAvailible($domain)
 	{	
 	    //initialize curl
@@ -434,5 +434,20 @@
 			return false;
 		}		
 		
-	}	
+	}
+
+    function getClientDomains($client_id)
+    {
+        $CI =& get_instance();
+        $doi_db = $CI->load->database('dois', TRUE);
+        $results = $doi_db->get_where('doi_client_domains', array('client_id'=>$client_id));
+
+        if( $results->num_rows()>0 )
+        {
+            return $results->result();
+        }else{
+            return false;
+        }
+
+    }
  ?>

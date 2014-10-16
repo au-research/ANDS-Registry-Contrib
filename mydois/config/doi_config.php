@@ -7,7 +7,7 @@ $config['gDOIS_DATACENTRE_NAME_PREFIX'] = "ANDS";
 $config['gDOIS_DATACENTRE_NAME_MIDDLE'] = "CENTRE";
 
 $config['gDOIS_DATACENTRE_PREFIXS'] = array( '10.4225/','10.4226/','10.4227/','10.5072/');
-$config['gCMD_SCHEMA_URIS'] = array( '3'=>'http://schema.datacite.org/meta/kernel-3/metadata.xsd','2.2'=>'http://schema.datacite.org/meta/kernel-2.2/metadata.xsd','2.1'=>'http://schema.datacite.org/meta/kernel-2.1/metadata.xsd');
+$config['gCMD_SCHEMA_URIS'] = array( '3'=>'/kernel-3/metadata.xsd','2.2'=>'/kernel-2.2/metadata.xsd','2.1'=>'/kernel-2.1/metadata.xsd');
 if (!isset($ENV['gDOIS_DATACITE_PASSWORD']))
 {
 	throw new Exception ("System is not configured for use with Data Cite API. Please set gDOIS_DATACITE_PASSWORD in global_config.php");
