@@ -308,6 +308,7 @@ class Doitasks extends CI_Model {
 	
 	function mint(){
 
+
 		$dataciteSchema = $this->config->item('gCMD_SCHEMA_URIS');
 
 		if ( isset($_SERVER["HTTP_X_FORWARDED_FOR"]) )    {
@@ -335,8 +336,16 @@ class Doitasks extends CI_Model {
 		$response1 = "OK";
 		$response2 = "OK";	
 		$debug = $this->input->get('debug');
-		
-		if($debug && $debug == 'true')	
+
+        $manual_mint = $this->input->get('manual_mint');
+        if($manual_mint)
+        {
+            $doiValue = rawurldecode($this->input->get_post('doi_id'));
+            $client_id = rawurldecode($this->input->get_post('client_id'));
+        }
+
+
+        if($debug && $debug == 'true')
 		{
 			$this->debugOn();
 		}
@@ -366,7 +375,7 @@ class Doitasks extends CI_Model {
 		}
 		if($errorMessages == '')
 		{
-			$client_id = checkDoisValidClient($ip,trim($app_id));
+			if(!$manual_mint) $client_id = checkDoisValidClient($ip,trim($app_id));
 			if($client_id===false)
 			{
 				$verbosemessage = 'Client with app_id '.$app_id.' from ip address '.$ip. ' is not a registered doi client.';
@@ -405,7 +414,7 @@ class Doitasks extends CI_Model {
 				$datacite_prefix = $clientDetail->datacite_prefix;
 			}
 
-			$doiValue = strtoupper($datacite_prefix.$client_id2.'/'.uniqid());	//generate a unique suffix for this doi for this client 
+            if(!$manual_mint) $doiValue = strtoupper($datacite_prefix.$client_id2.'/'.uniqid());	//generate a unique suffix for this doi for this client
 
 			$doiObjects = new DOMDocument();
 						
@@ -1025,6 +1034,7 @@ class Doitasks extends CI_Model {
 
 	function getAppId(){
 		$app_id= '';
+
 		$app_id = $this->input->get('app_id');		//passed as a parameter
 		//or app_id might be passed as part of the authstr
 
@@ -1064,4 +1074,6 @@ class Doitasks extends CI_Model {
         }
         return false;
     }
+
+
 }
