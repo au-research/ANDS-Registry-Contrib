@@ -21,41 +21,81 @@ $(document).on('change','input:radio[name="xml_input"]',function(e){
 
 })
 $(document).on('click', '#doi_mint_confirm', function(){
+
+    var xml_input = '';
+    var req_element_error = '';
+
+    $.each($('input[name="xml_input"]'),function(){
+       if($(this).is(":checked")){
+           xml_input = ($(this).val())
+       }
+    });
+
+    if(xml_input == 'formxml') req_element_error = checkFormInput()
     if($(this).hasClass('disabled')) return false;
     $(this).button('loading');
-    $("#loading").html('Loading....')
+    $('#mint_result').removeClass('label label-important');
+    $('#mint_result').html('');
+    $("#mint_result").html('<p>Minting.....</p><div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div>')
+    $("#mint_form").addClass('hide');
     var theButton = this;
     var doi = $("input[name='doi']").val();
     var doi_url = $("input[name='url']").val();
-    var xml = $("input[name='xml']").val();
     var client_id = $("input[name='client_id']").val();
     var app_id= $("input[name='app_id']").val();
     var url = apps_url+'mydois/mint.json/?manual_mint=true&url='+doi_url+'&app_id='+app_id;
+    var xml = $("input[name='xml']").val();
 
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: {doi_id:doi, xml:xml, client_id:client_id},
-        success: function(data){
-            if(data.response.type=='failure'){
-                var message =  data.response.message;
-                if(data.response.verbosemessage!='') message = message + ' <br /><i>'+data.response.verbosemessage+'</i>'
-                $('#mint_result').css('white-space','normal')
-                $('#mint_result').html(message).addClass('label label-important');
-                $(theButton).button('reset');
-                $("#loading").html('');
-            }else{
-                $('#mint_result').html(message).removeClass('label label-important');
-                $('#mint_result').html(data.response.message);
-                $("#loading").html('');
-                $('#doi_mint_confirm').addClass('hide');
-                $('#doi_mint_close').removeClass('hide');
+    if(req_element_error!=''){
+        message = req_element_error
+        $('#mint_result').css('white-space','normal')
+        $('#mint_result').html(message).addClass('label label-important');
+        $(theButton).button('reset');
+        $("#loading").html('');
+        $("#mint_form").removeClass('hide');
+    }
+    else if(doi_url==''){
+        message = "You must provide a URL to mint a DOI."
+        $('#mint_result').css('white-space','normal')
+        $('#mint_result').html(message).addClass('label label-important');
+        $(theButton).button('reset');
+        $("#loading").html('');
+        $("#mint_form").removeClass('hide');
+    }
+    else if(xml==''){
+        message = "You must provide xml to mint a DOI."
+        $('#mint_result').css('white-space','normal')
+        $('#mint_result').html(message).addClass('label label-important');
+        $(theButton).button('reset');
+        $("#loading").html('');
+        $("#mint_form").removeClass('hide');
+    }else{
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {doi_id:doi, xml:xml, client_id:client_id},
+            success: function(data){
+                if(data.response.type=='failure'){
+                    var message =  data.response.message;
+                    if(data.response.verbosemessage!='') message = message + ' <br /><i>'+data.response.verbosemessage+'</i>'
+                    $('#mint_result').css('white-space','normal')
+                    $('#mint_result').html(message).addClass('label label-important');
+                    $(theButton).button('reset');
+                    $("#loading").html('');
+                    $("#mint_form").removeClass('hide');
+                }else{
+                    $('#mint_result').html(message).removeClass('label label-important');
+                    $('#mint_result').html(data.response.message);
+                    $("#loading").html('');
+                    $('#doi_mint_confirm').addClass('hide');
+                    $('#doi_mint_close').removeClass('hide');
+                }
+            },
+            error: function(data){
+                console.log(data.response)
             }
-        },
-        error: function(data){
-            console.log(data.response)
-        }
-    });
+        });
+    }
 })
 
 $(document).on('click', '#doi_mint_close', function(){
@@ -103,4 +143,17 @@ $(document).on('change','#fileupload',function(e){
 
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function checkFormInput(){
+    var error_msg = "You must provide the following fields <br />"
+
+    if($("input#title").val()=='') error_msg =error_msg + "<em>Title(s)</em><br />"
+    if($("input#creatorname").val()=='') error_msg =error_msg + "<em>Creator(s)</em><br />"
+    if($("input#publisher").val()=='') error_msg =error_msg + "<em>Publisher</em><br />"
+    if($("input#year").val()=='') error_msg =error_msg + "<em>Publication Year</em><br />"
+
+    if(error_msg == "You must provide the following fields <br />"){
+        error_msg = '';
+    }
+    return error_msg
 }

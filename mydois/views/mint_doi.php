@@ -11,6 +11,7 @@
 ?>
 	<div class="box-content">
 		<p id="mint_result">  </p>
+        <div id="mint_form">
 		    <form action="<?=base_url('mydois/manualMint/');?>" method="POST" class="form-horizontal" id="mint_form" enctype="multipart/form-data">
                 <div id="loading"></div>
                 <input type="hidden" name="client_id" value="<?php echo $client_id; ?>"/>
@@ -252,3 +253,4 @@
 
 	</div>
 
+    </div>

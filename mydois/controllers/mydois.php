@@ -63,11 +63,15 @@ class Mydois extends MX_Controller {
 					foreach ($query->result() AS $result)
 					{
 						$data['associated_app_ids'][] = $result->parent_role_id;
+                        $app_count++;
 					}
 				}
 			}
-			
-			$this->load->view('input_app_id', $data);
+            if(count($data['associated_app_ids'])===1){
+                $this->show($data['associated_app_ids'][0]);
+            }else{
+			    $this->load->view('input_app_id', $data);
+            }
 		}else{
 			$this->load->view('login_required', $data);
 		}
@@ -132,7 +136,7 @@ class Mydois extends MX_Controller {
 		echo json_encode($response);
 	}
 
-	function show()
+	function show($app_id)
 	{
 		acl_enforce('DOI_USER');
 
@@ -148,6 +152,10 @@ class Mydois extends MX_Controller {
 		{
 			$appId = $this->input->get_post('app_id_select');
 		}
+        if (!$appId & isset($app_id)){
+            $appId = $app_id;
+
+        }
 		$doiStatus = $this->input->get_post('doi_status');
 		$data['doi_appids'] = $this->user->doiappids();
 		if($doi_update)

@@ -24,9 +24,8 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 			<div class="box-header clearfix">
 				<div class="navbar">
 				
-				    <a class="brand" href="<?=base_url('mydois');?>">DOI Query Tool</a>
+				    <a class="brand" href="<?=base_url('mydois');?>">My DOIs</a>
 				    <ul class="nav pull-right">
-				      	<li class="active"><a href="#" class="btn btn-mini">List My DOIs</a></li>
                         <li><?=anchor('mydois/manualMintForm?app_id=' . rawurlencode($client->app_id), 'Mint DOI', array("class"=>"btn btn-mini","role"=>"button", "data-target"=>"#mintModal", "data-toggle"=>"modal"));?></li>
 				      	<li><?=anchor('mydois/getActivityLog?app_id=' . rawurlencode($client->app_id), 'View Activity Log', array("class"=>"btn btn-mini","role"=>"button", "data-target"=>"#viewActivityLogModal", "data-toggle"=>"modal"));?></li>
 				      	<li><?=anchor('mydois/getAppIDConfig?app_id=' . rawurlencode($client->app_id), 'App ID Configuration', array("class"=>"btn btn-mini","role"=>"button", "data-target"=>"#viewAppIDConfigModal", "data-toggle"=>"modal"));?></li>
