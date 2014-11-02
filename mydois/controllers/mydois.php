@@ -63,7 +63,6 @@ class Mydois extends MX_Controller {
 					foreach ($query->result() AS $result)
 					{
 						$data['associated_app_ids'][] = $result->parent_role_id;
-                        $app_count++;
 					}
 				}
 			}
@@ -263,19 +262,21 @@ class Mydois extends MX_Controller {
 		acl_enforce('DOI_USER');
 		
 		$doi_db = $this->load->database('dois', TRUE);
-		
 		// Validate the doi_id
 		$doi_id = rawurldecode($this->input->get_post('doi_id'));
+        $appId = $this->input->get_post('app_id');
+        if (!$appId) throw new Exception ('Invalid App ID');
 
 		if (!$doi_id) throw new Exception ('Invalid DOI ID');  
 		
-		$query = $doi_db->where('doi_id',$doi_id)->select('doi_id, url,client_id')->get('doi_objects');
+		$query = $doi_db->where('doi_id',$doi_id)->select('doi_id, url,client_id, datacite_xml')->get('doi_objects');
 		if (!$doi_obj = $query->result_array()) throw new Exception ('Invalid DOI ID');  
 		$doi_obj = array_pop($doi_obj);
+        $doi_obj['app_id'] = $appId;
 		$this->load->view('update_doi',$doi_obj);
 		
 	}
-	function updateDoiUrl()
+	/* function updateDoiUrl()
 	{
 		acl_enforce('DOI_USER');
 
@@ -285,9 +286,10 @@ class Mydois extends MX_Controller {
 		$doi_id = rawurldecode($this->input->get_post('doi_id'));
 		$client_id = rawurldecode($this->input->get_post('client_id'));
 		
+        //echo $client_id." is the client id<br/>".$old_url." is the old url<br/>".$doi_id." is the doi_id<br/>";
+        //exit();
 
-
-		if (!$client_id || !$old_url || !$doi_id)
+		if ($client_id=='' || !$old_url || !$doi_id)
 		{
 			throw new Exception("Unable to update DOI. Not all parameters were given");
 		}
@@ -393,7 +395,7 @@ class Mydois extends MX_Controller {
 			throw new Exception ('Update of the doi was unsuccessful. ' . $extrainfo);  
 		}
 	
-	}
+	} */
 
 	function getAppIDConfig()
 	{

@@ -98,10 +98,16 @@ $(document).on('click', '#doi_mint_confirm', function(){
     }
 })
 
-$(document).on('click', '#doi_mint_close', function(){
+$(document).on('click', '#doi_mint_close #doi_update_close', function(){
     location.reload();
 })
-$(document).on('click', '#doi_mint_close_x', function(){
+$(document).on('click', '#doi_mint_close_x  #doi_update_close_x', function(){
+    location.reload();
+})
+$(document).on('click', '#doi_update_close', function(){
+    location.reload();
+})
+$(document).on('click', '#doi_update_close_x', function(){
     location.reload();
 })
 $(document).on('change','#fileupload',function(e){
@@ -141,6 +147,60 @@ $(document).on('change','#fileupload',function(e){
     }
 });
 
+$(document).on('click', '#doi_update_confirm', function(){
+
+    if($(this).hasClass('disabled')) return false;
+    $(this).button('loading');
+    $('#update_result').removeClass('label label-important');
+    $('#update_result').html('');
+    $("#update_result").html('<p>Updating.....</p><div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div>')
+    $("#update_form").addClass('hide');
+    var theButton = this;
+    var doi = $("input[name='doi_id']").val();
+    var doi_url = $("input[name='new_url']").val();
+    var client_id = $("input[name='client_id']").val();
+    var app_id= $("input[name='app_id']").val();
+    var url = apps_url+'mydois/update.json/?manual_update=true&doi='+doi+'&url='+doi_url+'&app_id='+app_id;
+    var xml = $("textarea[name='new_xml']").val();
+
+    if(doi_url=='' & xml==''){
+        message = "You must provide new url and/or new xml to update a DOI."
+        $('#update_result').css('white-space','normal')
+        $('#update_result').html(message).addClass('label label-important');
+        $(theButton).button('reset');
+        $("#loading").html('');
+        $("#update_form").removeClass('hide');
+    }else{
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {doi_id:doi, xml:xml, client_id:client_id},
+            success: function(data){
+                console.log(data)
+                if(data.response.type=='failure'){
+                    console.log(data.response);
+                    var message =  data.response.message;
+                    if(data.response.verbosemessage!='') message = message + ' <br /><i>'+data.response.verbosemessage+'</i>'
+                    $('#update_result').css('white-space','normal')
+                    $('#update_result').html(message).addClass('label label-important');
+                    $(theButton).button('reset');
+                    $("#loading").html('');
+                    $("#update_form").removeClass('hide');
+                }else{
+                    $('#update_result').html(message).removeClass('label label-important');
+                    $('#update_result').html(data.response.message);
+                    $("#loading").html('');
+                    $('#doi_update_confirm').addClass('hide');
+                    $('#doi_update_close').removeClass('hide');
+                }
+            },
+            error: function(data){
+                //console.log(data)
+            }
+        });
+    }
+})
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

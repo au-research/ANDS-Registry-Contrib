@@ -94,8 +94,12 @@ class Doitasks extends CI_Model {
 		if($debug && $debug == 'true')	
 		{
 			$this->debugOn();
-		}		
-	
+		}
+        $manual_update = $this->input->get('manual_update');
+        if($manual_update)
+        {
+            $client_id = rawurldecode($this->input->get_post('client_id'));
+        }
 		$app_id = $this->getAppId();
 		if(substr($app_id,0,4)=='TEST')
 		{
@@ -130,7 +134,7 @@ class Doitasks extends CI_Model {
 		} 
 		if($errorMessages == '')	
 		{
-			$client_id = checkDoisValidClient($ip,$app_id);
+			if(!$manual_update) $client_id = checkDoisValidClient($ip,$app_id);
 
 			if($client_id===false)
 			{
@@ -153,10 +157,13 @@ class Doitasks extends CI_Model {
 			$xml = $this->getXmlInput();
 
 			//first up, lets check that this client is permitted to update this doi.
+            $xml_row = $doidata->row();
+            $old_xml = $xml_row->datacite_xml;
+
+            if(trim($xml)===trim($old_xml)) $xml='';
 
 			if(isset($xml) && $xml) // if the client has posted xml to be updated
 			{
-			
 				$doiObjects = new DOMDocument();
 						
 				$result = $doiObjects->loadXML($xml);
@@ -204,7 +211,7 @@ class Doitasks extends CI_Model {
 					}				
 				}	
 			}
-			else
+			/*else
 			{
 				$xml_row = $doidata->row();
 				$xml = $xml_row->datacite_xml;
@@ -232,7 +239,7 @@ class Doitasks extends CI_Model {
 					}
 
 				}
-			}
+			}*/
 			
 			if( $errorMessages == '' )
 			{
@@ -244,7 +251,7 @@ class Doitasks extends CI_Model {
 					/* Fix: 09/01/2013, DataCite requires metadata FIRST, then DOI call */
 					// Send DataCite the metadata first
 					// Update the DOI
-					if($doiObjects)
+					if($doiObjects && $xml)
 					{
 						$response2 = $this->doisRequest("update", $doiValue, $urlValue, $xml, $client_id);
 					}

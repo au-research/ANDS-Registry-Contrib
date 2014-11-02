@@ -61,7 +61,7 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 								<?php if(strpos($doi->doi_id ,$testDoiPrefix) === 0) {echo "<br/><span class='muted'><em>Test prefix DOI</em></span>";}  ?>
 							</td>
 							<td>
-								<?=anchor('mydois/updateDoi?doi_id=' . rawurlencode($doi->doi_id), 'Update', array("role"=>"button", "class"=>"btn btn-mini", "data-target"=>"#updateDoiModal", "data-toggle"=>"modal"));?>
+								<?=anchor('mydois/updateDoi?app_id='.rawurlencode($client->app_id).'&doi_id=' . rawurlencode($doi->doi_id), 'Update', array("role"=>"button", "class"=>"btn btn-mini", "data-target"=>"#updateDoiModal", "data-toggle"=>"modal"));?>
 							</td>
 							<td>
 								<?=anchor('mydois/getDoiXml?doi_id=' . rawurlencode($doi->doi_id), 'View XML', array("role"=>"button", "class"=>"btn btn-mini", "data-target"=>"#viewDoiXmlModal", "data-toggle"=>"modal"));?>
@@ -83,17 +83,6 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 
 </section>
 
-<div class="modal hide fade" id="updateDoiModal" tabindex="-1" role="dialog" aria-labelledby="updateDoiModal" aria-hidden="true">
-  <div class="modal-body">
-    <p>Loading...</p>
-    <div class="progress progress-striped active">
-		<div class="bar" style="width: 100%;"></div>
-	</div>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
 
 <div class="modal hide fade" id="viewDoiXmlModal" tabindex="-1" role="dialog" aria-labelledby="viewDoiXmlModal" aria-hidden="true">
   <div class="modal-body">
@@ -176,6 +165,26 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
     </div>
     </div>
 </div>
+
+
+    <div class="bigModal  modal hide fade" id="updateDoiModal" tabindex="-1" role="dialog" aria-labelledby="updateDoiModal" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="doi_update_close_x">×</button>
+            <h3>Update DOI</h3>
+        </div>
+        <div class="modal-body">
+            <p>Loading...</p>
+            <div class="progress progress-striped active">
+                <div class="bar" style="width: 100%;"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <span id="result"></span>
+            <a id="doi_update_confirm" class="btn btn-primary" data-loading-text="Updating..." href="javascript:;">Update DOI</a>
+            <a id="doi_update_close"class="btn hide" data-dismiss="modal" href="#">Close</a>
+            </form>
+        </div>
+    </div>
 <?php $this->load->view('footer');?>
 <?php 
 if(isset($doi_update))
