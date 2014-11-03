@@ -18,6 +18,7 @@ class Pids extends MX_Controller {
 
 
 		$data['orgRole'] = $this->user->affiliations();
+        $data['registry_super_usser'] = $this->user->isSuperAdmin();
 		array_unshift($data['orgRole'], 'My Identifiers');
 
 
@@ -120,6 +121,46 @@ class Pids extends MX_Controller {
 			echo json_encode($responseArray);
 		}
 	}
+
+    function batch_mint(){
+        acl_enforce('SUPERUSER');
+        $counter = urlencode($this->input->post('counter'));
+        $desc = urlencode($this->input->post('desc'));
+
+        if($counter && $desc){
+            $counter = intval($counter);
+            if($counter > 100){
+                $responseArray['result']='error';
+                $responseArray['error']='no more than 100 please!!';
+                echo json_encode($responseArray);
+            }
+            elseif($counter <= 0){
+                $responseArray['result']='error';
+                $responseArray['error']='positive integer please!!';
+                echo json_encode($responseArray);
+            }
+            else{
+                $responseArray['result']='success';
+                for($i = 1 ; $i <= $counter; $i++ ){
+                    $response = $this->pids->pidsRequest('mint', 'type=DESC&value='.$desc);
+                    if($this->pids->pidsGetResponseType($response) == 'SUCCESS'){
+                        $responseArray[$i]['handle'] = $this->pids->pidsGetHandleValue($response);
+                        $responseArray[$i]['message'] =  $this->pids->pidsGetUserMessage($response);
+                    }else{
+                        $responseArray['result']='error';
+                        $responseArray['error'] =  $this->pids->pidsGetUserMessage($response);
+                        $responseArray[$i]['error'] =  $this->pids->pidsGetUserMessage($response);
+                    }
+                }
+                echo json_encode($responseArray);
+            }
+        }else{
+            $responseArray['result']='error';
+            $responseArray['error']='Both counter and description must be specified';
+            echo json_encode($responseArray);
+        }
+
+    }
 
 	/**
 	 * Webservice for updating a single handle

@@ -11,7 +11,10 @@
 	<h1>Identify My Data</h1>
 	<div class="btn-group">
 		<a data-toggle="modal" href="#mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a new Identifier</a>
-	</div>
+        <?php if(registry_super_usser == true): ?>
+            <a data-toggle="modal" href="#batch_mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a lot of new Identifiers</a>
+        <?php endif; ?>
+    </div>
 </div>
 <div id="breadcrumb" style="clear:both;">
 	<?php echo anchor(registry_url('auth/dashboard'), '<i class="icon-home"></i> Home'); ?>
@@ -137,6 +140,103 @@ You understand that:
 		<a href="#" class="btn hide" data-dismiss="modal">Close</a>
 	</div>
 </div>
+
+
+    <div class="modal hide fade" id="batch_mint_modal">
+        <div class="modal-header">
+            <a href="javascript:;" class="close" data-dismiss="modal">×</a>
+            <h3>Mint a new Identifier</h3>
+        </div>
+
+        <div class="modal-screen-container">
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    Please provide the relevant information
+                </div>
+                <form action="#" method="get" class="form-horizontal" id="batch_mint_form">
+                    <div class="control-group">
+                        <label class="control-label">Number of PIDS</label>
+                        <div class="controls">
+                            <input type="counter" name="counter" value="" placeholder="number of PIDs"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Temp. Description</label>
+                        <div class="controls">
+                            <input type="text" name="desc" value="temporarily description"/>
+                        </div>
+                    </div>
+                    <div style="height:175px;overflow:auto;border:1px solid #ccc;display:none;" id="terms"><p>You have asked to mint a persistent identifier through ANDS <i>Identify
+                                My Data</i> self-service. This means that you will enter location and/or
+                            description information relating to the object you wish to identify and
+                            ANDS will provide you with a persistent identifier for that object.</p>
+                        <p>
+                            In using ANDS <i>Identify My Data</i> self-service you agree that:
+                        </p>
+                        <ul>
+                            <li>You are part of the higher education, public research or cultural
+                                collections sector and that at least some of the objects you are
+                                identifying are publicly available or will eventually become publicly
+                                available.</li>
+                            <li>You are authorised and entitled to mint and manage persistent
+                                identifiers for the objects you intend to identify.</li>
+                            <li>You will endeavour to keep up-to-date the location and
+                                description fields for the persistent identifiers you mint.</li>
+                            <li>You understand that this location and description information
+                                will be available to the general public and that confidential material
+                                should not be entered into these fields.</li>
+                            <li>You will take responsibility for liaison with any party who has
+                                queries regarding persistent identifiers that you mint. (ANDS does not
+                                provide link-rot checking or help-desk services for end-users of
+                                persistent identifiers.)</li>
+                        </ul>
+
+                        <p>
+                            You understand that:
+                        </p>
+                        <ul>
+                            <li>ANDS provides the <i>Identify My Data</i> product on an ‘as is’ and
+                                ‘as available’ basis. ANDS hereby exclude any warranty either express
+                                or implied as to the merchantability, fitness for purpose, accuracy,
+                                currency or comprehensiveness of this product. To the fullest extent
+                                permitted by law, the liability of ANDS under any condition or warranty
+                                which cannot be excluded legally is limited, at the option of ANDS to
+                                supplying the services again or paying the cost of having the services
+                                supplied again.</li>
+
+                            <li>ANDS does not manage persistent identifiers; ANDS only provides
+                                the infrastructure that allows minting, resolution and updating of
+                                identifiers. Processes and policies need to be put in place by those
+                                utilising <i>Identify My Data</i> to ensure that appropriate maintenance
+                                practices are put in place to underpin persistence.</li>
+                            <li>ANDS will endeavour to persist ANDS Identifiers for a minimum of
+                                twenty years.</li>
+                            <li>The allocation of a persistent identifier to an object does not
+                                include any transfer or assignment of ownership of any Intellectual
+                                Property right (IPR) with regard to that content.</li>
+                            <li>ANDS will endeavour to provide a high availability service.
+                                However, ANDS <i>Identify My Data</i> is underpinned and reliant on the <a href="http://www.handle.net/">Handle
+                                    services</a> provided by the <a href="http://cnri.reston.va.us/">Corporation for National Research Initiatives</a>
+                                (CNRI), in particular the Global Handle Registry. ANDS cannot warrant
+                                the longevity or reliability of the Handle system or the CNRI.</li>
+                        </ul>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"></label>
+                        <div class="controls">
+                            <input type="checkbox" name="agree" checked=checked/> I Agree To the <a href="javascript:;" id="toggleTerms">Terms and Conditions</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <span id="batch_mint_result"></span>
+            <a id="batch_mint_confirm" href="javascript:;" class="btn btn-primary" data-loading-text="Minting...">Mint</a>
+            <a href="#" class="btn hide" data-dismiss="modal">Close</a>
+        </div>
+    </div>
+
 
 <script type="text/x-mustache" id="pids-list-template">
 <form class="form-search">		

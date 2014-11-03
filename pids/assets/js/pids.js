@@ -22,6 +22,26 @@ $(document).on('click', '#mint_confirm', function(){
 			}
 		}
 	});
+}).on('click', '#batch_mint_confirm', function(){
+    if($(this).hasClass('disabled')) return false;
+    $('#batch_mint_result').html("").removeClass('label-important');
+    $(this).button('loading');
+    var theButton = this;
+    var counter = $('#batch_mint_form input[name=counter]').val();
+    var desc = $('#batch_mint_form input[name=desc]').val();
+    $.ajax({
+        url: apps_url+'pids/batch_mint',
+        type: 'POST',
+        data: {counter:counter, desc:desc},
+        success: function(data){
+            if(data.error){
+                $('#batch_mint_result').html(data.error).addClass('label label-important');
+                $(theButton).button('reset');
+            }else{
+                location.reload();
+            }
+        }
+    });
 }).on('click', '.load_more', function(){
 	params['offset'] = $(this).attr('next_offset');
 	var button = $(this);
