@@ -220,7 +220,7 @@ function load_vocab(vocab_id){
 						at: 'bottom center'
 					},
 					show: {event: 'click'},
-					hide: {event: 'unfocus'},
+					hide: {event: 'click'},
 					events: {},
 					style: {classes: 'ui-tooltip-shadow ui-tooltip-bootstrap ui-tooltip-large'}
 				});
@@ -252,7 +252,7 @@ function load_vocab(vocab_id){
 					var jsonData = [];
 					jsonData.push({name:'vocab_id',value:$(this).attr('vocab_id')});
 					var theForm = $('#myModal form.contactPublisherForm');
-					Core_bindFormValidation(theForm);
+					// Core_bindFormValidation(theForm);
 					$('input,textarea', theForm).each(function(){
 						var label = $(this).attr('name');
 						var value = $(this).val();
@@ -445,7 +445,7 @@ function bindVocabVersioning(view){
 								$(target).qtip('reposition');
 
 								var form = $(this);
-								Core_bindFormValidation(form);
+								//Core_bindFormValidation(form);
 								$('.typeahead', form).typeahead({
 									source:[
 										{value:'SKOS',subtext:''},
@@ -493,7 +493,7 @@ function bindVocabVersioning(view){
 							var view = $(this).attr('view');
 							if(Core_checkValidForm(form)){
 								var jsonData = [];
-								$('input', form).each(function(){
+								$('input, select', form).each(function(){
 									var label = $(this).attr('name');
 									var value = $(this).val();
 									if(value!='' && value){
@@ -584,7 +584,7 @@ function bindVocabVersioning(view){
 				at: 'left center'
 			},
 			show: {event: 'click',solo:true},
-			hide: {fixed:true,delay:5500},
+			hide: {event: 'click', solo:true},
 			events: {},
 			style: {classes: 'ui-tooltip-shadow ui-tooltip-bootstrap ui-tooltip-large'}
 		});
@@ -617,7 +617,7 @@ function bindVocabVersioning(view){
 				show: function(event, api){
 					var tooltip = api.elements.tooltip;
 					var form = $('form',tooltip);
-					Core_bindFormValidation(form);
+					// Core_bindFormValidation(form);
 
 					$('.typeahead', tooltip).typeahead({
 						source:[
@@ -650,7 +650,7 @@ function bindVocabVersioning(view){
 
 						jsonData.push({name:'vocab_id', value:vocab_id});
 						
-						$('input', form).each(function(){
+						$('input, select', form).each(function(){
 							var label = $(this).attr('name');
 							var value = $(this).val();
 							if(value!='' && value){
@@ -732,7 +732,7 @@ function requireChangeHistory(vocab_id){
 	$('#myModal-noClose .modal-body').html(html);
 	$('#myModal-noClose').modal({backdrop:'static',keyboard:false});
 	var form = $('#myModal-noClose form');
-	Core_bindFormValidation(form);
+	// Core_bindFormValidation(form);
 	$('#confirmAddChangeHistory').click(function(){
 		var description = $('#myModal-noClose .changeHistoryDescription').val();
 		if(Core_checkValidForm($('#myModal-noClose form'))){
@@ -777,7 +777,7 @@ function load_vocab_edit(vocab_id){
 				$('#edit-vocab').fadeIn(500);
 				loadVersions(vocab_id, data.item.view);
 				var form = $('#edit-form');
-				Core_bindFormValidation(form);
+				// Core_bindFormValidation(form);
 
 				var record_owner = $('#edit-vocab input[name=record_owner]').val();
 				$('#chooseRecordOwner').val(record_owner);

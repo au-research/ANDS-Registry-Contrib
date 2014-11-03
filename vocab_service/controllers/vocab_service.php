@@ -659,11 +659,14 @@ class Vocab_service extends MX_Controller {
 		}else $version['makeCurrent']=false;
 		$version_id = $this->vocab->addVersion($vocab_id, $version);
 
+
+
 		//add initial format
 		$type = $this->input->post('type');
 		$format = $this->input->post('format');
 		$value = $this->input->post('value');
-		
+
+
 		$jsonData=array();
 		if($this->vocab->addFormat($version_id,$format,$type,$value)){
 			$jsonData['status']='OK';

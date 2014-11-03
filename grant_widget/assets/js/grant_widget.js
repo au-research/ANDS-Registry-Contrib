@@ -22,11 +22,11 @@
 
 	//settings
     var WIDGET_NAME = "ANDS Grant service";
-    var WIDGET_ID = "_grant_widget_list";
 
     //init the grant_widget()
     $.fn.grant_widget = function(options, param) {
 
+        var WIDGET_ID = generateUUID()
     	//set params
 		param = typeof(param) === 'undefined' ? false : param;
 
@@ -41,7 +41,7 @@
 		    //Text Settings
 		    search: true,
 		    pre_open_search: false,
-		    tooltip:true,
+		    tooltip:false,
 		    info_box_class:'info-box',
 		    search_text: '<i class="icon-search"></i> Search',
 		    search_class: 'grant_search btn btn-default btn-small',
@@ -59,6 +59,11 @@
 		    search_text_btn: 'Search',
 		    close_search_text_btn: '[x]',
 
+            //allow custom settings for the funders and search fields
+            funder_lists: false,
+            funders: '',
+            search_fields: '{"search_fields":["title","person","principalInvestigator","institution","description","id"]}',
+
 		    //custom hooks and handlers
 		    lookup_error_handler: false,
 		    lookup_success_handler: false,
@@ -66,9 +71,7 @@
 
 		    //auto close the search box once a value is chosen
 		    auto_close_search: true,
-            funder_lists: false,
-            funders: '',
-            search_fields: '{"search_fields":["title","person","principalInvestigator","institution","description","id"]}'
+
 
 		};
 
@@ -120,7 +123,9 @@
 			var p = obj.parent();
 			obj.p = p;
 		}
-		
+        obj[0].name = '#'+settings._wid;
+
+
 		//init a lookup if settings told you to
 		if(settings.pre_lookup || (obj.attr('data-autolookup')==='true')) _lookup(obj, settings);
 
@@ -153,28 +158,32 @@
                 var fields = jQuery.parseJSON(settings.search_fields)
                 for(i=0;i<fields['search_fields'].length;i++)
                 {
-                    field_list += fields['search_fields'][i]+'<input type="checkbox" name="'+fields['search_fields'][i]+'" value="'+fields['search_fields'][i]+'" class="search_fields"/> &nbsp; &nbsp;';
+                     var field_display =fields['search_fields'][i].replace(/([A-Z])/g, ' $1').replace(/^./, function(str){ return str.toUpperCase(); })
+                    field_list += field_display+'<span class="space"> </span><input type="checkbox" name="'+fields['search_fields'][i]+'" value="'+fields['search_fields'][i]+'" checked class="search_fields'+settings._wid+'"/> &nbsp; &nbsp;';
                 }
              }
+            var return_spot = $('<a name="'+settings._wid+'" id="return'+settings._wid+'"></a>')
 			var search_btn = $('<button>').addClass(settings.search_class).html(settings.search_text);
 			var search_html = '<p>'+settings.query_text+' <span class="indent"><input type="text" class="grant_search_input"/></p><p>'+funders_list+'</p><p>'+field_list+' </span></p><p><a class="search_grant"><button>'+settings.search_text_btn+'</button></a><div class="grant_search_result"></div><a class="close_search">'+settings.close_search_text_btn+'</a></p>';
-			var search_div = $('<div>').addClass(settings.search_div_class).html(search_html);
+			var search_div = $('<div id="'+settings._wid+'">').addClass(settings.search_div_class).html(search_html);
 
-			if(!settings.pre_open_search) $(search_div).hide();
+            p.append(return_spot)
 			p.append(search_btn).append(search_div);
+            if(!settings.pre_open_search)  $('#'+settings._wid).hide()
 			$(search_btn).on('click', function(e){
 				e.preventDefault();
-				_search_form(obj, settings);
+                $('.grant_success_div').hide()
+				_search_form(obj, settings._wid);
 			});
 			$('input.grant_search_input', p).on('keypress', function(e){
 				//enter key
 				if(e.keyCode==13){
-                    var searching_fields = _get_fields(fields);
-                    if($(this).next().prop("tagName")=='A')
+                    var searching_fields = _get_fields(fields,settings);
+                    if($('select.funder').val())
                     {
-                        var funder = 'All'
-                    }else{
                         var funder = $('select.funder').val()
+                    }else{
+                        var funder = 'All'
                     }
 
 					_search($(this).val(), funder, searching_fields ,obj, settings); return false;
@@ -185,18 +194,19 @@
  				e.preventDefault();
 				e.stopPropagation();
 				var query = $('.grant_search_input', p).val();
-                var searching_fields = _get_fields(fields);
-                if($(this).next().prop("tagName")=='A')
+                var searching_fields = _get_fields(fields,settings);
+                if($('select.funder').val())
                 {
-                    var funder = 'All'
-                }else{
+
                     var funder = $('select.funder').val()
+                }else{
+                    var funder = 'All'
                 }
 				_search(query,funder,searching_fields, obj, settings);
 			});
 			$('.close_search', p).on('click', function(){
 				//close button
-				$('.'+settings.search_div_class, p).slideUp();
+				$('#'+settings._wid, p).slideUp();
 			});
 
 		}
@@ -219,6 +229,7 @@
 	 * @return {void}            this will modify the DOM based on the return value
 	 */
 	function _lookup(obj, settings){
+        $('.'+settings.uid).slideUp()
 		var value = obj.val().replace('http://','');
 		$.ajax({
 			url:settings.lookup_endpoint+encodeURIComponent(value)+'&callback=?',
@@ -307,11 +318,12 @@
             if(obj[0]['relations'])
             {
                 resStr += "<h6>Relationships</h6>";
+
                 if(typeof(obj[0]['relations']['isFundedBy'])=='string')
                 {
                     resStr +="<p>Is funded by</p>";
                     resStr +="<p>"+obj[0]['relations']['isFundedBy']+"</p>";
-                }else if (typeof(obj[0]['relations']['isFundedBy'])=='array'){
+                }else if (typeof(obj[0]['relations']['isFundedBy'])=='object'){
                     resStr +="<p>Is funded by</p><p>";
                     for(i=0;i<obj[0]['relations']['isFundedBy'].length;i++)
                     {
@@ -324,7 +336,7 @@
                 {
                     resStr +="<p>Is managed by</p>";
                     resStr +="<p>"+obj[0]['relations']['isManagedBy']+"</p>";
-                }else if (typeof(obj[0]['relations']['isManagedBy'])=='array'){
+                }else if (typeof(obj[0]['relations']['isManagedBy'])=='object'){
                     resStr +="<p>Is managed by</p><p>";
                     for(i=0;i<obj[0]['relations']['isManagedBy'].length;i++)
                     {
@@ -337,7 +349,7 @@
                 {
                     resStr +="<p>Has participant</p>";
                     resStr +="<p>"+obj[0]['relations']['isParticipantIn']+"</p>";
-                }else if(typeof(obj[0]['relations']['isParticipantIn'])=='array'){
+                }else if(typeof(obj[0]['relations']['isParticipantIn'])=='object'){
                     resStr +="<p>Has participant</p><p>";
                     for(i=0;i<obj[0]['relations']['isParticipantIn'].length;i++)
                     {
@@ -350,7 +362,7 @@
                 {
                     resStr +="<p>Has principal investigator</p>";
                     resStr +="<p>"+obj[0]['relations']['isPrincipalInvestigatorOf']+"</p>";
-                }else if (typeof(obj[0]['relations']['isPrincipalInvestigatorOf'])=='array'){
+                }else if (typeof(obj[0]['relations']['isPrincipalInvestigatorOf'])=='object'){
                     resStr +="<p>Has principal investigator</p><p>";
                     for(i=0;i<obj[0]['relations']['isPrincipalInvestigatorOf'].length;i++)
                     {
@@ -371,6 +383,40 @@
 		resStr += "</div>"
 		return resStr;
 	}
+
+    /**
+     * construct a string out from an Grant object to obtain identifier value
+     * @param  {grant['grant-profile']} obj grant-profile array of the returned object
+     * @return {string}    identifier value
+     */
+    function _getIdentifier(obj,settings) {
+        if(obj.length==1)
+        {
+            if(obj[0]['identifiers'])
+            {
+                var i;
+                var identifier = '';
+
+                for (i in obj[0]['identifier_type']) {
+                    if (obj[0]['identifier_type'].hasOwnProperty(i)) {
+                        identifier = obj[0]['identifier_type'][i]
+                    }
+                }
+
+                for (j in obj[0]['identifier_type']) {
+                    if (obj[0]['identifier_type'].hasOwnProperty(j)) {
+                        if(j=='purl')
+                        {
+                            identifier = obj[0]['identifier_type'][j]
+                        }
+                    }
+                }
+
+            }
+
+        }
+        return identifier;
+    }
 
 	/**
 	 * isset equivalent for javascript
@@ -394,7 +440,6 @@
  		var p = obj.p;
 		var result_div = p.find('.'+settings.grant_search_result);
         var thefields = jQuery.parseJSON(fields)
-        var matches = '0';
         var funder_list = '';
         if(funder!='All')
         {
@@ -403,6 +448,7 @@
 		if($.trim(query)==""){
 			$('.grant_search_result', p).html('Please enter a search string');
 		}else{
+            var matches = '';
 			$('.grant_search_result', p).html('Loading...');
             var html = '';
             for(i=0;i<thefields['search_fields'].length;i++)
@@ -415,16 +461,19 @@
 						settings.success_handler(data, obj, settings);
 					}else{
 						if(data.message['numFound']>0){
-                            matches = data.message['numFound']
-                            html += '<a class="show_list" id="'+this.indexValue+'"> + </a>'+data.message['numFound']+" found in <i>"+ thefields['search_fields'][this.indexValue]+"</i><br />";
-							html +='<div id="div_'+this.indexValue+'" class="listdiv" style="display:none"><ul>';
+
+                            matches += data.message['numFound']
+                            html += '<a class="show_list" id="'+this.indexValue+settings._wid+'"> + </a>'+data.message['numFound']+" found in <i>"+ thefields['search_fields'][this.indexValue]+"</i><br />";
+							html +='<div id="div_'+this.indexValue+settings._wid+'" class="listdiv" style="display:none"><ul>';
 
 							$.each(data.message['recordData'], function(){
  								var titleStr = "";
                                 var obj = new Array(this);
+                                var identifier = _getIdentifier(obj,settings);
                                 if(settings.tooltip) titleStr = 'title="'+_constructGrantHTML(obj,settings)+'"';
+
 								html+='<li>';
-								html+='<a class="select_grant_search_result preview" grant-id="'+this.identifier+'" '+titleStr+' >'+this.title+'</a>';
+								html+='<a class="select_grant_search_result preview" grant-id="'+identifier+'" '+titleStr+' >'+this.title+'</a>';
 								html+='</li>';
 							});
 							html+='</ul></div>';
@@ -434,7 +483,10 @@
 					$('.select_grant_search_result', p).on('click', function(){
 						obj.val($(this).attr('grant-id'));
 						_lookup(obj, settings);
-						if(settings.auto_close_search) $('.'+settings.search_div_class).slideUp();
+						if(settings.auto_close_search) $('#'+settings._wid).slideUp();
+
+                        $(document.body).scrollTop($('#return'+settings._wid).offset().top -100);
+
 					});
 					if(settings.tooltip){
 						$('.preview').each(function(){       
@@ -468,14 +520,16 @@
 						console.error(xhr.responseText);
 					}
 				}
+
 			});
+                if(matches == '0')
+                {
+                    $('.grant_search_result', p).html(settings.nohits_msg);
+                }
+            }
         }
 
-        if(matches == '0')
-            {
-                $('.grant_search_result', p).html(settings.nohits_msg);
-            }
-		}
+
 
 	}
 
@@ -491,17 +545,16 @@
 	}
 
 	//open the search form
-	function _search_form(obj, settings){
-		$('.'+settings.search_div_class).slideToggle();
+	function _search_form(obj, wid){
+		$('#'+wid).slideToggle();
 	}
 
-    function _get_fields(searching_fields)
+    function _get_fields(searching_fields,settings)
     {
         var fields ='';
-
-        $.each($('.search_fields'),function()
+        $.each($('.search_fields'+settings._wid),function()
         {
-            if($(this).attr('checked'))
+            if($(this).prop('checked'))
             {
                 if(fields==''){
                     fields += '{"search_fields":["'+$(this).attr('name')+'"'
@@ -526,6 +579,19 @@
         return fields;
     }
 
+    function generateUUID(){
+        var d = new Date().getTime();
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = (d + Math.random()*16)%16 | 0;
+            d = Math.floor(d/16);
+            return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+        });
+        return uuid;
+    };
+
+    function scrollTo(hash) {
+        location.hash = "#" + hash;
+    }
 	//catch all .grant_widget and apply grant_widget() with default settings on
 
 	$('.grant_widget').each(function(){
@@ -535,6 +601,12 @@
 
     $(document).on("click", ".show_list", function(e) {
         var theUl = $(this).attr('id');
+        if($('#div_'+theUl).css('display')=='none')
+        {
+            $('#'+theUl).html(' - ')
+        }else{
+            $('#'+theUl).html(' + ')
+        }
         $('#div_'+theUl).slideToggle();
 
     });
