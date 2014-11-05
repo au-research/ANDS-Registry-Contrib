@@ -14,12 +14,23 @@
         <?php if(registry_super_usser == true): ?>
             <a data-toggle="modal" href="#batch_mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a lot of new Identifiers</a>
         <?php endif; ?>
+        <?php if($batch_pid_files):  ?>
+            <select class="chosen" id="pid_batch_file_chooser">
+                <option value="Download PIDS as CSV">Download PIDS as CSV</option>
+                <?php foreach($batch_pid_files as $o): ?>
+                    <option value="<?php echo $o ?>"><?php echo $o; ?></option>
+                <?php endforeach; ?>
+            </select>
+
+        <?php endif; ?>
     </div>
 </div>
+
 <div id="breadcrumb" style="clear:both;">
 	<?php echo anchor(registry_url('auth/dashboard'), '<i class="icon-home"></i> Home'); ?>
 	<?php echo anchor('/pids', 'Identify My Data', array('class'=>'current')); ?>
 </div>
+
 <input type="hidden" value="<?php echo $identifier; ?>" id="identifier"/>
 <div class="container-fluid" id="main-content">
 

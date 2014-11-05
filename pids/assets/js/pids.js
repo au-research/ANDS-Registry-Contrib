@@ -24,7 +24,7 @@ $(document).on('click', '#mint_confirm', function(){
 	});
 }).on('click', '#batch_mint_confirm', function(){
     if($(this).hasClass('disabled')) return false;
-    $('#batch_mint_result').html("").removeClass('label-important');
+    $('#batch_mint_result').html("").removeClass('label label-important');
     $(this).button('loading');
     var theButton = this;
     var counter = $('#batch_mint_form input[name=counter]').val();

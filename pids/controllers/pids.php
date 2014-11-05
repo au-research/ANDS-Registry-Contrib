@@ -19,6 +19,7 @@ class Pids extends MX_Controller {
 
 		$data['orgRole'] = $this->user->affiliations();
         $data['registry_super_usser'] = $this->user->isSuperAdmin();
+        $data['batch_pid_files'] = $this->pids->getBatchPidsCSVforIdentifier();
 		array_unshift($data['orgRole'], 'My Identifiers');
 
 
@@ -122,11 +123,17 @@ class Pids extends MX_Controller {
 		}
 	}
 
+    function download_csv()
+    {
+        $filename = urlencode($this->input->post('filename'));
+
+        
+    }
+
     function batch_mint(){
         acl_enforce('SUPERUSER');
         $counter = urlencode($this->input->post('counter'));
         $desc = urlencode($this->input->post('desc'));
-
         if($counter && $desc){
             $counter = intval($counter);
             if($counter > 100){
@@ -141,10 +148,17 @@ class Pids extends MX_Controller {
             }
             else{
                 $responseArray['result']='success';
+                $upload_path = './assets/uploads/pids/';
+                $fileName = preg_replace('-\W-','_',$this->pids->getCsvFileNameForCurrentIdentifier())."####".date('Y-m-d_H_i_s');
+                $responseArray['csv_file_path'] = $upload_path.$fileName.'.csv';
+                $file = fopen($upload_path.$fileName.'.csv','x+');
+                $responseArray['file'] = $file;
+                fputcsv($file,  array("NUMBER",'HANDLE','DESC','URL'), ',', '"');
                 for($i = 1 ; $i <= $counter; $i++ ){
                     $response = $this->pids->pidsRequest('mint', 'type=DESC&value='.$desc);
                     if($this->pids->pidsGetResponseType($response) == 'SUCCESS'){
                         $responseArray[$i]['handle'] = $this->pids->pidsGetHandleValue($response);
+                        fputcsv($file, array($i, $responseArray[$i]['handle'],$desc,'http://'), ',',  '"');
                         $responseArray[$i]['message'] =  $this->pids->pidsGetUserMessage($response);
                     }else{
                         $responseArray['result']='error';
@@ -152,6 +166,7 @@ class Pids extends MX_Controller {
                         $responseArray[$i]['error'] =  $this->pids->pidsGetUserMessage($response);
                     }
                 }
+                fclose($file);
                 echo json_encode($responseArray);
             }
         }else{
@@ -161,7 +176,6 @@ class Pids extends MX_Controller {
         }
 
     }
-
 	/**
 	 * Webservice for updating a single handle
 	 * @return json response 

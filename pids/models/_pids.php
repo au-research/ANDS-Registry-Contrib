@@ -82,6 +82,33 @@ class _pids extends CI_Model
 		$this->pid_db->delete('public.trusted_client', array('ip_address'=>$ip, 'app_id'=>$appId));
 	}
 
+    function getCsvFileNameForCurrentIdentifier()
+    {
+        $result = strtolower($this->_CI->session->userdata(PIDS_USER_IDENTIFIER));
+        $result = preg_replace("/[^a-z0-9\s-]/", "", $result);
+        return trim(preg_replace("/[\s-]+/", " ", $result));
+    }
+
+
+
+    function getBatchPidsCSVforIdentifier()
+    {
+        $upload_path = './assets/uploads/pids/';
+        $userIdentifier = $this->_CI->session->userdata(PIDS_USER_IDENTIFIER);
+        $fileArray = array();
+        if (is_dir($upload_path)){
+            if ($dh = opendir($upload_path)){
+                while (($file = readdir($dh)) !== false){
+                    if(strpos($file,$userIdentifier) === 0){
+                        array_push($fileArray, $file);
+                    }
+                }
+                closedir($dh);
+            }
+        }
+        return $fileArray;
+    }
+
 	function getPidOwners()
 	{
 		$result = array();
@@ -307,5 +334,4 @@ class _pids extends CI_Model
 		
 		return $listDescription;
 	}
-
 }
