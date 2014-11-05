@@ -66,8 +66,11 @@ class Mydois extends MX_Controller {
 					}
 				}
 			}
-			
-			$this->load->view('input_app_id', $data);
+            if(count($data['associated_app_ids'])===1){
+                $this->show($data['associated_app_ids'][0]);
+            }else{
+			    $this->load->view('input_app_id', $data);
+            }
 		}else{
 			$this->load->view('login_required', $data);
 		}
@@ -132,12 +135,12 @@ class Mydois extends MX_Controller {
 		echo json_encode($response);
 	}
 
-	function show()
+	function show($app_id)
 	{
 		acl_enforce('DOI_USER');
 
 		$data['js_lib'] = array('core');
-		$data['scripts'] = array('mydois');
+		$data['scripts'] = array('mydois','datacite_form');
 		$data['title'] = 'DOI Query Tool';
 		
 		// Validate the appId
@@ -148,6 +151,10 @@ class Mydois extends MX_Controller {
 		{
 			$appId = $this->input->get_post('app_id_select');
 		}
+        if (!$appId & isset($app_id)){
+            $appId = $app_id;
+
+        }
 		$doiStatus = $this->input->get_post('doi_status');
 		$data['doi_appids'] = $this->user->doiappids();
 		if($doi_update)
@@ -209,7 +216,6 @@ class Mydois extends MX_Controller {
 		
 
 	}
-	
 
 	function runDoiLinkChecker()
 	{
@@ -256,19 +262,21 @@ class Mydois extends MX_Controller {
 		acl_enforce('DOI_USER');
 		
 		$doi_db = $this->load->database('dois', TRUE);
-		
 		// Validate the doi_id
 		$doi_id = rawurldecode($this->input->get_post('doi_id'));
+        $appId = $this->input->get_post('app_id');
+        if (!$appId) throw new Exception ('Invalid App ID');
 
 		if (!$doi_id) throw new Exception ('Invalid DOI ID');  
 		
-		$query = $doi_db->where('doi_id',$doi_id)->select('doi_id, url,client_id')->get('doi_objects');
+		$query = $doi_db->where('doi_id',$doi_id)->select('doi_id, url,client_id, datacite_xml')->get('doi_objects');
 		if (!$doi_obj = $query->result_array()) throw new Exception ('Invalid DOI ID');  
 		$doi_obj = array_pop($doi_obj);
+        $doi_obj['app_id'] = $appId;
 		$this->load->view('update_doi',$doi_obj);
 		
 	}
-	function updateDoiUrl()
+	/* function updateDoiUrl()
 	{
 		acl_enforce('DOI_USER');
 
@@ -278,9 +286,10 @@ class Mydois extends MX_Controller {
 		$doi_id = rawurldecode($this->input->get_post('doi_id'));
 		$client_id = rawurldecode($this->input->get_post('client_id'));
 		
+        //echo $client_id." is the client id<br/>".$old_url." is the old url<br/>".$doi_id." is the doi_id<br/>";
+        //exit();
 
-
-		if (!$client_id || !$old_url || !$doi_id)
+		if ($client_id=='' || !$old_url || !$doi_id)
 		{
 			throw new Exception("Unable to update DOI. Not all parameters were given");
 		}
@@ -386,7 +395,7 @@ class Mydois extends MX_Controller {
 			throw new Exception ('Update of the doi was unsuccessful. ' . $extrainfo);  
 		}
 	
-	}
+	} */
 
 	function getAppIDConfig()
 	{
@@ -412,11 +421,53 @@ class Mydois extends MX_Controller {
 		
 		
 	}
-	
-	function __construct(){
+
+    function manualMintForm(){
+
+        acl_enforce('DOI_USER');
+        $doi_db = $this->load->database('dois', TRUE);
+        $appId = $this->input->get_post('app_id');
+        if (!$appId) throw new Exception ('Invalid App ID');
+
+        $query = $doi_db->where('app_id',$appId)->select('*')->get('doi_client');
+        if (!$client_obj = $query->result()) throw new Exception ('Invalid App ID');
+        $client_obj = array_pop($client_obj);
+        $data['client_id'] = $client_obj->client_id;
+        if($client_obj->client_id<10){
+            $client_obj->client_id = "0".$client_obj->client_id;
+        }
+        $data['doi_id'] = $client_obj->datacite_prefix.$client_obj->client_id."/".uniqid();
+        $data['app_id'] = $appId;
+        $this->load->view('mint_doi',$data);
+    }
+
+    function uploadFile(){
+        if ( isset($_FILES['file']) ) {
+            $filename = time().basename($_FILES['file']['name']);
+            $error = true;
+
+            $path = '/tmp/'.$filename;
+            $error = move_uploaded_file($_FILES['file']['tmp_name'], $path);
+
+            $rsp = array(
+                'error' => $error, // Used in JS
+                'filename' => $filename,
+                'filepath' => '/tmp/' . $filename, // Web accessible
+                'xml' =>file_get_contents($path),
+            );
+            unlink($path);
+            echo json_encode($rsp);
+            exit;
+        }else{
+            echo json_encode("File not uploaded");
+
+        }
+    }
+
+  	function __construct(){
 		acl_enforce('DOI_USER');
 		$this->load->model('_mydois', 'mydois');
-	}	
+	}
 		
 }
 	

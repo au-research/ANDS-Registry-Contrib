@@ -94,8 +94,12 @@ class Doitasks extends CI_Model {
 		if($debug && $debug == 'true')	
 		{
 			$this->debugOn();
-		}		
-	
+		}
+        $manual_update = $this->input->get('manual_update');
+        if($manual_update)
+        {
+            $client_id = rawurldecode($this->input->get_post('client_id'));
+        }
 		$app_id = $this->getAppId();
 		if(substr($app_id,0,4)=='TEST')
 		{
@@ -130,7 +134,7 @@ class Doitasks extends CI_Model {
 		} 
 		if($errorMessages == '')	
 		{
-			$client_id = checkDoisValidClient($ip,$app_id);
+			if(!$manual_update) $client_id = checkDoisValidClient($ip,$app_id);
 
 			if($client_id===false)
 			{
@@ -153,10 +157,13 @@ class Doitasks extends CI_Model {
 			$xml = $this->getXmlInput();
 
 			//first up, lets check that this client is permitted to update this doi.
+            $xml_row = $doidata->row();
+            $old_xml = $xml_row->datacite_xml;
+
+            if(trim($xml)===trim($old_xml)) $xml='';
 
 			if(isset($xml) && $xml) // if the client has posted xml to be updated
 			{
-			
 				$doiObjects = new DOMDocument();
 						
 				$result = $doiObjects->loadXML($xml);
@@ -192,7 +199,7 @@ class Doitasks extends CI_Model {
                             $theSchema = $this->getXmlSchema($resources->item(0)->attributes->item(0)->nodeValue);
                         }
                     }
-					$result = $doiObjects->schemaValidate($dataciteSchema[$theSchema]);
+					$result = $doiObjects->schemaValidate(asset_url('schema').$dataciteSchema[$theSchema]);
 
 					$xml = $doiObjects->saveXML();
 
@@ -204,7 +211,7 @@ class Doitasks extends CI_Model {
 					}				
 				}	
 			}
-			else
+			/*else
 			{
 				$xml_row = $doidata->row();
 				$xml = $xml_row->datacite_xml;
@@ -232,7 +239,7 @@ class Doitasks extends CI_Model {
 					}
 
 				}
-			}
+			}*/
 			
 			if( $errorMessages == '' )
 			{
@@ -244,7 +251,7 @@ class Doitasks extends CI_Model {
 					/* Fix: 09/01/2013, DataCite requires metadata FIRST, then DOI call */
 					// Send DataCite the metadata first
 					// Update the DOI
-					if($doiObjects)
+					if($doiObjects && $xml)
 					{
 						$response2 = $this->doisRequest("update", $doiValue, $urlValue, $xml, $client_id);
 					}
@@ -307,7 +314,8 @@ class Doitasks extends CI_Model {
 	}
 	
 	function mint(){
-	
+
+
 		$dataciteSchema = $this->config->item('gCMD_SCHEMA_URIS');
 
 		if ( isset($_SERVER["HTTP_X_FORWARDED_FOR"]) )    {
@@ -335,8 +343,16 @@ class Doitasks extends CI_Model {
 		$response1 = "OK";
 		$response2 = "OK";	
 		$debug = $this->input->get('debug');
-		
-		if($debug && $debug == 'true')	
+
+        $manual_mint = $this->input->get('manual_mint');
+        if($manual_mint)
+        {
+            $doiValue = rawurldecode($this->input->get_post('doi_id'));
+            $client_id = rawurldecode($this->input->get_post('client_id'));
+        }
+
+
+        if($debug && $debug == 'true')
 		{
 			$this->debugOn();
 		}
@@ -366,7 +382,7 @@ class Doitasks extends CI_Model {
 		}
 		if($errorMessages == '')
 		{
-			$client_id = checkDoisValidClient($ip,trim($app_id));
+			if(!$manual_mint) $client_id = checkDoisValidClient($ip,trim($app_id));
 			if($client_id===false)
 			{
 				$verbosemessage = 'Client with app_id '.$app_id.' from ip address '.$ip. ' is not a registered doi client.';
@@ -387,12 +403,16 @@ class Doitasks extends CI_Model {
 
 			foreach($clientDetails->result() as $clientDetail)
 			{
-				if($clientDetail->client_id<'10')
+
+                if($clientDetail->client_id<'10')
 				{
 					$client_id2 = "0".$clientDetail->client_id;
 				}else{
 					$client_id2 = $clientDetail->client_id;
 				}
+
+                $client_domains = getClientDomains($clientDetail->client_id);
+
 			}
 			if($testing=='yes')
 			{
@@ -401,11 +421,8 @@ class Doitasks extends CI_Model {
 				$datacite_prefix = $clientDetail->datacite_prefix;
 			}
 
-				
-			$doiValue = strtoupper($datacite_prefix.$client_id2.'/'.uniqid());	//generate a unique suffix for this doi for this client 
-			
+            if(!$manual_mint) $doiValue = strtoupper($datacite_prefix.$client_id2.'/'.uniqid());	//generate a unique suffix for this doi for this client
 
-		
 			$doiObjects = new DOMDocument();
 						
 			$result = $doiObjects->loadXML($xml);
@@ -442,8 +459,7 @@ class Doitasks extends CI_Model {
 				$newdoi = $doiObjects->createElement('identifier',$doiValue);
 				$newdoi->setAttribute('identifierType',"DOI");	
 				$doiObjects->getElementsByTagName('resource')->item(0)->insertBefore($newdoi,$doiObjects->getElementsByTagName('resource')->item(0)->firstChild);
-		
-				//$xml = $doiObjects->saveXML();
+
 			}
 
 			if( $errors )
@@ -470,18 +486,29 @@ class Doitasks extends CI_Model {
 					unlink($tempFile);
 				}
 
-				$result = $doiObjects->schemaValidate($dataciteSchema[$theSchema]);
-				
+				$result = $doiObjects->schemaValidate(asset_url('schema').$dataciteSchema[$theSchema]);
+
 				$xml = $doiObjects->saveXML();
 			
 				$errors = error_get_last();
+
 				if( $errors || !$result)
 				{
 					$verbosemessage = "Document Validation Error: ".$errors['message'];
 					$errorMessages = doisGetUserMessage("MT006", $doi_id=NULL, $response_type, $app_id, $verbosemessage,$urlValue);
 				}			
 				
-			}					
+			}
+            if(!$errors){
+                //ensure provided url is valid with registered top level domain
+
+                if(!$this->validDomain($urlValue,$client_domains)){
+                    $verbosemessage = 'URL not permitted.';
+                    $errorMessages = doisGetUserMessage("MT014", $doi_id=NULL, $response_type,$app_id, $verbosemessage,$urlValue);
+                }
+
+            }
+
 			
 		}	
 			
@@ -1010,9 +1037,11 @@ class Doitasks extends CI_Model {
 				print $name. "=".$value."<br />";
 			}	
 		}		
-	} 
+	}
+
 	function getAppId(){
 		$app_id= '';
+
 		$app_id = $this->input->get('app_id');		//passed as a parameter
 		//or app_id might be passed as part of the authstr
 
@@ -1039,6 +1068,19 @@ class Doitasks extends CI_Model {
             return trim($data);
         }
 
-
     }
+
+    function validDomain($urlValue,$client_domains){
+        //check that the host component of a given url belings to one of the clients registered domains
+        $theDomain = parse_url($urlValue);
+        foreach($client_domains as $domain){
+            $check =  strpos($theDomain['host'], $domain->client_domain);
+            if($check||$check===0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

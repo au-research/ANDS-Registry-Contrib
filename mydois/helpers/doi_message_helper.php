@@ -78,8 +78,12 @@ function doisGetUserMessage($responseCode, $doi_id,$response_type="string",$app_
 			$message = $verbosemessage;
 			$verbosemessage = strlen($verbosemessage) . " bytes";
 			$type = "success";					
-			break;		
-		case "MT090":
+			break;
+        case "MT014":
+            $message = "The provided URL does not belong to any of your registered top level domains. If you would like to add additional domains to your account please contact services@ands.org.au. ";
+            $type = "failure";
+            break;
+        case "MT090":
 			// Success response for status pings (verbose message should indicate ms turnaround time)
 			$message = "The rocket is ready to blast off -- all systems are go!";
 			$type = "success";
