@@ -10,6 +10,7 @@
  */
 ?>
 	<div class="box-content">
+
 		<p id="mint_result">  </p>
         <div id="mint_form">
 		    <form action="<?=base_url('mydois/manualMint/');?>" method="POST" class="form-horizontal" id="mint_form" enctype="multipart/form-data">
@@ -24,7 +25,7 @@
                 <label class="control-label">URL</label> <div class="controls"> <input type="text" name="url" value="" /></div>
             </div>
             <div class="control-group">
-                <label class="control-label">Metadata</label> <div class="controls"><input type="radio" name="xml_input" value="formxml"> Generate XML with form  <input type="radio" name="xml_input" value="uploadxml"> Upload XML Metadata</div>
+                <label class="control-label">Metadata</label> <div class="controls"><input type="radio" name="xml_input" value="formxml" checked="checked"> Generate XML with form  <input type="radio" name="xml_input" value="uploadxml"> Upload XML Metadata</div>
             </div>
         <div class="control-group" id="uploadxml" style="display:none">
             <label class="control-label">File</label> <div class="controls"><input type="file" name="fileupload" id="fileupload"> </div>
@@ -32,7 +33,6 @@
         </div>
 
        <div class="control-group" id="formxml" style="display:none">
-
            <!-- DataCite Metadata Generator (Kernel 3.0)-->
            <!-- created: 04/10/2013 paluchm - DataCite Canada -->
            <!-- This form makes uses of styles developed by the wet-boew project (https://github.com/wet-boew/wet-boew)  -->

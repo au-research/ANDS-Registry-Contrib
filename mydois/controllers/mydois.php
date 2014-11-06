@@ -135,7 +135,7 @@ class Mydois extends MX_Controller {
 		echo json_encode($response);
 	}
 
-	function show($app_id)
+	function show($app_id=null)
 	{
 		acl_enforce('DOI_USER');
 
@@ -190,11 +190,21 @@ class Mydois extends MX_Controller {
 		{
 			$data['dois'][] = $doi;
 		}
+
+		$query = $doi_db->order_by('timestamp', 'desc')->where('client_id',$client_obj->client_id)->select('*')->limit(50)->get('activity_log');
+		$data['activities'] = $query->result();
+
+		$query = $doi_db->where('client_id',$client_obj->client_id)->select('client_domain')->get('doi_client_domains');
+		foreach ($query->result_array() AS $domain) {
+			$client_obj->permitted_url_domains[] = $domain['client_domain'];
+		}
+
+        $data['client_id'] = $client_obj->client_id;
+        $data['doi_id'] = $client_obj->datacite_prefix.$client_obj->client_id."/".uniqid();
+        $data['app_id'] = $appId;
 		
 		$data['client'] = $client_obj;
-		
 		$this->load->view('list_dois', $data);
-
 	}
 
 	function getActivityLog()
