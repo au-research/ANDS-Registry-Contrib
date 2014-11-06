@@ -135,7 +135,7 @@ class Mydois extends MX_Controller {
 		echo json_encode($response);
 	}
 
-	function show($app_id)
+	function show($app_id=null)
 	{
 		acl_enforce('DOI_USER');
 
