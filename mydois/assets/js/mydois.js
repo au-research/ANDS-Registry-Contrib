@@ -1,14 +1,22 @@
+$(document).on('click', '.nav li', function(){
+    var tab = $(this).attr('name');
+    if($('.widget-content[name='+tab+']').length) {
+        $('.nav li').removeClass('active');
+        $(this).addClass('active');
+        $('.widget-content').hide();
+        $('.widget-content[name='+tab+']').show();
+    }
+});
+
 $(document).on('click', '#linkChecker', function(){
 	var app_id = $(this).attr('app_id');
-	$('#viewLinkCheckerLogModal .modal-body').html('<p>Loading...</p><div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>');
-	$('#viewLinkCheckerLogModal').modal('show');
 	$.ajax({
 		url:apps_url+'mydois/runDoiLinkChecker', 
 		type: 'POST',
 		data: {app_id:app_id},
 		success: function(data){
 			if(data.status=='SUCCESS'){
-				$('#viewLinkCheckerLogModal .modal-body').html(data.message);																				
+				$('#linkChecker_result').html(data.message);																				
 			}
 		}
 	});
@@ -18,11 +26,11 @@ $(document).on('change','input:radio[name="xml_input"]',function(e){
 	var radio = $('input[name="xml_input"]')
 	$.each(radio,function(){$('#'+this.value).css('display','none')});
     $('#'+toDisplay).css('display','block')
-
-})
+});
+$('#formxml').show();
 $(document).on('click', '#doi_mint_confirm', function(){
 
-    var xml_input = '';
+    var xml_input = 'formxml';
     var req_element_error = '';
 
     $.each($('input[name="xml_input"]'),function(){
