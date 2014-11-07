@@ -198,7 +198,10 @@ class Mydois extends MX_Controller {
 		foreach ($query->result_array() AS $domain) {
 			$client_obj->permitted_url_domains[] = $domain['client_domain'];
 		}
-
+        if($client_obj->client_id<10)
+        {
+            $client_obj->client_id = "0".$client_obj->client_id;
+        }
         $data['client_id'] = $client_obj->client_id;
         $data['doi_id'] = $client_obj->datacite_prefix.$client_obj->client_id."/".uniqid();
         $data['app_id'] = $appId;
