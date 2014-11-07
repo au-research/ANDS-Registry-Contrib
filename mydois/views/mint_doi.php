@@ -17,10 +17,10 @@
                 <div id="loading"></div>
                 <input type="hidden" name="client_id" value="<?php echo $client_id; ?>"/>
                 <input type="hidden" name="app_id" value="<?php echo $app_id; ?>"/>
-                <input type="hidden" name="xml"/>
+                <input type="hidden" name="xml"/> <a href="http://schema.datacite.org/meta/kernel-3.0/index.html" target="_blank" class="pull-right">DataCite Schema Help</a>
             <div class="control-group">
                 <label class="control-label">DOI</label> <div class="controls"><input type="text" name="doi" value="<?php echo $doi_id; ?>" readonly="readonly"/></div>
-                <div class="pull-right"><a href="http://schema.datacite.org/meta/kernel-3.0/index.html" target="_blank">DataCite Schema Help</a></div>
+
             </div>
             <div class="control-group">
                 <label class="control-label">URL</label> <div class="controls"> <input type="text" name="url" value="" /></div>
@@ -239,6 +239,11 @@
                </div>
                <br />
            </div>
+           <div >
+               <a id="doi_mint_confirm" class="btn btn-primary pull-right" data-loading-text="Updating..." href="javascript:;">Mint DOI</a>
+
+            </form>
+        </div>
            <div class="right hidden">
              <!--  <h3 class="results">Metadata</h3> -->
                <div class="form results">
