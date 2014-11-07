@@ -40,12 +40,12 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 			<table class="table table-hover table-condensed">
 				<thead>
 					<tr>
-						<th>Title</th>	
-						<th>DOI</th>
-						<th></th>
-						<th></th>
-						<th>Status</th>	
-						<th>Last Updated</th>			
+						<th style="text-align:left">Title</th>
+						<th style="text-align:left">DOI</th>
+						<th style="text-align:left"></th>
+						<th style="text-align:left"></th>
+						<th style="text-align:left">Status</th>
+						<th style="text-align:left">Last Updated</th>
 					</tr>
 				</thead>
 				<tbody>
