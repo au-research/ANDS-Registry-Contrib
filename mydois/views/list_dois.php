@@ -72,10 +72,10 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 				</tbody>
 			</table>
 		</div>
-		<div class="widget-content" name="mint">
+		<div class="widget-content hide" name="mint">
 			<?php $this->load->view('mint_doi'); ?>
 		</div>
-		<div class="widget-content" name="log">
+		<div class="widget-content hide" name="log">
 			<table class="table table-hover table-condensed">
 				<thead>
 					<tr>
@@ -101,7 +101,7 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 				</tbody>
 			</table>
 		</div>
-		<div class="widget-content" name="conf">
+		<div class="widget-content hide" name="conf">
 			<dl class="dl-vertical">
 			  <dt>Client Name</dt>
 			  <dd><?=$client->client_name;?></dd>
@@ -120,7 +120,7 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 			  <dd><pre><?=implode(", ", $client->permitted_url_domains);?></pre></dd>
 			</dl>
 		</div>
-		<div class="widget-content" name="check_links">
+		<div class="widget-content hide" name="check_links">
 			<div class="alert alert-info">
 				Check DOI Link functionality will send an email to the DOI owner with the report
 			</div>
