@@ -289,126 +289,7 @@ class Mydois extends MX_Controller {
 		$this->load->view('update_doi',$doi_obj);
 		
 	}
-	/* function updateDoiUrl()
-	{
-		acl_enforce('DOI_USER');
 
-		// Validate the url
-		$new_url = rawurldecode($this->input->get_post('new_url'));
-		$old_url = rawurldecode($this->input->get_post('old_url'));
-		$doi_id = rawurldecode($this->input->get_post('doi_id'));
-		$client_id = rawurldecode($this->input->get_post('client_id'));
-		
-        //echo $client_id." is the client id<br/>".$old_url." is the old url<br/>".$doi_id." is the doi_id<br/>";
-        //exit();
-
-		if ($client_id=='' || !$old_url || !$doi_id)
-		{
-			throw new Exception("Unable to update DOI. Not all parameters were given");
-		}
-		$doi_db = $this->load->database('dois', TRUE);
-		$query = $doi_db->where('client_id',$client_id)->select('*')->get('doi_client');
-		if (!$client_obj = $query->result()) throw new Exception ('Invalid Client ID');  
-		$client_obj = array_pop($client_obj);
-		
-		$doi_appids = $this->user->doiappids();
-		if(!in_array($client_obj->app_id, $doi_appids))
-		{
-			throw new Exception ('You do not have authorisation to update DOI  '.$doi_id);  
-		}
-		$doi_db = $this->load->database('dois', TRUE);		
-		$query = $doi_db->where('client_id',$client_id)->select('client_domain')->get('doi_client_domains');
-		if(!$new_url)
-		{
-			$message = "param 'url' required";
-			$client = str_replace("-","0",$client_id);
-			$logdata = array(
-               'client_id' => $client,
-               'activity' => "UPDATE", 
-               'doi_id'  => $doi_id, 
-               'result'    => "FAILURE",  
-               'message'    => $message,      
-            	);
-			$doi_db->insert('activity_log', $logdata); 
-			redirect('/mydois/show/?app_id='.$client_obj->app_id.'&doi_update='.urlencode($message)."&error=yes", 'location');
-		}
-		
-		$validDomain = false;
-		if ($query->num_rows() > 0)
-		{
-			foreach ($query->result() AS $result)
-			{
-				if(strpos($new_url, $result->client_domain) !== FALSE)
-				{
-					$validDomain = $result->client_domain;
-				}
-			}
-		}
-
-		if(!$validDomain)
-		{
-			$message = "Invalid top level domain provided in url ";
-			$client = str_replace("-","0",$client_id);
-			$logdata = array(
-               'client_id' => $client,
-               'activity' => "UPDATE", 
-               'doi_id'  => $doi_id, 
-               'result'    => "FAILURE",  
-               'message'    => $message,      
-            	);
-			$doi_db->insert('activity_log', $logdata); 
-			redirect('/mydois/show/?app_id='.$client_obj->app_id.'&doi_update='.urlencode($message)."&error=yes", 'location');				
-		} 
-
-		if($client_id<10) $client_id = '-'.$client_id;	
-
-		$requestURI =  $this->config->item('gDOIS_SERVICE_BASE_URI');
-		$authstr = $this->config->item('gDOIS_DATACENTRE_NAME_PREFIX').".".$this->config->item('gDOIS_DATACENTRE_NAME_MIDDLE').$client_id.":".$this->config->item('gDOIS_DATACITE_PASSWORD');	
-
-		$context  = array('Content-Type:text/plain;charset=UTF-8','Authorization: Basic '.base64_encode($authstr));
-		$metadata="url=".$new_url."\ndoi=".$doi_id;
-		$requestURI = $this->config->item('gDOIS_SERVICE_BASE_URI')."doi";
-		$result = '';
-		$extrainfo = '';
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_POST,1);
-		curl_setopt($ch, CURLOPT_URL, $requestURI);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
-		curl_setopt($ch, CURLOPT_HTTPHEADER,$context);
-		curl_setopt($ch, CURLOPT_POSTFIELDS,$metadata);
-		$result = curl_exec($ch);
-	
-		$curlinfo = curl_getinfo($ch);
-	
-		curl_close($ch);
-	
-		if($result == $this->config->item('gDOIS_RESPONSE_SUCCESS'))
-		{
-			//if its all Ok - update the database and return to the doi listing
-			$data = array(
-               'url' => $new_url,
-               'updated_when' => date("Y-m-d H:i:s"),
-            	);
-			$doi_db->where('doi_id', $doi_id);
-			$doi_db->update('doi_objects', $data); 
-			$message =  "DOI ".$doi_id." was successfully update to url '".$new_url."' with ".$validDomain;
-			$client = str_replace("-","0",$client_id);
-			$logdata = array(
-               'client_id' => $client,
-               'activity' => "UPDATE", 
-               'doi_id'  => $doi_id, 
-               'result'    => "SUCCESS",  
-               'message'    => $message,      
-            	);
-			$doi_db->insert('activity_log', $logdata); 
-			redirect('/mydois/show/?app_id='.$client_obj->app_id.'&doi_update='.$message, 'location');
-		}else{
-			//we got an error back or nothing so we need to tell the user something went wrong
-			if($result) $extrainfo = "The following error message was returned : ".$result;
-			throw new Exception ('Update of the doi was unsuccessful. ' . $extrainfo);  
-		}
-	
-	} */
 
 	function getAppIDConfig()
 	{
@@ -435,7 +316,7 @@ class Mydois extends MX_Controller {
 		
 	}
 
-    function manualMintForm(){
+    /*function manualMintForm(){
 
         acl_enforce('DOI_USER');
         $doi_db = $this->load->database('dois', TRUE);
@@ -452,7 +333,7 @@ class Mydois extends MX_Controller {
         $data['doi_id'] = $client_obj->datacite_prefix.$client_obj->client_id."/".uniqid();
         $data['app_id'] = $appId;
         $this->load->view('mint_doi',$data);
-    }
+    } */
 
     function uploadFile(){
         if ( isset($_FILES['file']) ) {

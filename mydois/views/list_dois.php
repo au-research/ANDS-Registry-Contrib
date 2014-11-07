@@ -119,11 +119,12 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
 			  <dt>Permitted URL Domains</dt>
 			  <dd><pre><?=implode(", ", $client->permitted_url_domains);?></pre></dd>
 			</dl>
+            <p class="alert">To request a change to any of the information related to this DOI AppID, please contact <a href="mailto:services@ands.org.au">services@ands.org.au</a></p>
 		</div>
 		<div class="widget-content hide" name="check_links">
 			<div class="alert alert-info">
-				Check DOI Link functionality will send an email to the DOI owner with the report
-			</div>
+                The DOI Link report will be sent to the registered Client Contact Email.
+            </div>
 			<a href="javascript:;" id="linkChecker" class="btn btn-primary" app_id="<?php echo $app_id; ?>">Check DOI Links</a>
 			<hr>
 			<div id="linkChecker_result"></div>

@@ -239,25 +239,9 @@
                </div>
                <br />
            </div>
-           <div >
-               <a id="doi_mint_confirm" class="btn btn-primary pull-right" data-loading-text="Updating..." href="javascript:;">Mint DOI</a>
 
-            </form>
         </div>
-           <div class="right hidden">
-             <!--  <h3 class="results">Metadata</h3> -->
-               <div class="form results">
-                   <pre><code style="display:inline-block;"></code></pre>
-               </div>
-               <br />
-               <button type="button" id="download" onclick="save()">Ready to Save</button>
-               <button type="button" id="reset">Reset</button>
-               <button type="button" id="selectall">Select All</button>
-               <span class="output" id="output"></span>
-           </div>
-       </div>
-
-
+                <a id="doi_mint_confirm" class="btn btn-primary pull-right" style="margin-top:-25px" data-loading-text="Minting..." href="javascript:;">Mint DOI</a></form>
 	</div>
 
     </div>
