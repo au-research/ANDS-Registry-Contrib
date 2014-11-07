@@ -200,10 +200,12 @@ class Mydois extends MX_Controller {
 		}
         if($client_obj->client_id<10)
         {
-            $client_obj->client_id = "0".$client_obj->client_id;
+            $doi_client_id = "0".$client_obj->client_id;
+        }else{
+            $doi_client_id = $client_obj->client_id;
         }
         $data['client_id'] = $client_obj->client_id;
-        $data['doi_id'] = $client_obj->datacite_prefix.$client_obj->client_id."/".uniqid();
+        $data['doi_id'] = $client_obj->datacite_prefix.$doi_client_id."/".uniqid();
         $data['app_id'] = $appId;
 		
 		$data['client'] = $client_obj;
