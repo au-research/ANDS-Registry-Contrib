@@ -20,6 +20,7 @@
                 <input type="hidden" name="xml"/>
             <div class="control-group">
                 <label class="control-label">DOI</label> <div class="controls"><input type="text" name="doi" value="<?php echo $doi_id; ?>" readonly="readonly"/></div>
+                <div class="pull-right"><a href="http://schema.datacite.org/meta/kernel-3.0/index.html" target="_blank">DataCite Schema Help</a></div>
             </div>
             <div class="control-group">
                 <label class="control-label">URL</label> <div class="controls"> <input type="text" name="url" value="" /></div>
@@ -69,6 +70,7 @@
 
            <!-- <h2 class="pagetitle"></h2> -->
            <div class="controls left">
+               <p><em>This form supports version 3.0 of the DataCite schema</em></p>
                <h3 class="mandatory">Mandatory Elements</h3>
                <div class="form mandatory">
                    <div>

@@ -5,7 +5,7 @@
 
 
 $(document).ready(function() {
-	$('#mintModal').on('shown.bs.modal', function () {
+	$('li[name="mint"]').on('click', function () {
     	var pageTitle = "DataCite Metadata Generator - Kernel 3.0";
    	 	var kernelVersion = "3.0";
    	 	var kernelNamespace = "http://datacite.org/schema/kernel-3";
