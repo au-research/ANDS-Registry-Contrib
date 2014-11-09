@@ -135,6 +135,7 @@ class Doitasks extends CI_Model {
 		if($errorMessages == '')	
 		{
 			if(!$manual_update) $client_id = checkDoisValidClient($ip,$app_id);
+            $client_domains = getClientDomains($client_id);
 
 			if($client_id===false)
 			{
@@ -211,36 +212,12 @@ class Doitasks extends CI_Model {
 					}				
 				}	
 			}
-			/*else
-			{
-				$xml_row = $doidata->row();
-				$xml = $xml_row->datacite_xml;
-				$doiObjects = new DOMDocument();
-				$result = $doiObjects->loadXML($xml);
-				$errors = error_get_last();
-			
-				if( $errors )
-				{
-					$errorMessages = "Document Load Error: ".$errors['message']."\n";
-				}else{
-					error_reporting(0);
-					// Create temporary file and save manually created DOMDocument.
-					$tempFile = "/tmp/" . time() . '-' . rand() . '-document.tmp';	
-					  
-					$doiObjects->save($tempFile);	
-					$doiObjects = new DOMDocument();			 
-					// Create temporary DOMDocument and re-load content from file.
 
-					$doiObjects = new DOMDocument();
-					$doiObjects->load($tempFile);
-					if (is_file($tempFile))
-					{
-						unlink($tempFile);
-					}
+            if(!$this->validDomain($urlValue,$client_domains)){
+                $verbosemessage = 'URL not permitted.';
+                $errorMessages = doisGetUserMessage("MT014", $doi_id=NULL, $response_type,$app_id, $verbosemessage,$urlValue);
+            }
 
-				}
-			}*/
-			
 			if( $errorMessages == '' )
 			{
 				// Update doi information
