@@ -247,7 +247,7 @@
     </div>
 <div class="modal hide fade" id="mintDoiResult" tabindex="-1" role="dialog" aria-labelledby="mintDoiResult" aria-hidden="true">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" id="doi_update_close">×</button>
+        <button type="button" class="close" data-dismiss="modal" id="doi_mint_close">×</button>
 
     </div>
     <div class="modal-body">

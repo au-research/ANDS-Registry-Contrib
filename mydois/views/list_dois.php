@@ -194,7 +194,7 @@ if(isset($doi_update))
     </p>
     </div>
     <div class="modal-footer">
-        <a id="doi_mint_close" class="btn hide" data-dismiss="modal" href="#">Close</a>
+        <a id="doi_update_close" class="btn hide" data-dismiss="modal" href="#">Close</a>
 
   	</div>
 </div>
