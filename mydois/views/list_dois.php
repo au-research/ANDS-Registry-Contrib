@@ -162,6 +162,7 @@ $testDoiPrefix =  $this->config->item('test_doi_prefix');
         </form>
     </div>
 </div>
+
 <?php $this->load->view('footer');?>
 <?php 
 if(isset($doi_update))
@@ -200,6 +201,7 @@ if(isset($doi_update))
 <script >
 $("#updateDoiResult").modal();
 </script>
+
 
 <?php 
 }

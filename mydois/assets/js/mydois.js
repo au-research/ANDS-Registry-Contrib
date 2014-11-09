@@ -92,10 +92,10 @@ $(document).on('click', '#doi_mint_confirm', function(){
                     $("#loading").html('');
                     $("#mint_form").removeClass('hide');
                 }else{
+                    $('#mintDoiResult').modal('show');
                     $('#mint_result').html(message).removeClass('label label-important');
-                    $('#mint_result').html(data.response.message);
-                    $("#loading").html('');
-                    $('#doi_mint_confirm').addClass('hide');
+                    $('#mint_result').html();
+                    $('#mintDoiResult .modal-body').html('<p>'+data.response.message+'</p>');
                     $('#doi_mint_close').removeClass('hide');
                 }
             },
@@ -106,13 +106,14 @@ $(document).on('click', '#doi_mint_confirm', function(){
     }
 })
 
-$(document).on('click', '#doi_mint_close #doi_update_close', function(){
+$(document).on('click', '#doi_mint_close', function(){
     location.reload();
 })
-$(document).on('click', '#doi_mint_close_x  #doi_update_close_x', function(){
+$(document).on('click', '#doi_mint_close_x', function(){
     location.reload();
 })
 $(document).on('click', '#doi_update_close', function(){
+
     location.reload();
 })
 $(document).on('click', '#doi_update_close_x', function(){

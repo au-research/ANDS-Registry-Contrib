@@ -245,3 +245,19 @@
 	</div>
 
     </div>
+<div class="modal hide fade" id="mintDoiResult" tabindex="-1" role="dialog" aria-labelledby="mintDoiResult" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" id="doi_update_close">×</button>
+
+    </div>
+    <div class="modal-body">
+        <p>
+        <div>
+            mint successful
+        </div>
+        </p>
+    </div>
+    <div class="modal-footer">
+        <a id="doi_mint_close"class="btn hide" data-dismiss="modal" href="#">Close</a>
+    </div>
+</div>
