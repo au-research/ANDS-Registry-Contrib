@@ -25,12 +25,12 @@ class Registry_summary extends MX_Controller {
 
         }
 
-        $retStr['theHtml'] ='
-<span class="green_heading">What&#39;s in Research Data Australia:</span><br />
+        $retStr['theHtml'] =$data['collection'];
+        /*'<span class="green_heading">What&#39;s in Research Data Australia:</span><br />
 <span class="green_heading indent">Collections </span>(Research Datasets) = '.$data['collection'].'<br />
 <span class="green_heading indent">Parties </span>(Researchers, Organisations) = '.$data['party'].'<br />
 <span class="green_heading indent">Activities </span>(Projects, Research Grants, Programs) = '.$data['activity'].'<br />
-<span class="green_heading indent">Services </span>(to create or use a collection) =  '.$data['service'].'<br />';
+<span class="green_heading indent">Services </span>(to create or use a collection) =  '.$data['service'].'<br />';*/
         return $this->JSONP($callback,$retStr);
     }
 

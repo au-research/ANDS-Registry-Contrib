@@ -66,8 +66,11 @@ class Mydois extends MX_Controller {
 					}
 				}
 			}
-			
-			$this->load->view('input_app_id', $data);
+            if(count($data['associated_app_ids'])===1){
+                $this->show($data['associated_app_ids'][0]);
+            }else{
+			    $this->load->view('input_app_id', $data);
+            }
 		}else{
 			$this->load->view('login_required', $data);
 		}
@@ -132,12 +135,12 @@ class Mydois extends MX_Controller {
 		echo json_encode($response);
 	}
 
-	function show()
+	function show($app_id=null)
 	{
 		acl_enforce('DOI_USER');
 
 		$data['js_lib'] = array('core');
-		$data['scripts'] = array('mydois');
+		$data['scripts'] = array('mydois','datacite_form');
 		$data['title'] = 'DOI Query Tool';
 		
 		// Validate the appId
@@ -148,6 +151,10 @@ class Mydois extends MX_Controller {
 		{
 			$appId = $this->input->get_post('app_id_select');
 		}
+        if (!$appId & isset($app_id)){
+            $appId = $app_id;
+
+        }
 		$doiStatus = $this->input->get_post('doi_status');
 		$data['doi_appids'] = $this->user->doiappids();
 		if($doi_update)
@@ -183,11 +190,26 @@ class Mydois extends MX_Controller {
 		{
 			$data['dois'][] = $doi;
 		}
+
+		$query = $doi_db->order_by('timestamp', 'desc')->where('client_id',$client_obj->client_id)->select('*')->limit(50)->get('activity_log');
+		$data['activities'] = $query->result();
+
+		$query = $doi_db->where('client_id',$client_obj->client_id)->select('client_domain')->get('doi_client_domains');
+		foreach ($query->result_array() AS $domain) {
+			$client_obj->permitted_url_domains[] = $domain['client_domain'];
+		}
+        if($client_obj->client_id<10)
+        {
+            $doi_client_id = "0".$client_obj->client_id;
+        }else{
+            $doi_client_id = $client_obj->client_id;
+        }
+        $data['client_id'] = $client_obj->client_id;
+        $data['doi_id'] = $client_obj->datacite_prefix.$doi_client_id."/".uniqid();
+        $data['app_id'] = $appId;
 		
 		$data['client'] = $client_obj;
-		
 		$this->load->view('list_dois', $data);
-
 	}
 
 	function getActivityLog()
@@ -209,7 +231,6 @@ class Mydois extends MX_Controller {
 		
 
 	}
-	
 
 	function runDoiLinkChecker()
 	{
@@ -256,137 +277,21 @@ class Mydois extends MX_Controller {
 		acl_enforce('DOI_USER');
 		
 		$doi_db = $this->load->database('dois', TRUE);
-		
 		// Validate the doi_id
 		$doi_id = rawurldecode($this->input->get_post('doi_id'));
+        $appId = $this->input->get_post('app_id');
+        if (!$appId) throw new Exception ('Invalid App ID');
 
 		if (!$doi_id) throw new Exception ('Invalid DOI ID');  
 		
-		$query = $doi_db->where('doi_id',$doi_id)->select('doi_id, url,client_id')->get('doi_objects');
+		$query = $doi_db->where('doi_id',$doi_id)->select('doi_id, url,client_id, datacite_xml')->get('doi_objects');
 		if (!$doi_obj = $query->result_array()) throw new Exception ('Invalid DOI ID');  
 		$doi_obj = array_pop($doi_obj);
+        $doi_obj['app_id'] = $appId;
 		$this->load->view('update_doi',$doi_obj);
 		
 	}
-	function updateDoiUrl()
-	{
-		acl_enforce('DOI_USER');
 
-		// Validate the url
-		$new_url = rawurldecode($this->input->get_post('new_url'));
-		$old_url = rawurldecode($this->input->get_post('old_url'));
-		$doi_id = rawurldecode($this->input->get_post('doi_id'));
-		$client_id = rawurldecode($this->input->get_post('client_id'));
-		
-
-
-		if (!$client_id || !$old_url || !$doi_id)
-		{
-			throw new Exception("Unable to update DOI. Not all parameters were given");
-		}
-		$doi_db = $this->load->database('dois', TRUE);
-		$query = $doi_db->where('client_id',$client_id)->select('*')->get('doi_client');
-		if (!$client_obj = $query->result()) throw new Exception ('Invalid Client ID');  
-		$client_obj = array_pop($client_obj);
-		
-		$doi_appids = $this->user->doiappids();
-		if(!in_array($client_obj->app_id, $doi_appids))
-		{
-			throw new Exception ('You do not have authorisation to update DOI  '.$doi_id);  
-		}
-		$doi_db = $this->load->database('dois', TRUE);		
-		$query = $doi_db->where('client_id',$client_id)->select('client_domain')->get('doi_client_domains');
-		if(!$new_url)
-		{
-			$message = "param 'url' required";
-			$client = str_replace("-","0",$client_id);
-			$logdata = array(
-               'client_id' => $client,
-               'activity' => "UPDATE", 
-               'doi_id'  => $doi_id, 
-               'result'    => "FAILURE",  
-               'message'    => $message,      
-            	);
-			$doi_db->insert('activity_log', $logdata); 
-			redirect('/mydois/show/?app_id='.$client_obj->app_id.'&doi_update='.urlencode($message)."&error=yes", 'location');
-		}
-		
-		$validDomain = false;
-		if ($query->num_rows() > 0)
-		{
-			foreach ($query->result() AS $result)
-			{
-				if(strpos($new_url, $result->client_domain) !== FALSE)
-				{
-					$validDomain = $result->client_domain;
-				}
-			}
-		}
-
-		if(!$validDomain)
-		{
-			$message = "Invalid top level domain provided in url ";
-			$client = str_replace("-","0",$client_id);
-			$logdata = array(
-               'client_id' => $client,
-               'activity' => "UPDATE", 
-               'doi_id'  => $doi_id, 
-               'result'    => "FAILURE",  
-               'message'    => $message,      
-            	);
-			$doi_db->insert('activity_log', $logdata); 
-			redirect('/mydois/show/?app_id='.$client_obj->app_id.'&doi_update='.urlencode($message)."&error=yes", 'location');				
-		} 
-
-		if($client_id<10) $client_id = '-'.$client_id;	
-
-		$requestURI =  $this->config->item('gDOIS_SERVICE_BASE_URI');
-		$authstr = $this->config->item('gDOIS_DATACENTRE_NAME_PREFIX').".".$this->config->item('gDOIS_DATACENTRE_NAME_MIDDLE').$client_id.":".$this->config->item('gDOIS_DATACITE_PASSWORD');	
-
-		$context  = array('Content-Type:text/plain;charset=UTF-8','Authorization: Basic '.base64_encode($authstr));
-		$metadata="url=".$new_url."\ndoi=".$doi_id;
-		$requestURI = $this->config->item('gDOIS_SERVICE_BASE_URI')."doi";
-		$result = '';
-		$extrainfo = '';
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_POST,1);
-		curl_setopt($ch, CURLOPT_URL, $requestURI);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
-		curl_setopt($ch, CURLOPT_HTTPHEADER,$context);
-		curl_setopt($ch, CURLOPT_POSTFIELDS,$metadata);
-		$result = curl_exec($ch);
-	
-		$curlinfo = curl_getinfo($ch);
-	
-		curl_close($ch);
-	
-		if($result == $this->config->item('gDOIS_RESPONSE_SUCCESS'))
-		{
-			//if its all Ok - update the database and return to the doi listing
-			$data = array(
-               'url' => $new_url,
-               'updated_when' => date("Y-m-d H:i:s"),
-            	);
-			$doi_db->where('doi_id', $doi_id);
-			$doi_db->update('doi_objects', $data); 
-			$message =  "DOI ".$doi_id." was successfully update to url '".$new_url."' with ".$validDomain;
-			$client = str_replace("-","0",$client_id);
-			$logdata = array(
-               'client_id' => $client,
-               'activity' => "UPDATE", 
-               'doi_id'  => $doi_id, 
-               'result'    => "SUCCESS",  
-               'message'    => $message,      
-            	);
-			$doi_db->insert('activity_log', $logdata); 
-			redirect('/mydois/show/?app_id='.$client_obj->app_id.'&doi_update='.$message, 'location');
-		}else{
-			//we got an error back or nothing so we need to tell the user something went wrong
-			if($result) $extrainfo = "The following error message was returned : ".$result;
-			throw new Exception ('Update of the doi was unsuccessful. ' . $extrainfo);  
-		}
-	
-	}
 
 	function getAppIDConfig()
 	{
@@ -412,11 +317,53 @@ class Mydois extends MX_Controller {
 		
 		
 	}
-	
-	function __construct(){
+
+    /*function manualMintForm(){
+
+        acl_enforce('DOI_USER');
+        $doi_db = $this->load->database('dois', TRUE);
+        $appId = $this->input->get_post('app_id');
+        if (!$appId) throw new Exception ('Invalid App ID');
+
+        $query = $doi_db->where('app_id',$appId)->select('*')->get('doi_client');
+        if (!$client_obj = $query->result()) throw new Exception ('Invalid App ID');
+        $client_obj = array_pop($client_obj);
+        $data['client_id'] = $client_obj->client_id;
+        if($client_obj->client_id<10){
+            $client_obj->client_id = "0".$client_obj->client_id;
+        }
+        $data['doi_id'] = $client_obj->datacite_prefix.$client_obj->client_id."/".uniqid();
+        $data['app_id'] = $appId;
+        $this->load->view('mint_doi',$data);
+    } */
+
+    function uploadFile(){
+        if ( isset($_FILES['file']) ) {
+            $filename = time().basename($_FILES['file']['name']);
+            $error = true;
+
+            $path = '/tmp/'.$filename;
+            $error = move_uploaded_file($_FILES['file']['tmp_name'], $path);
+
+            $rsp = array(
+                'error' => $error, // Used in JS
+                'filename' => $filename,
+                'filepath' => '/tmp/' . $filename, // Web accessible
+                'xml' =>file_get_contents($path),
+            );
+            unlink($path);
+            echo json_encode($rsp);
+            exit;
+        }else{
+            echo json_encode("File not uploaded");
+
+        }
+    }
+
+  	function __construct(){
 		acl_enforce('DOI_USER');
 		$this->load->model('_mydois', 'mydois');
-	}	
+	}
 		
 }
 	
