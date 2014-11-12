@@ -11,17 +11,11 @@
 	<h1>Identify My Data</h1>
 	<div class="btn-group">
 		<a data-toggle="modal" href="#mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a new Identifier</a>
-        <?php if(registry_super_usser == true): ?>
+        <?php if(registry_super_user == true): ?>
             <a data-toggle="modal" href="#batch_mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a lot of new Identifiers</a>
         <?php endif; ?>
         <?php if($batch_pid_files):  ?>
-            <select class="chosen" id="pid_batch_file_chooser">
-                <option value="Download PIDS as CSV">Download PIDS as CSV</option>
-                <?php foreach($batch_pid_files as $o): ?>
-                    <option value="<?php echo $o ?>"><?php echo $o; ?></option>
-                <?php endforeach; ?>
-            </select>
-
+            <a data-toggle="modal" href="#batch_view" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Downloads Uploads</a>
         <?php endif; ?>
     </div>
 </div>
@@ -56,6 +50,33 @@
 	</div>
 </div>
 
+
+<div class="modal hide fade" id="batch_view">
+	<div class="modal-header">
+        <a href="javascript:;" class="close" data-dismiss="modal">×</a>
+        <h3>Download pids as CSV files</h3>
+    </div>
+    <div class="modal-screen-container">
+        <div class="modal-body">
+        <?php if($batch_pid_files):  ?>
+            <ul>
+                <h3>Download PIDS as CSV</h3>
+                <?php foreach($batch_pid_files as $o): ?>
+                    <li><a href="../assets/uploads/pids/<?php echo $o; ?>"><?php echo $o; ?></a></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+        </div>
+        <div class="modal-footer">
+            <span id="upload_result"></span><br/>
+            <form action="#" method="post" class="form-horizontal" id="upload_form">
+                <input type="file" name="csv_file" id="csv_file">
+                <a id="upload_confirm" href="javascript:;" class="btn btn-primary" data-loading-text="Processing...">Upload CSV</a>
+            </form>
+            <a href="#" class="btn hide" data-dismiss="modal">Close</a>
+        </div>
+    </div>
+</div>
 
 <div class="modal hide fade" id="mint_modal">
 	<div class="modal-header">
@@ -174,7 +195,13 @@ You understand that:
                     <div class="control-group">
                         <label class="control-label">Temp. Description</label>
                         <div class="controls">
-                            <input type="text" name="desc" value="temporarily description"/>
+                            <input type="text" name="desc" value="temporary description"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Temp. Description</label>
+                        <div class="controls">
+                            <input type="text" name="url" placeholder="http://"/>
                         </div>
                     </div>
                     <div style="height:175px;overflow:auto;border:1px solid #ccc;display:none;" id="terms"><p>You have asked to mint a persistent identifier through ANDS <i>Identify
@@ -247,7 +274,6 @@ You understand that:
             <a href="#" class="btn hide" data-dismiss="modal">Close</a>
         </div>
     </div>
-
 
 <script type="text/x-mustache" id="pids-list-template">
 <form class="form-search">		

@@ -29,10 +29,11 @@ $(document).on('click', '#mint_confirm', function(){
     var theButton = this;
     var counter = $('#batch_mint_form input[name=counter]').val();
     var desc = $('#batch_mint_form input[name=desc]').val();
+    var url = $('#batch_mint_form input[name=url]').val();
     $.ajax({
         url: apps_url+'pids/batch_mint',
         type: 'POST',
-        data: {counter:counter, desc:desc},
+        data: {counter:counter, desc:desc, url:url},
         success: function(data){
             if(data.error){
                 $('#batch_mint_result').html(data.error).addClass('label label-important');
@@ -69,6 +70,27 @@ $(document).on('click', '#mint_confirm', function(){
 	}else $('#mint_confirm').addClass('disabled');
 }).on('click', '#toggleTerms', function(){
 	$('#terms').toggle();
+}).on('click', '#upload_confirm', function(){
+    $('#upload_result').html("").removeClass('label label-important');
+    $(this).button('Uploading....');
+    var theButton = this;
+    var fd = new FormData();
+    fd.append( 'file', $('#csv_file')[0].files[0] );
+    $.ajax({
+        url: apps_url+'pids/upload_csv',
+        data: fd,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data){
+            if(data.error){
+                $('#upload_result').html(data.error).addClass('label label-important');
+                $(theButton).button('reset');
+            }else{
+                $('#upload_result').html(data.message+"<br/><a href='../assets/uploads/pids/" + data.log_file + "'>view log</a>").addClass('label');
+            }
+        }
+    });
 });
 
 function initView(){

@@ -18,7 +18,7 @@ class Pids extends MX_Controller {
 
 
 		$data['orgRole'] = $this->user->affiliations();
-        $data['registry_super_usser'] = $this->user->isSuperAdmin();
+        $data['registry_super_user'] = $this->user->isSuperAdmin();
         $data['batch_pid_files'] = $this->pids->getBatchPidsCSVforIdentifier();
 		array_unshift($data['orgRole'], 'My Identifiers');
 
@@ -123,18 +123,41 @@ class Pids extends MX_Controller {
 		}
 	}
 
-    function download_csv()
+    function upload_csv()
     {
-        $filename = urlencode($this->input->post('filename'));
-
-        
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Content-type: application/json');
+        set_exception_handler('json_exception_handler');
+        $fileName = preg_replace('-\W-','_',$this->pids->getFilePrefixForCurrentIdentifier())."_".date('Y-m-d_H_i_s').'_upload';
+        $upload_path = './assets/uploads/pids/';
+        $config['upload_path'] = $upload_path;
+        $config['file_name'] = $fileName;
+        $config['allowed_types'] = 'csv|text';
+        $config['overwrite'] = true;
+        $config['max_size']	= '4000';
+        $this->load->library('upload', $config);
+        if(!$this->upload->do_upload('file')) {
+            echo json_encode(
+                array(
+                    'status'=>'ERROR',
+                    'error' => $this->upload->display_errors('','')
+                )
+            );
+        } else {
+            $result = $this->pids->processUploadedFile($upload_path, $fileName);
+            $file = fopen($upload_path.$fileName.'.log','x+');
+            fwrite($file, $result['message'].NL.$result['log']);
+            fclose($file);
+            echo json_encode(array('status'=> $result['status'], 'message' => $result['message'], 'log_file' => $fileName.'.log'));
+        }
     }
 
     function batch_mint(){
         acl_enforce('SUPERUSER');
-        $counter = urlencode($this->input->post('counter'));
+        $counter = $this->input->post('counter');
+        $url = urlencode($this->input->post('url'));
         $desc = urlencode($this->input->post('desc'));
-        if($counter && $desc){
+        if($counter && ($desc || $url)){
             $counter = intval($counter);
             if($counter > 100){
                 $responseArray['result']='error';
@@ -149,21 +172,65 @@ class Pids extends MX_Controller {
             else{
                 $responseArray['result']='success';
                 $upload_path = './assets/uploads/pids/';
-                $fileName = preg_replace('-\W-','_',$this->pids->getCsvFileNameForCurrentIdentifier())."####".date('Y-m-d_H_i_s');
+                $fileName = preg_replace('-\W-','_',$this->pids->getFilePrefixForCurrentIdentifier())."_".date('Y-m-d_H_i_s')."_batch_mint";
                 $responseArray['csv_file_path'] = $upload_path.$fileName.'.csv';
                 $file = fopen($upload_path.$fileName.'.csv','x+');
                 $responseArray['file'] = $file;
                 fputcsv($file,  array("NUMBER",'HANDLE','DESC','URL'), ',', '"');
                 for($i = 1 ; $i <= $counter; $i++ ){
-                    $response = $this->pids->pidsRequest('mint', 'type=DESC&value='.$desc);
-                    if($this->pids->pidsGetResponseType($response) == 'SUCCESS'){
-                        $responseArray[$i]['handle'] = $this->pids->pidsGetHandleValue($response);
-                        fputcsv($file, array($i, $responseArray[$i]['handle'],$desc,'http://'), ',',  '"');
-                        $responseArray[$i]['message'] =  $this->pids->pidsGetUserMessage($response);
-                    }else{
-                        $responseArray['result']='error';
-                        $responseArray['error'] =  $this->pids->pidsGetUserMessage($response);
-                        $responseArray[$i]['error'] =  $this->pids->pidsGetUserMessage($response);
+                    if($url && $desc){
+                        //do desc -> update with url
+                        $response = $this->pids->pidsRequest('mint', 'type=DESC&value='.$desc);
+                        if($this->pids->pidsGetResponseType($response) == 'SUCCESS'){
+                            $handle = $this->pids->pidsGetHandleValue($response);
+                            $responseArray[$i]['handle'] = $handle;
+                            if(preg_match("/^https?:\/\/.*/",urldecode($url))){
+                                $updateResponse = $this->pids->pidsRequest('addValue', 'type=URL&value='.$url.'&handle='.urlencode($handle));
+                                if($this->pids->pidsGetResponseType($updateResponse) != 'SUCCESS'){
+                                    $responseArray['result']='error';
+                                    $responseArray['error'] =  $this->pids->pidsGetUserMessage($response);
+                                    $responseArray[$i]['error'] =  $this->pids->pidsGetUserMessage($response);
+                                }
+                                else{
+                                    fputcsv($file, array($i, $responseArray[$i]['handle'],urldecode($desc),urldecode($url)), ',',  '"');
+                                    $responseArray[$i]['message'] =  $this->pids->pidsGetUserMessage($response);
+                                }
+                            }
+                            else{
+                                fputcsv($file, array($i, $responseArray[$i]['handle'],urldecode($desc),urldecode($url)), ',',  '"');
+                                $responseArray[$i]['message'] =  $this->pids->pidsGetUserMessage($response);
+                            }
+                        }else{
+                            $responseArray['result']='error';
+                            $responseArray['error'] =  $this->pids->pidsGetUserMessage($response);
+                            $responseArray[$i]['error'] =  $this->pids->pidsGetUserMessage($response);
+                        }
+                    }
+                    else if($url){
+                        //do url only
+                        $response = $this->pids->pidsRequest('mint', 'type=URL&value='.$url);
+                        if($this->pids->pidsGetResponseType($response) == 'SUCCESS'){
+                            $responseArray[$i]['handle'] = $this->pids->pidsGetHandleValue($response);
+                            fputcsv($file, array($i, $responseArray[$i]['handle'],urldecode($desc),urldecode($url)), ',',  '"');
+                            $responseArray[$i]['message'] =  $this->pids->pidsGetUserMessage($response);
+                        }else{
+                            $responseArray['result']='error';
+                            $responseArray['error'] =  $this->pids->pidsGetUserMessage($response);
+                            $responseArray[$i]['error'] =  $this->pids->pidsGetUserMessage($response);
+                        }
+                    }
+                    else if($desc){
+                        //do desc
+                        $response = $this->pids->pidsRequest('mint', 'type=DESC&value='.$desc);
+                        if($this->pids->pidsGetResponseType($response) == 'SUCCESS'){
+                            $responseArray[$i]['handle'] = $this->pids->pidsGetHandleValue($response);
+                            fputcsv($file, array($i, $responseArray[$i]['handle'],urldecode($desc),urldecode($url)), ',',  '"');
+                            $responseArray[$i]['message'] =  $this->pids->pidsGetUserMessage($response);
+                        }else{
+                            $responseArray['result']='error';
+                            $responseArray['error'] =  $this->pids->pidsGetUserMessage($response);
+                            $responseArray[$i]['error'] =  $this->pids->pidsGetUserMessage($response);
+                        }
                     }
                 }
                 fclose($file);
@@ -187,12 +254,12 @@ class Pids extends MX_Controller {
 		$handle = $this->input->post('handle');
 		$response = array();
 		if($index > 0 && $value!=''){
-			$message = $this->pids->modify_value_by_index($handle, $value, $index);
-		}else if($index < 0 && $value!=''){
-			$message = $this->pids->pidsRequest('addValue', 'type='.$type.'&value='.urlencode($value).'&handle='.urlencode($handle));
-		}else{
-			$message = $this->pids->delete_value_by_index($handle, $index);
-		}
+            $message = $this->pids->modify_value_by_index($handle, $value, $index);
+        }else if($index < 0 && $value!=''){
+            $message = $this->pids->pidsRequest('addValue', 'type='.$type.'&value='.urlencode($value).'&handle='.urlencode($handle));
+        }else{
+            $message = $this->pids->delete_value_by_index($handle, $index);
+        }
 		$response['result'] = $this->pids->pidsGetResponseType($message);
 		$response['message'] = $this->pids->pidsGetUserMessage($message);
 		echo json_encode($response);
