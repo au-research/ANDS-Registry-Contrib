@@ -61,6 +61,7 @@
         <?php if($batch_pid_files):  ?>
             <ul>
                 <h3>Download PIDS as CSV</h3>
+                <li><a href="pids/my_pids">Download all</a></li>
                 <?php foreach($batch_pid_files as $o): ?>
                     <li><a href="../assets/uploads/pids/<?php echo $o; ?>"><?php echo $o; ?></a></li>
                 <?php endforeach; ?>

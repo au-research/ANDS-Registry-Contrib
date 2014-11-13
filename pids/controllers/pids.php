@@ -354,6 +354,51 @@ class Pids extends MX_Controller {
 		echo json_encode($response);
 	}
 
+
+    function my_pids(){
+
+
+        $pidsDetails = array();
+        $params = $this->input->post('params');
+        $searchText = (isset($params['searchText'])? $params['searchText']: null);
+        $authDomain = (isset($params['authDomain'])? $params['authDomain']: $this->user->authDomain());
+        $identifier = (isset($params['identifier'])? $params['identifier']: $this->user->localIdentifier());
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Content-type: application/csv');
+        header("Content-Disposition: attachment; filename={$identifier}.csv");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+
+        $ownerHandle = $this->pids->getOwnerHandle($identifier,$authDomain);
+
+        if($ownerHandle)
+        {
+            $handles = $this->pids->getHandles($ownerHandle, $searchText);
+            if(sizeof($handles) > 0){
+                $result = $this->pids->getHandlesDetails($handles);
+                foreach($result as $r)
+                {
+                    $pidsDetails[$r['handle']]['HANDLE'] = $r['handle'];
+                    if($r['type'] == 'DESC')
+                    {
+                        $pidsDetails[$r['handle']]['DESC']  = $r['data'];
+                    }
+                    if($r['type'] == 'URL')
+                    {
+                        $pidsDetails[$r['handle']]['URL']  = $r['data'];
+
+                    }
+                }
+            }
+        }
+        echo "COUNTER,HANDLE,DESC,URL".NL;
+        $i = 0;
+        foreach($pidsDetails as $r)
+        {
+            echo ++$i.','.$r['HANDLE'].',"'.$r['DESC'].'",'.$r['URL'].NL;
+        }
+    }
+
 	function get_handler($handler)
 	{
 		$serviceName = "getHandle";
