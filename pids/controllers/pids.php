@@ -363,9 +363,10 @@ class Pids extends MX_Controller {
         $searchText = (isset($params['searchText'])? $params['searchText']: null);
         $authDomain = (isset($params['authDomain'])? $params['authDomain']: $this->user->authDomain());
         $identifier = (isset($params['identifier'])? $params['identifier']: $this->user->localIdentifier());
+        $fileName = preg_replace('-\W-','_',$this->pids->getFilePrefixForCurrentIdentifier())."_".date('Y-m-d_H_i_s')."_all_pids.csv";
         header('Cache-Control: no-cache, must-revalidate');
         header('Content-type: application/csv');
-        header("Content-Disposition: attachment; filename={$identifier}.csv");
+        header("Content-Disposition: attachment; filename={$fileName}");
         header("Pragma: no-cache");
         header("Expires: 0");
 
