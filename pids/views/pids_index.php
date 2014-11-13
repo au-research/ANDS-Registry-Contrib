@@ -11,7 +11,7 @@
 	<h1>Identify My Data</h1>
 	<div class="btn-group">
 		<a data-toggle="modal" href="#mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a new Identifier</a>
-        <?php if(registry_super_user == true): ?>
+        <?php if($registry_super_user == true): ?>
             <a data-toggle="modal" href="#batch_mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a lot of new Identifiers</a>
         <?php endif; ?>
         <?php if($batch_pid_files):  ?>
