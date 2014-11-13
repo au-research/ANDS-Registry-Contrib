@@ -207,7 +207,7 @@ class _pids extends CI_Model
         $headers = array();
         if (file_exists($file) && is_readable($file)) {
             $handle = fopen($file, 'r');
-            while (($row = fgetcsv($handle, 10240, ',', '"')) !== false)
+            while (($row = fgetcsv($handle, 2048, ',', '"')) !== false)
             {
                 if (empty($headers))
                     $headers = $row;
