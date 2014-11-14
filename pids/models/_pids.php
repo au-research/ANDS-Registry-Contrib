@@ -78,11 +78,154 @@ class _pids extends CI_Model
 		return $result;
 	}
 
+    function processUploadedFile($upload_path, $fileName){
+        $status = 'SUCCESS';
+        $log = '';
+        $updateCount = 0;
+        $errorCount = 0;
+        $mintCount = 0;
+        $csv = $this->getAssocArrayFromFile($upload_path.$fileName.'.csv');
+        $userIdentifier = $this->_CI->session->userdata(PIDS_USER_IDENTIFIER);
+        $userDomain = $this->_CI->session->userdata(PIDS_USER_DOMAIN);
+        $ownerHandle = $this->getOwnerHandle($userIdentifier, $userDomain);
+        $userHandles = $this->getHandles($ownerHandle);
+        $file = fopen($upload_path.$fileName.'_result.csv','x+');
+        fputcsv($file,  array("NUMBER",'HANDLE','DESC','URL'), ',', '"');
+        $i = 0;
+        foreach($csv as $handleInfo)
+        {
+            $i++;
+            $handleValue = $handleInfo['HANDLE'];
+            if($handleValue != '')
+            {
+                if(in_array($handleValue, $userHandles)){
+                    $log .= $this->updateHandle($handleInfo);
+                    fputcsv($file, array($i, $handleInfo['HANDLE'], $handleInfo['DESC'], $handleInfo['URL']), ',',  '"');
+                    $updateCount++;
+                }
+                else{
+                    $log .= 'Error updating handle: '.$handleValue." doesn't exist in your domain!";
+                    $errorCount++;
+                }
+            }
+            else{
+                $result = $this->mintHandle($handleInfo);
+                $log .= $result['log'];
+                fputcsv($file, array($i, $result['handle'], $handleInfo['DESC'], $handleInfo['URL']), ',',  '"');
+                $mintCount++;
+            }
+        }
+        fclose($file);
+        $message = 'Handles Received:'.count($csv).NL.'Updated:'.$updateCount.NL.'Minted: '.$mintCount.NL.'Error:'.$errorCount;
+        return array('status' => $status,'message' => $message, 'log' => $log);
+    }
+
+    function updateHandle($handleInfo){
+        $handleValue = $handleInfo['HANDLE'];
+        $description = $handleInfo['DESC'];
+        $url = $handleInfo['URL'];
+        $log = 'UPDATE LOG:'.NL;
+        $hadDescription = false;
+        $hadUrl = false;
+        $handlesDetails = $this->getHandlesDetails(array($handleValue));
+
+        foreach($handlesDetails as $h){
+            $index = $h['idx'];
+            if($h['type']=='DESC'){
+                $hadDescription = true;
+                if($description == '') {
+                    $updateResponse= $this->delete_value_by_index($handleValue, $index);
+                    $log .= $handleValue." ".$this->pidsGetUserMessage($updateResponse).NL.' (DESC)';
+                }
+                elseif($description != $h['data'])
+                {
+                    $updateResponse = $this->modify_value_by_index($handleValue, $description, $index);
+                    $log .= $handleValue." ".$this->pidsGetUserMessage($updateResponse).' DESC: '.$description.NL;
+                }
+                else{
+                    $log .= $handleValue ." DESC ".$h['data']." wasn't changed".NL;
+                }
+            }
+            if($h['type']=='URL'){
+                $hadUrl = true;
+                if($url == ''){
+                    $updateResponse = $this->delete_value_by_index($handleValue, $index);
+                    $log .= $handleValue." ".$this->pidsGetUserMessage($updateResponse).NL.' (URL)';
+                }
+                elseif($url != $h['data'])
+                {
+                    $updateResponse = $this->modify_value_by_index($handleValue, $url, $index);
+                    $log .= $handleValue." ".$this->pidsGetUserMessage($updateResponse).' URL: '.$url.NL;
+                }
+                else{
+                    $log .= $handleValue ." URL ".$h['data']." wasn't changed".NL;
+                }
+            }
+        }
+        if(!$hadDescription && $description != ''){
+            $updateResponse = $this->pidsRequest('addValue', 'type=DESC&value='.urlencode($description).'&handle='.urlencode($handleValue));
+            $log .= pidsGetUserMessage($updateResponse).NL.' DESC: '.$description.NL;
+        }
+        if(!$hadUrl && $url != ''){
+            $updateResponse = $this->pidsRequest('addValue', 'type=URL&value='.urlencode($url).'&handle='.urlencode($handleValue));
+            $log .= pidsGetUserMessage($updateResponse).NL.' URL: '.$url.NL;
+        }
+
+        return $log;
+    }
+
+    function mintHandle($handleInfo){
+        $handleValue = '';
+        $description = urlencode($handleInfo['DESC']);
+        $url = urlencode($handleInfo['URL']);
+        $log = 'MINT LOG:'.NL;
+        if($url && $description){
+            $response = $this->pidsRequest('mint', 'type=DESC&value='.$description);
+            if($this->pidsGetResponseType($response) == 'SUCCESS'){
+                $handleValue = $this->pidsGetHandleValue($response);
+                $updateResponse = $this->pidsRequest('addValue', 'type=URL&value='.$url.'&handle='.urlencode($handleValue));
+                if($this->pidsGetResponseType($updateResponse) != 'SUCCESS'){
+                    $log .= "Couldn't add URL: ".$url." to Handle:".$handleValue;
+                }
+            }
+        }else if($url){
+            $response = $this->pidsRequest('mint', 'type=URL&value='.$url);
+        }else if($description){
+            $response = $this->pidsRequest('mint', 'type=DESC&value='.$description);
+        }
+        if($this->pidsGetResponseType($response) == 'SUCCESS'){
+            $handleValue = $this->pidsGetHandleValue($response);
+            $log .= "Successfully created Handle:".$handleValue." with DESC:".$handleInfo['DESC']." URL:".$handleInfo['URL'];
+        }
+        return array('handle'=>$handleValue, 'log'=>$log);
+    }
+
+    function getAssocArrayFromFile($file)
+    {
+        ini_set('auto_detect_line_endings',true);
+        $rows = array();
+        $headers = array();
+        if (file_exists($file) && is_readable($file)) {
+            $handle = fopen($file, 'r');
+            while (($row = fgetcsv($handle, 2048, ',', '"')) !== false)
+            {
+                if (empty($headers))
+                    $headers = $row;
+                else if (is_array($row)) {
+                    array_splice($row, count($headers));
+                    $rows[] = array_combine($headers, $row);
+                }
+            }
+            fclose($handle);
+        }
+        return $rows;
+    }
+
 	function removeTrustedClient($ip, $appId){
 		$this->pid_db->delete('public.trusted_client', array('ip_address'=>$ip, 'app_id'=>$appId));
 	}
 
-    function getCsvFileNameForCurrentIdentifier()
+    function getFilePrefixForCurrentIdentifier()
     {
         $result = strtolower($this->_CI->session->userdata(PIDS_USER_IDENTIFIER));
         $result = preg_replace("/[^a-z0-9\s-]/", "", $result);
@@ -94,17 +237,15 @@ class _pids extends CI_Model
     function getBatchPidsCSVforIdentifier()
     {
         $upload_path = './assets/uploads/pids/';
-        $userIdentifier = $this->_CI->session->userdata(PIDS_USER_IDENTIFIER);
+        $userFilePrefix = $this->getFilePrefixForCurrentIdentifier();
         $fileArray = array();
         if (is_dir($upload_path)){
-            if ($dh = opendir($upload_path)){
-                while (($file = readdir($dh)) !== false){
-                    if(strpos($file,$userIdentifier) === 0){
+            $fileNames = scandir($upload_path ,SCANDIR_SORT_DESCENDING);
+                foreach($fileNames as $file){
+                    if(strpos($file,$userFilePrefix) === 0){
                         array_push($fileArray, $file);
                     }
                 }
-                closedir($dh);
-            }
         }
         return $fileArray;
     }

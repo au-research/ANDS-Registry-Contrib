@@ -9,21 +9,6 @@
 <?php  $this->load->view('header');?>
 <div class="content-header">
 	<h1>Identify My Data</h1>
-	<div class="btn-group">
-		<a data-toggle="modal" href="#mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a new Identifier</a>
-        <?php if(registry_super_usser == true): ?>
-            <a data-toggle="modal" href="#batch_mint_modal" href="javascript:;" class="btn btn-large"><i class="icon icon-plus"></i> Mint a lot of new Identifiers</a>
-        <?php endif; ?>
-        <?php if($batch_pid_files):  ?>
-            <select class="chosen" id="pid_batch_file_chooser">
-                <option value="Download PIDS as CSV">Download PIDS as CSV</option>
-                <?php foreach($batch_pid_files as $o): ?>
-                    <option value="<?php echo $o ?>"><?php echo $o; ?></option>
-                <?php endforeach; ?>
-            </select>
-
-        <?php endif; ?>
-    </div>
 </div>
 
 <div id="breadcrumb" style="clear:both;">
@@ -32,30 +17,186 @@
 </div>
 
 <input type="hidden" value="<?php echo $identifier; ?>" id="identifier"/>
-<div class="container-fluid" id="main-content">
 
-	<div class="row-fluid">
-		<div class="span2">&nbsp;</div>
-		<div class="span8">
-			<div class="widget-box">
-				<div class="widget-title">
-					<h5></h5>
-					<select class="chosen" id="pid_chooser">
-						<option value=""></option>
-						<?php foreach($orgRole as $o): ?>
-						<option value="<?php echo $o ?>"><?php echo $o; ?></option>
-						<?php endforeach; ?>
-					</select>
-				</div>
-				<div class="widget-content">
-					<div id="pids">Loading...</div>
-				</div>
-			</div>
+
+<div class="container-fluid">
+	<div class="widget-box">
+		<div class="widget-title">
+			<ul class="nav nav-tabs pull-left">
+				<li class="active" name="list"><a href="javascript:;">List PIDs</a></li>
+				<li name="mint"><a href="javascript:;">Mint PIDs</a></li>
+				<li name="export"><a href="javascript:;">Export</a></li>
+			</ul>
+			<select class="chosen" id="pid_chooser">
+				<option value=""></option>
+				<?php foreach($orgRole as $o): ?>
+				<option value="<?php echo $o ?>"><?php echo $o; ?></option>
+				<?php endforeach; ?>
+			</select>
 		</div>
-		<div class="span3"></div>
+		<div class="widget-content" name="list">
+			<div id="pids">Loading...</div>
+		</div>
+		<div class="widget-content hide" name="mint">
+			<form action="#" method="get" class="form-horizontal" id="mint_form">
+				<div class="control-group">
+					<label for="" class="control-label">Mint as</label>
+					<div class="controls">
+						<span class="uneditable-input"><?php echo $identifier ? $identifier : 'My Identifier'; ?></span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">URL</label>
+					<div class="controls">
+						<input type="url" name="url" value="" placeholder="http://"/>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">Description</label>
+					<div class="controls">
+						<input type="text" name="desc"/>
+					</div>
+				</div>
+				<div class="control-group">
+					<label for="" class="control-label"></label>
+					<div class="controls">
+						<label class="checkbox">
+							<input type="checkbox" id="batch_mint_toggle"> Batch Mint
+						</label>
+					</div>
+				</div>
+				<?php if($registry_super_user == true): ?>
+				<div id="pids_counter" class="hide">
+					<div class="control-group">
+						<label class="control-label">Amount</label>
+						<div class="controls">
+							<input type="number" name="counter" value="1"/>
+							<p class="help-inline">1 - 100</p>
+						</div>
+					</div>
+					<div class="control-group">
+						<label for="" class="control-label">Upload CSV</label>
+						<div class="controls">
+							<input type="file" name="csv_file" id="csv_file"> <a href="javascript:;" id="clear_csv_file"><i class="icon icon-remove" tip="Clear"></i></a>
+						</div>
+					</div>
+				</div>
+				
+				<div class="control-group">
+					<div class="controls" id="upload_result"></div>
+				</div>
+				<?php endif; ?>
+<div style="height:175px;overflow:auto;border:1px solid #ccc;display:none;" id="terms"><p>You have asked to mint a persistent identifier through ANDS <i>Identify
+My Data</i> self-service. This means that you will enter location and/or
+description information relating to the object you wish to identify and
+ANDS will provide you with a persistent identifier for that object.</p>
+<p>
+In using ANDS <i>Identify My Data</i> self-service you agree that:
+</p>
+<ul>
+	<li>You are part of the higher education, public research or cultural
+	collections sector and that at least some of the objects you are
+	identifying are publicly available or will eventually become publicly
+	available.</li>
+	<li>You are authorised and entitled to mint and manage persistent
+	identifiers for the objects you intend to identify.</li>
+	<li>You will endeavour to keep up-to-date the location and
+	description fields for the persistent identifiers you mint.</li>
+	<li>You understand that this location and description information
+	will be available to the general public and that confidential material
+	should not be entered into these fields.</li>
+	<li>You will take responsibility for liaison with any party who has
+	queries regarding persistent identifiers that you mint. (ANDS does not
+	provide link-rot checking or help-desk services for end-users of
+	persistent identifiers.)</li>
+</ul>
+
+<p>
+You understand that:
+</p>
+<ul>
+	<li>ANDS provides the <i>Identify My Data</i> product on an ‘as is’ and
+	‘as available’ basis. ANDS hereby exclude any warranty either express
+	or implied as to the merchantability, fitness for purpose, accuracy,
+	currency or comprehensiveness of this product. To the fullest extent
+	permitted by law, the liability of ANDS under any condition or warranty
+	which cannot be excluded legally is limited, at the option of ANDS to
+	supplying the services again or paying the cost of having the services
+	supplied again.</li>
+	
+	<li>ANDS does not manage persistent identifiers; ANDS only provides
+	the infrastructure that allows minting, resolution and updating of
+	identifiers. Processes and policies need to be put in place by those
+	utilising <i>Identify My Data</i> to ensure that appropriate maintenance
+	practices are put in place to underpin persistence.</li>
+	<li>ANDS will endeavour to persist ANDS Identifiers for a minimum of
+	twenty years.</li>
+	<li>The allocation of a persistent identifier to an object does not
+	include any transfer or assignment of ownership of any Intellectual
+	Property right (IPR) with regard to that content.</li>
+	<li>ANDS will endeavour to provide a high availability service.
+	However, ANDS <i>Identify My Data</i> is underpinned and reliant on the <a href="http://www.handle.net/">Handle
+	services</a> provided by the <a href="http://cnri.reston.va.us/">Corporation for National Research Initiatives</a>
+	(CNRI), in particular the Global Handle Registry. ANDS cannot warrant
+	the longevity or reliability of the Handle system or the CNRI.</li>
+</ul>
+</div>
+				<div class="control-group">
+					<div class="controls">
+						<input type="checkbox" name="agree" checked=checked/> I Agree To the <a href="javascript:;" id="toggleTerms">Terms and Conditions</a>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="controls">
+						<a href="javascript:;" id="mint_confirm" class="btn btn-primary">Mint</a>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="controls" id="mint_result"></div>
+				</div>
+				<hr>
+				
+			</form>
+		</div>
+		<div class="widget-content hide" name="export">
+			<a href="<?php echo apps_url('pids/my_pids')?>" class="btn btn-primary">Export All PIDs as CSV</a>
+			<?php if($batch_pid_files):  ?>
+			    <ul>
+			        <?php foreach($batch_pid_files as $o): ?>
+			            <li><a href="../assets/uploads/pids/<?php echo $o; ?>"><?php echo $o; ?></a></li>
+			        <?php endforeach; ?>
+			    </ul>
+			<?php endif; ?>
+		</div>
 	</div>
 </div>
 
+<div class="modal hide fade" id="batch_view">
+	<div class="modal-header">
+        <a href="javascript:;" class="close" data-dismiss="modal">×</a>
+        <h3>Download pids as CSV files</h3>
+    </div>
+    <div class="modal-screen-container">
+        <div class="modal-body">
+        <?php if($batch_pid_files):  ?>
+            <ul>
+                <h3>Download PIDS as CSV</h3>
+                <?php foreach($batch_pid_files as $o): ?>
+                    <li><a href="../assets/uploads/pids/<?php echo $o; ?>"><?php echo $o; ?></a></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+        </div>
+        <div class="modal-footer">
+            <span id="upload_result"></span><br/>
+            <form action="#" method="post" class="form-horizontal" id="upload_form">
+                <input type="file" name="csv_file" id="csv_file">
+                <a id="upload_confirm" href="javascript:;" class="btn btn-primary" data-loading-text="Processing...">Upload CSV</a>
+            </form>
+            <a href="#" class="btn hide" data-dismiss="modal">Close</a>
+        </div>
+    </div>
+</div>
 
 <div class="modal hide fade" id="mint_modal">
 	<div class="modal-header">
@@ -174,7 +315,13 @@ You understand that:
                     <div class="control-group">
                         <label class="control-label">Temp. Description</label>
                         <div class="controls">
-                            <input type="text" name="desc" value="temporarily description"/>
+                            <input type="text" name="desc" value="temporary description"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Temp. Description</label>
+                        <div class="controls">
+                            <input type="text" name="url" placeholder="http://"/>
                         </div>
                     </div>
                     <div style="height:175px;overflow:auto;border:1px solid #ccc;display:none;" id="terms"><p>You have asked to mint a persistent identifier through ANDS <i>Identify
@@ -247,7 +394,6 @@ You understand that:
             <a href="#" class="btn hide" data-dismiss="modal">Close</a>
         </div>
     </div>
-
 
 <script type="text/x-mustache" id="pids-list-template">
 <form class="form-search">		
