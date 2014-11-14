@@ -66,12 +66,24 @@
 					</div>
 				</div>
 				<?php if($registry_super_user == true): ?>
-				<div class="control-group hide" id="pids_counter">
-					<label class="control-label">Amount</label>
-					<div class="controls">
-						<input type="number" name="counter" value="1"/>
-						<p class="help-inline">1 - 100</p>
+				<div id="pids_counter" class="hide">
+					<div class="control-group">
+						<label class="control-label">Amount</label>
+						<div class="controls">
+							<input type="number" name="counter" value="1"/>
+							<p class="help-inline">1 - 100</p>
+						</div>
 					</div>
+					<div class="control-group">
+						<label for="" class="control-label">Upload CSV</label>
+						<div class="controls">
+							<input type="file" name="csv_file" id="csv_file"> <a href="javascript:;" id="clear_csv_file"><i class="icon icon-remove" tip="Clear"></i></a>
+						</div>
+					</div>
+				</div>
+				
+				<div class="control-group">
+					<div class="controls" id="upload_result"></div>
 				</div>
 				<?php endif; ?>
 <div style="height:175px;overflow:auto;border:1px solid #ccc;display:none;" id="terms"><p>You have asked to mint a persistent identifier through ANDS <i>Identify
@@ -143,15 +155,7 @@ You understand that:
 					<div class="controls" id="mint_result"></div>
 				</div>
 				<hr>
-				<div class="control-group">
-					<label for="" class="control-label">Upload CSV</label>
-					<div class="controls">
-						<input type="file" name="csv_file" id="csv_file"> <a id="upload_confirm" href="javascript:;" class="btn btn-primary" data-loading-text="Processing...">Upload CSV</a>
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="controls" id="upload_result"></div>
-				</div>
+				
 			</form>
 		</div>
 		<div class="widget-content hide" name="export">

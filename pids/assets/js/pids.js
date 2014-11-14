@@ -34,6 +34,21 @@ $(document).on('click', '#mint_confirm', function(){
 		counter: $('#mint_form input[name=counter]').val()
 	}
 
+	$.ajaxSetup({
+		processData: true,
+        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+	});
+
+	if($('#csv_file').val()!="") {
+		data = new FormData();
+		data.append( 'file', $('#csv_file')[0].files[0] );
+		mint_url = apps_url+'pids/upload_csv';
+		$.ajaxSetup({
+			processData: false,
+	        contentType: false,
+		});
+	}
+
 	$('#mint_result').html('').removeClass('alert');
 
 	$.ajax({
@@ -41,7 +56,6 @@ $(document).on('click', '#mint_confirm', function(){
 		type: 'POST',
 		data: data,
 		success: function(data){
-			console.log(data);
 			if(data.error || data.status=='ERROR' || data.result=='error'){
             	var message = data.error ? data.error : data.message;
                 $('#mint_result').html(message).addClass('alert alert-error');
@@ -51,33 +65,17 @@ $(document).on('click', '#mint_confirm', function(){
 	        	if(data.csv_file_path){
 	        		var message = 'Your batch mint is completed successfully. <a target="_blank" href="'+data.file_path+'">'+data.file+'</a>';
 	        	}
+	        	if(data.message) {
+	        		message = data.message;
+	        	}
+	        	if(data.log_file) {
+	        		message += "<br/><a target='_blank' href='../assets/uploads/pids/" + data.log_file + "'>view log</a>"
+	        	}
 	            $('#mint_result').html(message).removeClass('alert-error').addClass('alert alert-success');
 	            $(theButton).button('reset');
             }
 		}
 	});
-}).on('click', '#batch_mint_confirm', function(){
-    if($(this).hasClass('disabled')) return false;
-    $('#batch_mint_result').html("").removeClass('label label-important');
-    $(this).button('loading');
-    var theButton = this;
-    var counter = $('#batch_mint_form input[name=counter]').val();
-    var desc = $('#batch_mint_form input[name=desc]').val();
-    var url = $('#batch_mint_form input[name=url]').val();
-    $.ajax({
-        url: apps_url+'pids/batch_mint',
-        type: 'POST',
-        data: {counter:counter, desc:desc, url:url},
-        success: function(data){
-            if(data.error || data.status=='ERROR'){
-            	var message = data.error ? data.error : data.message;
-                $('#batch_mint_result').html(message).addClass('label label-important');
-                $(theButton).button('reset');
-            }else{
-                location.reload();
-            }
-        }
-    });
 }).on('click', '.load_more', function(){
 	params['offset'] = $(this).attr('next_offset');
 	var button = $(this);
@@ -130,6 +128,8 @@ $(document).on('click', '#mint_confirm', function(){
 	if($(this).attr('checked')) {
 		$('#pids_counter').show();
 	} else $('#pids_counter').hide();
+}).on('click', '#clear_csv_file', function(){
+	$('#csv_file').val('');
 });
 
 function initView(){
