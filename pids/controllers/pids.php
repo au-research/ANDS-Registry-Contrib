@@ -154,6 +154,9 @@ class Pids extends MX_Controller {
 
     function batch_mint(){
         acl_enforce('SUPERUSER');
+        set_exception_handler('json_exception_handler');
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Content-type: application/json');
         $counter = $this->input->post('counter');
         $url = urlencode($this->input->post('url'));
         $desc = urlencode($this->input->post('desc'));
@@ -175,7 +178,8 @@ class Pids extends MX_Controller {
                 $fileName = preg_replace('-\W-','_',$this->pids->getFilePrefixForCurrentIdentifier())."_".date('Y-m-d_H_i_s')."_batch_mint";
                 $responseArray['csv_file_path'] = $upload_path.$fileName.'.csv';
                 $file = fopen($upload_path.$fileName.'.csv','x+');
-                $responseArray['file'] = $file;
+                $responseArray['file'] = $fileName.'.csv';
+                $responseArray['file_path'] = asset_url('uploads/pids/'.$fileName.'.csv', 'base');
                 fputcsv($file,  array("NUMBER",'HANDLE','DESC','URL'), ',', '"');
                 for($i = 1 ; $i <= $counter; $i++ ){
                     if($url && $desc){
@@ -394,9 +398,10 @@ class Pids extends MX_Controller {
         }
         echo "COUNTER,HANDLE,DESC,URL".NL;
         $i = 0;
-        foreach($pidsDetails as $r)
-        {
-            echo ++$i.','.$r['HANDLE'].',"'.$r['DESC'].'",'.$r['URL'].NL;
+        foreach($pidsDetails as $r) {
+        	$desc = isset($r['DESC']) ? $r['DESC'] : '';
+        	$url = isset($r['URL']) ? $r['URL'] : '';
+            echo ++$i.','.$r['HANDLE'].',"'.$desc.'",'.$url.NL;
         }
     }
 
