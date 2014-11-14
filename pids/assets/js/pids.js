@@ -73,6 +73,10 @@ $(document).on('click', '#mint_confirm', function(){
 	        	}
 	            $('#mint_result').html(message).removeClass('alert-error').addClass('alert alert-success');
 	            $(theButton).button('reset');
+            	$.ajaxSetup({
+            		processData: true,
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            	});
             }
 		}
 	});

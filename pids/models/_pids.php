@@ -239,6 +239,7 @@ class _pids extends CI_Model
         $upload_path = './assets/uploads/pids/';
         $userFilePrefix = $this->getFilePrefixForCurrentIdentifier();
         $fileArray = array();
+        if(!$userFilePrefix) return $fileArray;
         if (is_dir($upload_path)){
             $fileNames = scandir($upload_path ,SCANDIR_SORT_DESCENDING);
                 foreach($fileNames as $file){
